@@ -97,7 +97,7 @@
     <transition name="fade">
       <MountainBikeGame
         v-if="showMountainBikeGame"
-        @close-game="showMountainBikeGame = false"
+        @close="showMountainBikeGame = false"
       />
     </transition>
 

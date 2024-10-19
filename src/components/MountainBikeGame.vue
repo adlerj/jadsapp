@@ -1,346 +1,273 @@
 <template>
-  <div
-    class="game-container"
-    @keydown="handleKeyDown"
-    tabindex="0"
-    ref="gameContainer"
-  >
-    <div
-      class="background"
-      :style="{ transform: `translateX(${-cameraX}px)` }"
-    ></div>
-    <div
-      v-for="(ramp, index) in ramps"
-      :key="index"
-      class="ramp"
-      :style="{ left: `${ramp.x - cameraX}px`, bottom: '0px' }"
-    ></div>
-    <div
-      class="biker"
-      :style="{
-        left: `${bikerX - cameraX}px`,
-        top: `${bikerY}px`,
-        transform: `rotate(${rotation}deg)`,
-      }"
-    >
-      <i class="fas fa-bicycle"></i>
-    </div>
-    <div class="score">Score: {{ score }}</div>
-    <div class="trick" v-if="currentTrick">{{ currentTrick }}</div>
-    <div v-if="gameOver" class="game-over">
-      Game Over! Your score: {{ score }}
-      <button @click="restartGame">Play Again</button>
-    </div>
-    <div class="mobile-controls" v-if="isMobile">
-      <button class="jump-button" @touchstart="jump" @mousedown="jump">
-        Jump
-      </button>
-      <button
-        class="left-trick"
-        @touchstart="performLeftTrick"
-        @mousedown="performLeftTrick"
+  <div class="mountain-biker-animation">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+      <defs>
+        <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color: #ff6b6b; stop-opacity: 1">
+            <animate
+              attributeName="stop-color"
+              values="#FF6B6B;#22223B;#FF6B6B"
+              dur="20s"
+              repeatCount="indefinite"
+            />
+          </stop>
+          <stop offset="50%" style="stop-color: #fca3b7; stop-opacity: 1">
+            <animate
+              attributeName="stop-color"
+              values="#FCA3B7;#4A4E69;#FCA3B7"
+              dur="20s"
+              repeatCount="indefinite"
+            />
+          </stop>
+          <stop offset="100%" style="stop-color: #ffd93d; stop-opacity: 1">
+            <animate
+              attributeName="stop-color"
+              values="#FFD93D;#9A8C98;#FFD93D"
+              dur="20s"
+              repeatCount="indefinite"
+            />
+          </stop>
+        </linearGradient>
+      </defs>
+
+      <!-- Sky -->
+      <rect width="800" height="600" fill="url(#skyGradient)" />
+
+      <!-- Sun -->
+      <circle cx="400" cy="150" r="60" fill="#FF6B6B">
+        <animate
+          attributeName="cy"
+          values="150;600;150"
+          dur="20s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="fill"
+          values="#FF6B6B;#FFD93D;#FF6B6B"
+          dur="20s"
+          repeatCount="indefinite"
+        />
+      </circle>
+
+      <!-- Mountains -->
+      <polygon points="0,600 300,200 600,600" fill="#4A4E69" />
+      <polygon points="400,600 700,300 800,600" fill="#22223B" />
+
+      <!-- Ground -->
+      <rect x="0" y="500" width="800" height="100" fill="#22223B" />
+
+      <!-- Trail -->
+      <path
+        d="M0,550 Q400,500 800,550"
+        stroke="#9A8C98"
+        stroke-width="4"
+        fill="none"
+      />
+
+      <!-- Biker -->
+      <g>
+        <animateTransform
+          attributeName="transform"
+          type="translate"
+          from="-100,450"
+          to="900,450"
+          dur="10s"
+          repeatCount="indefinite"
+        />
+        <g transform="scale(0.5)">
+          <!-- Bike frame -->
+          <path
+            d="M10,80 L80,80 L65,40 L10,80 Z"
+            stroke="#F2E9E4"
+            stroke-width="4"
+            fill="none"
+          />
+          <line
+            x1="65"
+            y1="40"
+            x2="90"
+            y2="80"
+            stroke="#F2E9E4"
+            stroke-width="4"
+          />
+
+          <!-- Wheels -->
+          <circle
+            cx="10"
+            cy="80"
+            r="20"
+            stroke="#F2E9E4"
+            stroke-width="4"
+            fill="none"
+          >
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 10 80"
+              to="360 10 80"
+              dur="1s"
+              repeatCount="indefinite"
+            />
+          </circle>
+          <circle
+            cx="90"
+            cy="80"
+            r="20"
+            stroke="#F2E9E4"
+            stroke-width="4"
+            fill="none"
+          >
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 90 80"
+              to="360 90 80"
+              dur="1s"
+              repeatCount="indefinite"
+            />
+          </circle>
+
+          <!-- Rider -->
+          <circle cx="50" cy="30" r="10" fill="#F2E9E4" />
+          <!-- Head -->
+          <line
+            x1="50"
+            y1="40"
+            x2="50"
+            y2="60"
+            stroke="#F2E9E4"
+            stroke-width="4"
+          />
+          <!-- Body -->
+          <line
+            x1="50"
+            y1="60"
+            x2="80"
+            y2="80"
+            stroke="#F2E9E4"
+            stroke-width="4"
+          >
+            <!-- Leg -->
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              values="0 50 60;-20 50 60;0 50 60"
+              dur="1s"
+              repeatCount="indefinite"
+            />
+          </line>
+          <line
+            x1="50"
+            y1="45"
+            x2="70"
+            y2="55"
+            stroke="#F2E9E4"
+            stroke-width="4"
+          >
+            <!-- Arm -->
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              values="0 50 45;-10 50 45;0 50 45"
+              dur="1s"
+              repeatCount="indefinite"
+            />
+          </line>
+        </g>
+      </g>
+
+      <!-- Trees -->
+      <g transform="translate(100, 450) scale(0.7)">
+        <polygon points="0,50 25,0 50,50" fill="#355E3B">
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="0,0;0,-5;0,0"
+            dur="2s"
+            repeatCount="indefinite"
+          />
+        </polygon>
+        <rect x="20" y="50" width="10" height="20" fill="#22223B" />
+      </g>
+      <g transform="translate(650, 470) scale(0.5)">
+        <polygon points="0,50 25,0 50,50" fill="#355E3B">
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="0,0;0,-3;0,0"
+            dur="1.5s"
+            repeatCount="indefinite"
+          />
+        </polygon>
+        <rect x="20" y="50" width="10" height="20" fill="#22223B" />
+      </g>
+    </svg>
+    <button class="close-button" @click="closeAnimation">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       >
-        Left Trick
-      </button>
-      <button
-        class="right-trick"
-        @touchstart="performRightTrick"
-        @mousedown="performRightTrick"
-      >
-        Right Trick
-      </button>
-    </div>
-    <button class="close-button" @click="closeGame">Close Game</button>
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted } from "vue";
-
 export default {
-  name: "MountainBikeGame",
-  setup(props, { emit }) {
-    const bikerX = ref(50);
-    const bikerY = ref(400);
-    const velocityX = ref(5);
-    const velocityY = ref(0);
-    const rotation = ref(0);
-    const score = ref(0);
-    const gameOver = ref(false);
-    const gameLoop = ref(null);
-    const gameContainer = ref(null);
-    const inAir = ref(false);
-    const currentTrick = ref("");
-    const ramps = ref([
-      { x: 0, width: 150 },
-      { x: 800, width: 150 },
-      { x: 1600, width: 150 },
-    ]);
-    const cameraX = ref(0);
-    const isMobile = ref(false);
-
-    const tricks = [
-      "360 Spin",
-      "Backflip",
-      "Tailwhip",
-      "Bar Spin",
-      "No Hander",
-    ];
-
-    const handleKeyDown = (e) => {
-      if (gameOver.value) return;
-      if (e.key === "ArrowUp" && !inAir.value) {
-        jump();
-      } else if (e.key === "ArrowLeft" && inAir.value) {
-        performLeftTrick();
-      } else if (e.key === "ArrowRight" && inAir.value) {
-        performRightTrick();
-      }
-    };
-
-    const jump = () => {
-      if (inAir.value) return;
-      velocityY.value = -15;
-      inAir.value = true;
-    };
-
-    const performLeftTrick = () => {
-      if (inAir.value) {
-        rotation.value -= 45;
-        performTrick();
-      }
-    };
-
-    const performRightTrick = () => {
-      if (inAir.value) {
-        rotation.value += 45;
-        performTrick();
-      }
-    };
-
-    const performTrick = () => {
-      if (!currentTrick.value) {
-        currentTrick.value = tricks[Math.floor(Math.random() * tricks.length)];
-        setTimeout(() => {
-          score.value += 100;
-          currentTrick.value = "";
-        }, 1000);
-      }
-    };
-
-    const gameUpdate = () => {
-      bikerX.value += velocityX.value;
-      cameraX.value = bikerX.value - 200;
-
-      if (inAir.value) {
-        velocityY.value += 0.5; // Gravity
-        bikerY.value += velocityY.value;
-
-        // Check for landing
-        const currentRamp = ramps.value.find(
-          (ramp) =>
-            bikerX.value >= ramp.x && bikerX.value <= ramp.x + ramp.width
-        );
-        if (currentRamp && bikerY.value >= 400) {
-          bikerY.value = 400;
-          inAir.value = false;
-          if (Math.abs(rotation.value) > 180) {
-            gameOver.value = true;
-            clearInterval(gameLoop.value);
-          }
-          rotation.value = 0;
-        }
-      } else {
-        // Check if we're off a ramp
-        const currentRamp = ramps.value.find(
-          (ramp) =>
-            bikerX.value >= ramp.x && bikerX.value <= ramp.x + ramp.width
-        );
-        if (!currentRamp) {
-          inAir.value = true;
-        }
-      }
-
-      // Generate new ramps
-      if (bikerX.value > ramps.value[ramps.value.length - 1].x - 800) {
-        const lastRamp = ramps.value[ramps.value.length - 1];
-        ramps.value.push({
-          x: lastRamp.x + 800 + Math.random() * 400,
-          width: 150,
-        });
-      }
-
-      // Remove old ramps
-      if (ramps.value.length > 5) {
-        ramps.value.shift();
-      }
-
-      // Check for game over
-      if (bikerY.value > 600) {
-        gameOver.value = true;
-        clearInterval(gameLoop.value);
-      }
-    };
-
-    const startGame = () => {
-      gameLoop.value = setInterval(gameUpdate, 20);
-      gameContainer.value.focus();
-    };
-
-    const restartGame = () => {
-      bikerX.value = 50;
-      bikerY.value = 400;
-      velocityX.value = 5;
-      velocityY.value = 0;
-      rotation.value = 0;
-      score.value = 0;
-      gameOver.value = false;
-      inAir.value = false;
-      currentTrick.value = "";
-      cameraX.value = 0;
-      ramps.value = [
-        { x: 0, width: 150 },
-        { x: 800, width: 150 },
-        { x: 1600, width: 150 },
-      ];
-      startGame();
-    };
-
-    const closeGame = () => {
-      emit("close-game");
-    };
-
-    onMounted(() => {
-      startGame();
-      isMobile.value =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        );
-    });
-
-    onUnmounted(() => {
-      clearInterval(gameLoop.value);
-    });
-
-    return {
-      bikerX,
-      bikerY,
-      rotation,
-      score,
-      gameOver,
-      currentTrick,
-      ramps,
-      cameraX,
-      isMobile,
-      handleKeyDown,
-      jump,
-      performLeftTrick,
-      performRightTrick,
-      restartGame,
-      closeGame,
-      gameContainer,
-    };
+  name: "MountainBikerAnimation",
+  methods: {
+    closeAnimation() {
+      this.$emit("close");
+    },
   },
 };
 </script>
 
 <style scoped>
-.game-container {
-  width: 400px;
-  height: 600px;
-  background-color: #87ceeb;
-  border: 2px solid #4caf50;
-  position: relative;
-  overflow: hidden;
-  margin: 0 auto;
-}
-
-.background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 10000px; /* Extended background */
+.mountain-biker-animation {
+  width: 100%;
   height: 100%;
-  background: linear-gradient(0deg, #4caf50 0%, #4caf50 60%, #87ceeb 60%);
+  min-height: 300px; /* Adjust as needed */
+  position: relative;
 }
 
-.ramp {
-  position: absolute;
-  bottom: 0;
-  width: 150px;
-  height: 200px;
-  background-color: #8b4513;
-  clip-path: polygon(0 100%, 100% 0, 100% 100%);
-}
-
-.biker {
-  position: absolute;
-  font-size: 30px;
-  color: #ff5722;
-}
-
-.score,
-.trick {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 20px;
-  color: #ffffff;
-  text-shadow: 2px 2px 4px #000000;
-  z-index: 10;
-}
-
-.trick {
-  top: 40px;
-  font-weight: bold;
-}
-
-.game-over {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #ffffff;
-  padding: 20px;
-  text-align: center;
-  border: 2px solid #4caf50;
-  z-index: 20;
-}
-
-.close-button,
-.game-over button {
-  background-color: #4caf50;
-  color: #ffffff;
-  border: none;
-  padding: 5px 10px;
-  margin-top: 10px;
-  cursor: pointer;
+svg {
+  width: 100%;
+  height: 100%;
 }
 
 .close-button {
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 20;
-}
-
-.mobile-controls {
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  z-index: 20;
-}
-
-.mobile-controls button {
-  background-color: rgba(76, 175, 80, 0.7);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.7);
   border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 5px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.close-button svg {
+  width: 24px;
+  height: 24px;
+  stroke: #333;
 }
 </style>
