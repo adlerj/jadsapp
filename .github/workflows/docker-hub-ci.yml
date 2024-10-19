@@ -44,3 +44,10 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Verify build contents
+      run: |
+        docker create --name temp ${{ steps.meta.outputs.tags }}
+        docker cp temp:/usr/share/nginx/html ./html_contents
+        ls -R ./html_contents
+        docker rm temp

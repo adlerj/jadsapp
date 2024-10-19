@@ -24,7 +24,7 @@ export default {
             artist: "Souls of Mischief",
             title: "93 Til Infinity (Youandewan Remix)",
           },
-          url: "./tunes/youandewan.mp3",
+          url: "/tunes/youandewan.mp3",
           duration: 301,
         },
         {
@@ -32,7 +32,7 @@ export default {
             artist: "Jamie xx",
             title: "Sleep Sound",
           },
-          url: "./tunes/jamiexx.mp3",
+          url: "/tunes/jamiexx.mp3",
           duration: 384,
         },
         {
@@ -40,7 +40,7 @@ export default {
             artist: "Big Wild",
             title: "6's to 9's (feat. Rationale) [Day Wave Remix]",
           },
-          url: "./tunes/6sto9s.mp3",
+          url: "/tunes/6sto9s.mp3",
           duration: 165,
         },
         {
@@ -48,7 +48,7 @@ export default {
             artist: "Nice & Smooth",
             title: "Sometimes I Rhyme Slow",
           },
-          url: "./tunes/slow.mp3",
+          url: "/tunes/slow.mp3",
           duration: 170,
         },
         {
@@ -56,7 +56,7 @@ export default {
             artist: "Nickleback",
             title: "Savin' Me",
           },
-          url: "./tunes/savin.mp3",
+          url: "/tunes/savin.mp3",
           duration: 217,
         },
         // Add more tracks as needed
