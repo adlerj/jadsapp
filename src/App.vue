@@ -1,12 +1,25 @@
 <template>
   <div id="app" class="solaris-console">
     <header>
-      <h1 @mouseover="glitchEffect">Jeff Adler</h1>
-      <nav>
-        <a href="#about" @click="navigateTo('about')">About</a>
-        <a href="#experience" @click="navigateTo('experience')">Experience</a>
-        <a href="#passions" @click="navigateTo('passions')">Passions</a>
-      </nav>
+      <div class="header-content">
+        <h1 @mouseover="glitchEffect">Jeff Adler</h1>
+        <nav>
+          <a href="#about" @click.prevent="navigateTo('about')">About</a>
+          <a href="#experience" @click.prevent="navigateTo('experience')"
+            >Experience</a
+          >
+          <a href="#passions" @click.prevent="navigateTo('passions')"
+            >Passions</a
+          >
+        </nav>
+      </div>
+      <button
+        @click="toggleWebamp"
+        class="music-button"
+        :class="{ active: showWebamp }"
+      >
+        <i class="fas fa-music"></i>
+      </button>
     </header>
 
     <main>
@@ -53,6 +66,7 @@
             class="passion-item"
             @mouseover="activatePassion(index)"
             @mouseleave="deactivatePassion(index)"
+            @click="activatePassionFeature(index)"
           >
             <div
               class="passion-icon"
@@ -69,18 +83,40 @@
     <footer>
       <p>© 2024 Jeff Adler. All rights reserved. | System Version 1.0.0</p>
     </footer>
+
+    <transition name="fade">
+      <SnowboardGame v-if="showGame" @close-game="showGame = false" />
+    </transition>
+
+    <WebampPlayer :isVisible="showWebamp" @close="showWebamp = false" />
   </div>
 </template>
 
 <script>
 import { ref, onMounted } from "vue";
+import SnowboardGame from "./components/SnowboardGame.vue";
+import WebampPlayer from "./components/WebampPlayer.vue";
+
+console.log("WebampModule:", WebampPlayer);
 
 export default {
   name: "App",
+  components: {
+    SnowboardGame,
+    WebampPlayer,
+  },
+
   setup() {
     const typewriterText = ref("");
+    const phrases = [
+      "Engineering Leader",
+      "AI Product Innovator",
+      "Mountain Enthusiast",
+    ];
     const activeJob = ref(null);
     const activePassion = ref(null);
+    const showGame = ref(false);
+    const showWebamp = ref(false);
 
     const jobHistory = [
       {
@@ -127,7 +163,40 @@ export default {
     ];
 
     const typeWriter = () => {
-      // ... (same as before)
+      let currentPhraseIndex = 0;
+      let currentCharIndex = 0;
+      let isDeleting = false;
+
+      const type = () => {
+        const currentPhrase = phrases[currentPhraseIndex];
+
+        if (isDeleting) {
+          typewriterText.value = currentPhrase.substring(
+            0,
+            currentCharIndex - 1
+          );
+          currentCharIndex--;
+        } else {
+          typewriterText.value = currentPhrase.substring(
+            0,
+            currentCharIndex + 1
+          );
+          currentCharIndex++;
+        }
+
+        if (!isDeleting && currentCharIndex === currentPhrase.length) {
+          isDeleting = true;
+          setTimeout(type, 2000); // Wait before starting to delete
+        } else if (isDeleting && currentCharIndex === 0) {
+          isDeleting = false;
+          currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
+          setTimeout(type, 500); // Wait before typing next phrase
+        } else {
+          setTimeout(type, isDeleting ? 50 : 100);
+        }
+      };
+
+      type();
     };
 
     const setActiveJob = (index) => {
@@ -153,6 +222,18 @@ export default {
       document.getElementById(section).scrollIntoView({ behavior: "smooth" });
     };
 
+    const activatePassionFeature = (index) => {
+      if (index === 0) {
+        showGame.value = true;
+      } else if (index === 2) {
+        showWebamp.value = true;
+      }
+    };
+
+    const toggleWebamp = () => {
+      showWebamp.value = !showWebamp.value;
+    };
+
     onMounted(() => {
       typeWriter();
     });
@@ -163,11 +244,15 @@ export default {
       passions,
       activeJob,
       activePassion,
+      showGame,
+      showWebamp,
       setActiveJob,
       activatePassion,
       deactivatePassion,
       glitchEffect,
       navigateTo,
+      activatePassionFeature,
+      toggleWebamp,
     };
   },
 };
@@ -176,7 +261,6 @@ export default {
 <style>
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css");
 
-/* Add these new rules at the top */
 html,
 body {
   height: 100%;
@@ -191,11 +275,11 @@ body {
 .solaris-console {
   font-family: "Courier New", monospace;
   color: #00ff00;
-  min-height: 100vh; /* Changed from height: 100vh */
+  min-height: 100vh;
   padding: 20px;
   line-height: 1.6;
   overflow-y: auto;
-  box-sizing: border-box; /* Add this */
+  box-sizing: border-box;
 }
 
 #app {
@@ -211,6 +295,15 @@ header {
   border-bottom: 1px solid #00ff00;
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
+nav {
+  margin-left: 20px;
+}
+
 nav a {
   margin-left: 20px;
   text-decoration: none;
@@ -221,6 +314,22 @@ nav a {
 
 nav a:hover {
   color: #ffff00;
+}
+
+.music-button {
+  background-color: transparent;
+  border: 2px solid #00ff00;
+  color: #00ff00;
+  padding: 10px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.music-button:hover,
+.music-button.active {
+  background-color: #00ff00;
+  color: #001100;
 }
 
 h1,
@@ -268,6 +377,7 @@ h2 {
   padding: 20px;
   border: 1px solid #00ff00;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .passion-icon {
@@ -312,5 +422,14 @@ footer {
 
 .glitch {
   animation: glitch 0.5s linear;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
