@@ -2,6 +2,9 @@
   <div
     class="game-container"
     @keydown="handleKeyDown"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="handleTouchEnd"
     tabindex="0"
     ref="gameContainer"
   >
@@ -10,15 +13,16 @@
       class="snowboarder"
       :style="{ left: snowboarderX + 'px', top: snowboarderY + 'px' }"
     >
-      <div class="snowboarder-body"></div>
-      <div class="snowboarder-board"></div>
+      <i class="fas fa-snowboarding"></i>
     </div>
     <div
       v-for="(patroller, index) in patrollers"
       :key="index"
       class="patroller"
       :style="{ left: patroller.x + 'px', top: patroller.y + 'px' }"
-    ></div>
+    >
+      <i class="fas fa-skiing"></i>
+    </div>
     <div class="score">Score: {{ score }}</div>
     <div v-if="gameOver" class="game-over">
       Game Over! Your score: {{ score }}
@@ -41,6 +45,7 @@ export default {
     const gameOver = ref(false);
     const gameLoop = ref(null);
     const gameContainer = ref(null);
+    const touchStartX = ref(null);
 
     const handleKeyDown = (e) => {
       if (gameOver.value) return;
@@ -49,6 +54,30 @@ export default {
       } else if (e.key === "ArrowRight" && snowboarderX.value < 380) {
         snowboarderX.value += 10;
       }
+    };
+
+    const handleTouchStart = (e) => {
+      touchStartX.value = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault(); // Prevent scrolling
+      if (gameOver.value || touchStartX.value === null) return;
+
+      const touchEndX = e.touches[0].clientX;
+      const diff = touchEndX - touchStartX.value;
+
+      if (diff < 0 && snowboarderX.value > 0) {
+        snowboarderX.value = Math.max(0, snowboarderX.value + diff * 0.5);
+      } else if (diff > 0 && snowboarderX.value < 380) {
+        snowboarderX.value = Math.min(380, snowboarderX.value + diff * 0.5);
+      }
+
+      touchStartX.value = touchEndX;
+    };
+
+    const handleTouchEnd = () => {
+      touchStartX.value = null;
     };
 
     const createPatroller = () => {
@@ -110,10 +139,21 @@ export default {
 
     onMounted(() => {
       startGame();
+      // Prevent default touch behavior to avoid scrolling
+      gameContainer.value.addEventListener(
+        "touchmove",
+        (e) => e.preventDefault(),
+        { passive: false }
+      );
     });
 
     onUnmounted(() => {
       clearInterval(gameLoop.value);
+      if (gameContainer.value) {
+        gameContainer.value.removeEventListener("touchmove", (e) =>
+          e.preventDefault()
+        );
+      }
     });
 
     return {
@@ -123,6 +163,9 @@ export default {
       score,
       gameOver,
       handleKeyDown,
+      handleTouchStart,
+      handleTouchMove,
+      handleTouchEnd,
       restartGame,
       closeGame,
       gameContainer,
@@ -135,7 +178,7 @@ export default {
 .game-container {
   width: 400px;
   height: 600px;
-  background-color: #001100; /* This matches the website's background */
+  background-color: #001100;
   border: 2px solid #00ff00;
   position: relative;
   overflow: hidden;
@@ -167,38 +210,15 @@ export default {
   }
 }
 
-.snowboarder {
-  width: 30px;
-  height: 40px;
+.snowboarder,
+.patroller {
   position: absolute;
-}
-
-.snowboarder-body {
-  width: 20px;
-  height: 30px;
-  background-color: #00ff00;
-  position: absolute;
-  top: 0;
-  left: 5px;
-  border-radius: 50% 50% 0 0;
-}
-
-.snowboarder-board {
-  width: 30px;
-  height: 10px;
-  background-color: #00aa00;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  border-radius: 50% 50% 50% 50%;
+  font-size: 30px;
+  color: #00ff00;
 }
 
 .patroller {
-  width: 20px;
-  height: 30px;
-  background-color: #ff0000;
-  position: absolute;
-  border-radius: 50% 50% 0 0;
+  color: #ff0000;
 }
 
 .score {

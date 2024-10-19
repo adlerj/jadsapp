@@ -49,7 +49,10 @@
               <p>{{ job.company }} | {{ job.duration }}</p>
               <ul v-if="activeJob === index">
                 <li v-for="(detail, idx) in job.details" :key="idx">
-                  {{ detail }}
+                  <span v-if="!detail.isLink" v-html="detail"></span>
+                  <a v-else :href="detail.url" target="_blank">{{
+                    detail.text
+                  }}</a>
                 </li>
               </ul>
             </div>
@@ -85,7 +88,24 @@
     </footer>
 
     <transition name="fade">
-      <SnowboardGame v-if="showGame" @close-game="showGame = false" />
+      <SnowboardGame
+        v-if="showSnowboardGame"
+        @close-game="showSnowboardGame = false"
+      />
+    </transition>
+
+    <transition name="fade">
+      <MountainBikeGame
+        v-if="showMountainBikeGame"
+        @close-game="showMountainBikeGame = false"
+      />
+    </transition>
+
+    <transition name="fade">
+      <DiscGolfGame
+        v-if="showDiscGolfGame"
+        @close-game="showDiscGolfGame = false"
+      />
     </transition>
 
     <WebampPlayer :isVisible="showWebamp" @close="showWebamp = false" />
@@ -95,6 +115,8 @@
 <script>
 import { ref, onMounted } from "vue";
 import SnowboardGame from "./components/SnowboardGame.vue";
+import MountainBikeGame from "./components/MountainBikeGame.vue";
+import DiscGolfGame from "./components/DiscGolfGame.vue";
 import WebampPlayer from "./components/WebampPlayer.vue";
 
 console.log("WebampModule:", WebampPlayer);
@@ -103,6 +125,8 @@ export default {
   name: "App",
   components: {
     SnowboardGame,
+    MountainBikeGame,
+    DiscGolfGame,
     WebampPlayer,
   },
 
@@ -111,11 +135,15 @@ export default {
     const phrases = [
       "Engineering Leader",
       "AI Product Innovator",
-      "Mountain Enthusiast",
+      "Mountain Biker",
+      "Snowboarding shredder",
+      "Disc golf ripper",
     ];
     const activeJob = ref(null);
     const activePassion = ref(null);
-    const showGame = ref(false);
+    const showSnowboardGame = ref(false);
+    const showMountainBikeGame = ref(false);
+    const showDiscGolfGame = ref(false);
     const showWebamp = ref(false);
 
     const jobHistory = [
@@ -124,9 +152,16 @@ export default {
         company: "Dropbox",
         duration: "May 2023 - Present",
         details: [
-          "Leading web, desktop, iOS, and Android teams",
-          "Working with ML on a daily basis",
-          "Building Dropbox Dash, the future of AI tools in business",
+          "Tech lead manager bringing Dropbox Dash's new applications from 0 to 1.",
+          "Leading Client Product Development across iOS, Android, MacOS, Windows, and Web Infra.",
+          "Partnering closely with stakeholders and partners to deliver industry-leading AI productivity experiences.",
+          "Driving the shared component architecture for Dash.ai & Desktop.",
+          "Driving Search & Answers experience development.",
+          {
+            isLink: true,
+            url: "https://blog.dropbox.com/topics/company/dash-for-business-launch-2024",
+            text: "Meet Dash for Business, AI-powered universal search for teams",
+          },
         ],
       },
       {
@@ -134,8 +169,16 @@ export default {
         company: "Reddit, Inc.",
         duration: "Nov 2021 - May 2023",
         details: [
-          "Responsible for all consumer surfaces in Reddits iOS app",
-          "Supporting a team of 100+ iOS Devs",
+          "Responsible for all consumer surfaces in Reddit’s iOS app, supporting a team of 100+ iOS Devs",
+          "Modernized the full iOS development stack across Reddit.",
+          "Introduced the CoreStack to consolidate the many different ways features are built.",
+          "Architected and led a team to build SliceKit, a declarative, unidirectional, MVVM-C UI Framework.",
+          "Rearchitected media handling across our stack for better video performance.",
+          {
+            isLink: true,
+            url: "https://www.reddit.com/r/RedditEng/comments/v3hpns/the_slicekit_series_introducing_our_new_ios/",
+            text: "The SliceKit Series: Introducing Our New iOS Presentation Framework.",
+          },
         ],
       },
       {
@@ -143,22 +186,25 @@ export default {
         company: "Dropbox",
         duration: "Apr 2019 - Nov 2021",
         details: [
-          "Led development and launch for HelloSign Mobile Apps",
-          "Worked on Dropbox Scan, File Transfers, Family Plan",
-          "Led Mobile Labs and Mobile Expansion initiatives",
+          "Led development and the launch for HelloSign Mobile Apps, Dropbox Scan, File Transfers, Family Plan, the Mobile Labs and Mobile Expansion teams.",
+          "Conceptualized and strategically drove adoption of reusable app architectures which influenced company roadmaps to enable multi product development. This framework was used in mobile apps such as Passwords, Dropbox Scan, HelloSign and has become the adopted standard in EPD for building new mobile apps.",
         ],
       },
       {
         title: "Senior Software Engineer",
         company: "Google",
         duration: "Jul 2016 - Apr 2019",
-        details: ["Technical Lead for iOS Google Drive App Redesign"],
+        details: [
+          "Led full app rearchitectures of iOS Google Search app, Google Drive App",
+          "Led projects to bring ML into Google Apps",
+        ],
       },
     ];
 
     const passions = [
       { name: "Snowboarding", icon: "fas fa-snowboarding" },
       { name: "Mountain Biking", icon: "fas fa-biking" },
+      { name: "Disc Golf", icon: "fas fa-compact-disc" },
       { name: "Live Music", icon: "fas fa-music" },
     ];
 
@@ -224,8 +270,12 @@ export default {
 
     const activatePassionFeature = (index) => {
       if (index === 0) {
-        showGame.value = true;
+        showSnowboardGame.value = true;
+      } else if (index === 1) {
+        showMountainBikeGame.value = true;
       } else if (index === 2) {
+        showDiscGolfGame.value = true;
+      } else if (index === 3) {
         showWebamp.value = true;
       }
     };
@@ -244,7 +294,9 @@ export default {
       passions,
       activeJob,
       activePassion,
-      showGame,
+      showSnowboardGame,
+      showMountainBikeGame,
+      showDiscGolfGame,
       showWebamp,
       setActiveJob,
       activatePassion,
@@ -309,11 +361,29 @@ nav a {
   text-decoration: none;
   color: #00ff00;
   font-weight: bold;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: 5px;
 }
 
 nav a:hover {
+  color: #001100;
+  background-color: #00ff00;
+  border-color: #00ff00;
+}
+
+a {
+  color: #00ffff;
+  text-decoration: none;
+  border-bottom: 1px solid #00ffff;
+  transition: all 0.3s ease;
+}
+
+a:hover {
   color: #ffff00;
+  border-bottom-color: #ffff00;
+  text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
 }
 
 .music-button {
