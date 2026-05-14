@@ -10,4 +10,7 @@ module.exports = defineConfig({
       title: "Jeff Adler",
     },
   },
+  devServer: {
+    historyApiFallback: true,
+  },
 });
