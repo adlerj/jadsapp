@@ -11,6 +11,7 @@ if (process.env.NODE_ENV === "production") {
       rendererOptions: {
         renderAfterTime: 5000,
         headless: true,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
       },
     })
   );
