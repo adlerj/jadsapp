@@ -4,7 +4,7 @@
       <header class="chat-header">
         <div class="header-left">
           <h1>JADBOT TERMINAL</h1>
-          <span class="version">v3.0</span>
+          <span class="version">v4.0</span>
         </div>
         <div class="header-right">
           <button @click="resetChat" class="header-btn" aria-label="Clear chat">
@@ -63,17 +63,19 @@
 </template>
 
 <script>
-import { ref, nextTick, watch, onMounted } from "vue";
+import { ref, nextTick, watch, onMounted, onUnmounted } from "vue";
 import { marked } from "marked";
 import { useChat } from "../composables/useChat";
+import { WIDGET_CATALOG } from "../constants/widgets";
 
 export default {
   name: "TerminalChat",
   props: {
     inline: { type: Boolean, default: false },
   },
+  emits: ["launch-widget"],
 
-  setup() {
+  setup(props, { emit }) {
     const { messages, isReady, error, isGenerating, sendMessage, reset } =
       useChat();
 
@@ -105,7 +107,23 @@ export default {
 
     const formatMessage = (content) => {
       if (!content) return "";
-      return marked.parse(content);
+      let text = content;
+      if (isGenerating.value) {
+        text = text.replace(/\[WIDGET:[^\]]*$/, "");
+      }
+      text = text.replace(/\[WIDGET:(\w+)\]/g, (_, type) => {
+        const w = WIDGET_CATALOG[type];
+        if (!w) return "";
+        return `<button class="widget-btn" data-widget="${type}">${w.icon} ${w.label}</button>`;
+      });
+      return marked.parse(text);
+    };
+
+    const handleWidgetClick = (e) => {
+      const btn = e.target.closest("[data-widget]");
+      if (btn) {
+        emit("launch-widget", btn.dataset.widget);
+      }
     };
 
     const scrollToBottom = () => {
@@ -125,6 +143,11 @@ export default {
 
     onMounted(() => {
       nextTick(() => inputField.value?.focus());
+      terminalBody.value?.addEventListener("click", handleWidgetClick);
+    });
+
+    onUnmounted(() => {
+      terminalBody.value?.removeEventListener("click", handleWidgetClick);
     });
 
     return {
@@ -319,6 +342,28 @@ export default {
 
 .message.user .message-content :deep(strong) {
   color: #00ffff;
+}
+
+.message-content :deep(.widget-btn) {
+  display: inline-block;
+  background: transparent;
+  border: 1px solid #00ffff;
+  color: #00ffff;
+  padding: 8px 16px;
+  font-family: "Courier New", monospace;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 8px 4px 4px 0;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.message-content :deep(.widget-btn:hover) {
+  background: #00ffff;
+  color: #001100;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
 }
 
 .generating {

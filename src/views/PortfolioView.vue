@@ -60,7 +60,7 @@
           </div>
 
           <div id="terminal" class="terminal-section">
-            <TerminalChat :inline="true" />
+            <TerminalChat :inline="true" @launch-widget="handleWidgetLaunch" />
           </div>
 
           <h2>About Me</h2>
@@ -444,6 +444,21 @@ export default {
       showWebamp.value = !showWebamp.value;
     };
 
+    const handleWidgetLaunch = (type) => {
+      const widgetMap = {
+        snowboard: showSnowboardGame,
+        bike: showMountainBikeGame,
+        discgolf: showDiscGolfGame,
+        volleyball: showVolleyballGame,
+        tabletop: showTabletopGame,
+        guitar: showGuitarStrum,
+        sushi: showSushiRain,
+        webamp: showWebamp,
+      };
+      const target = widgetMap[type];
+      if (target) target.value = true;
+    };
+
     onMounted(() => {
       if (!showBoot.value) {
         typeWriter();
@@ -472,6 +487,7 @@ export default {
       navigateTo,
       activatePassionFeature,
       toggleWebamp,
+      handleWidgetLaunch,
       typeWriter,
     };
   },

@@ -56,7 +56,7 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
   try {
     const stream = anthropic.messages.stream({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 300,
+      max_tokens: 400,
       temperature: 0.3,
       system: customSystemPrompt || systemPrompt,
       messages: trimmed,
