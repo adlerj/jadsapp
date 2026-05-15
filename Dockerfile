@@ -13,8 +13,7 @@ COPY --from=build-stage /app/dist ./dist
 COPY --from=build-stage /app/public/tunes ./dist/tunes
 COPY server.js ./
 COPY server/ ./server/
-COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm init -y && npm install express@^4.21.0 @anthropic-ai/sdk@^0.39.0 express-rate-limit@^7.5.0
 ENV PORT=80
 EXPOSE 80
 CMD ["node", "server.js"]
