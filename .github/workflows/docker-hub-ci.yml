@@ -48,6 +48,6 @@ jobs:
     - name: Verify build contents
       run: |
         docker create --name temp ${{ steps.meta.outputs.tags }}
-        docker cp temp:/usr/share/nginx/html ./html_contents
+        docker cp temp:/app/dist ./html_contents
         ls -R ./html_contents
         docker rm temp

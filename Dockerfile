@@ -15,5 +15,6 @@ COPY server.js ./
 COPY server/ ./server/
 COPY package*.json ./
 RUN npm install --omit=dev
-EXPOSE 3000
+ENV PORT=80
+EXPOSE 80
 CMD ["node", "server.js"]
