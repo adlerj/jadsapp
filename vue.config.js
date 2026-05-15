@@ -2,7 +2,7 @@ const { defineConfig } = require("@vue/cli-service");
 const path = require("path");
 
 const plugins = [];
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production" && process.arch === "x64") {
   const PrerendererWebpackPlugin = require("@prerenderer/webpack-plugin");
   plugins.push(
     new PrerendererWebpackPlugin({
@@ -12,6 +12,7 @@ if (process.env.NODE_ENV === "production") {
         renderAfterTime: 5000,
         headless: true,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
     })
   );
