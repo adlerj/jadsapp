@@ -59,7 +59,7 @@ export default {
       canvas.height = window.innerHeight;
 
       const drops = [];
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < 300; i++) {
         drops.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -70,7 +70,7 @@ export default {
 
       const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = "rgba(110, 160, 255, 0.3)";
+        ctx.strokeStyle = "rgba(110, 160, 255, 0.5)";
         ctx.lineWidth = 1;
 
         for (const drop of drops) {
@@ -103,7 +103,7 @@ export default {
       const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.strokeStyle = "rgba(111, 239, 255, 0.06)";
+        ctx.strokeStyle = "rgba(111, 239, 255, 0.12)";
         ctx.lineWidth = 1;
 
         for (
@@ -142,7 +142,7 @@ export default {
             y += spacing
           ) {
             ctx.beginPath();
-            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+            ctx.arc(x, y, 2.5, 0, Math.PI * 2);
             ctx.fill();
           }
         }
@@ -161,13 +161,17 @@ export default {
       canvas.height = window.innerHeight;
 
       const stars = [];
-      for (let i = 0; i < 200; i++) {
+      for (let i = 0; i < 300; i++) {
+        const hasColor = Math.random() > 0.85;
         stars.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          size: Math.random() * 1.5,
+          size: Math.random() * 2,
           twinkleSpeed: 0.005 + Math.random() * 0.02,
           phase: Math.random() * Math.PI * 2,
+          hue: hasColor
+            ? [0, 60, 200, 280][Math.floor(Math.random() * 4)]
+            : null,
         });
       }
 
@@ -179,7 +183,10 @@ export default {
           const alpha =
             0.3 +
             0.7 * Math.abs(Math.sin(time * star.twinkleSpeed + star.phase));
-          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          ctx.fillStyle =
+            star.hue !== null
+              ? `hsla(${star.hue}, 80%, 70%, ${alpha})`
+              : `rgba(255, 255, 255, ${alpha})`;
           ctx.beginPath();
           ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
           ctx.fill();
@@ -199,7 +206,7 @@ export default {
       canvas.height = window.innerHeight;
 
       const sparkles = [];
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 150; i++) {
         sparkles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -208,7 +215,7 @@ export default {
           speedY: -0.3 - Math.random() * 0.7,
           life: Math.random() * 100,
           maxLife: 60 + Math.random() * 80,
-          hue: Math.random() > 0.5 ? 300 : 180,
+          hue: [300, 180, 45][Math.floor(Math.random() * 3)],
         });
       }
 

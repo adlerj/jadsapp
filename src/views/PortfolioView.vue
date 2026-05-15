@@ -53,9 +53,11 @@
                 <h3>{{ typewriterText }}<span class="cursor">_</span></h3>
               </div>
               <p class="hero-summary">
-                Engineering leader building AI products from zero to one and
-                scaling them post-PMF. Currently directing engineering orgs at
-                Dropbox. Based in Denver, CO.
+                Engineering leader building AI products from zero to one using
+                LLMs, Claude, and agentic orchestration — then scaling them
+                post-PMF. Currently directing engineering orgs at Dropbox.
+                Previously Staff iOS Engineer at Reddit and Senior Engineer at
+                Google. Based in Denver, CO.
               </p>
               <div class="hero-links">
                 <a
@@ -78,8 +80,9 @@
               <h3>What I Build</h3>
               <ul>
                 <li>
-                  AI-powered products from concept to scale, taking ideas from
-                  zero to one and driving them through product-market fit
+                  AI-powered products from concept to scale using LLMs and ML —
+                  taking ideas from zero to one and driving them through
+                  product-market fit
                 </li>
                 <li>
                   Foundational platforms at massive scale, building and owning
@@ -90,8 +93,9 @@
                   browser extensions with shared-code architectures
                 </li>
                 <li>
-                  Agentic development workflows that fundamentally change how
-                  engineering teams ship software
+                  Agentic development workflows powered by Claude and LLM
+                  orchestration that fundamentally change how engineering teams
+                  ship software
                 </li>
               </ul>
             </div>
@@ -190,12 +194,18 @@
               <span v-if="passion.action" class="play-hint">Click to play</span>
             </div>
           </div>
+          <p class="passions-description">
+            When not building AI products and engineering agentic workflows,
+            Jeff is mountain biking Colorado trails, snowboarding at A-Basin,
+            playing disc golf, or DJing drum &amp; bass.
+          </p>
         </section>
       </main>
 
       <footer>
         <p>
-          &copy; 2026 Jeff Adler. All rights reserved. | System Version 2.0.0
+          &copy; 2026 Jeff Adler (jadler / jads). All rights reserved. | System
+          Version 2.0.0
         </p>
       </footer>
 
@@ -790,6 +800,13 @@ h2 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
+}
+
+.passions-description {
+  margin-top: 20px;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 .passion-item {

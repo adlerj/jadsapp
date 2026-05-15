@@ -20,15 +20,15 @@ export default {
 
       const chars =
         "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF";
-      const fontSize = 14;
+      const fontSize = 16;
       const columns = Math.floor(width / fontSize);
       const drops = Array(columns).fill(1);
 
       const draw = () => {
-        ctx.fillStyle = "rgba(0, 17, 0, 0.05)";
+        ctx.fillStyle = "rgba(0, 17, 0, 0.08)";
         ctx.fillRect(0, 0, width, height);
 
-        ctx.fillStyle = "rgba(0, 255, 0, 0.03)";
+        ctx.fillStyle = "rgba(0, 255, 0, 0.08)";
         ctx.font = `${fontSize}px monospace`;
 
         for (let i = 0; i < drops.length; i++) {
@@ -73,7 +73,7 @@ export default {
   height: 100%;
   pointer-events: none;
   z-index: -1;
-  opacity: 0.15;
+  opacity: 0.35;
 }
 
 @media (prefers-reduced-motion: reduce) {

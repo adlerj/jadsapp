@@ -66,6 +66,7 @@ THEMES: This site has switchable visual themes. If the user asks to change the t
 [THEME:win95] — "Windows 95" retro desktop nostalgia
 [THEME:tron] — "Tron Legacy" electric blue digital grid
 [THEME:myspace] — "MySpace" 2005 internet chaos energy
+[THEME:geocities] — "Geocities" 1998 personal homepage chaos with under-construction vibes
 
 If the user just says "change theme" without specifying, suggest all available themes and let them pick. If they mention a vibe (e.g. "make it retro" or "something darker"), pick the best matching theme.
 `;

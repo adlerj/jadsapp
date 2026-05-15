@@ -1,13 +1,33 @@
 const { defineConfig } = require("@vue/cli-service");
+const path = require("path");
+
+const plugins = [];
+if (process.env.NODE_ENV === "production") {
+  const PrerendererWebpackPlugin = require("@prerenderer/webpack-plugin");
+  plugins.push(
+    new PrerendererWebpackPlugin({
+      routes: ["/", "/chat"],
+      renderer: "@prerenderer/renderer-puppeteer",
+      rendererOptions: {
+        renderAfterTime: 5000,
+        headless: true,
+      },
+    })
+  );
+}
 
 module.exports = defineConfig({
   transpileDependencies: true,
+  configureWebpack: {
+    plugins,
+  },
   pages: {
     index: {
       entry: "src/main.js",
       template: "public/index.html",
       filename: "index.html",
-      title: "Jeff Adler",
+      title:
+        "Jeff Adler — Director of Engineering at Dropbox | AI & Agentic Engineering Leader, Denver CO",
     },
   },
   devServer: {
