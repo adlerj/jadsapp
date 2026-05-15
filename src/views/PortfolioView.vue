@@ -19,14 +19,23 @@
             >
           </nav>
         </div>
-        <button
-          @click="toggleWebamp"
-          class="music-button"
-          :class="{ active: showWebamp }"
-          aria-label="Toggle music player"
-        >
-          <i class="fas fa-music"></i>
-        </button>
+        <div class="header-actions">
+          <button
+            @click="openThemePicker"
+            class="music-button"
+            aria-label="Change theme"
+          >
+            <i class="fas fa-palette"></i>
+          </button>
+          <button
+            @click="toggleWebamp"
+            class="music-button"
+            :class="{ active: showWebamp }"
+            aria-label="Toggle music player"
+          >
+            <i class="fas fa-music"></i>
+          </button>
+        </div>
       </header>
 
       <main>
@@ -262,8 +271,9 @@ export default {
     BootSequence,
     TerminalChat,
   },
+  emits: ["open-theme-picker"],
 
-  setup() {
+  setup(_, { emit }) {
     const typewriterText = ref("");
     const phrases = [
       "Director of Engineering",
@@ -444,6 +454,10 @@ export default {
       showWebamp.value = !showWebamp.value;
     };
 
+    const openThemePicker = () => {
+      emit("open-theme-picker");
+    };
+
     const handleWidgetLaunch = (type) => {
       const widgetMap = {
         snowboard: showSnowboardGame,
@@ -487,6 +501,7 @@ export default {
       navigateTo,
       activatePassionFeature,
       toggleWebamp,
+      openThemePicker,
       handleWidgetLaunch,
       typeWriter,
     };
@@ -508,13 +523,18 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 20px 0;
-  border-bottom: 1px solid #00ff00;
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .header-content {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header-actions {
+  display: flex;
   gap: 10px;
 }
 
@@ -526,7 +546,7 @@ nav a,
 nav .nav-link {
   margin-left: 20px;
   text-decoration: none;
-  color: #00ff00;
+  color: var(--text-primary);
   font-weight: bold;
   transition: all 0.3s ease;
   padding: 5px 10px;
@@ -536,32 +556,33 @@ nav .nav-link {
 
 nav a:hover,
 nav .nav-link:hover {
-  color: #001100;
-  background-color: #00ff00;
-  border-color: #00ff00;
+  color: var(--btn-hover-text);
+  background-color: var(--btn-hover-bg);
+  border-color: var(--border-primary);
 }
 
 .music-button {
-  background-color: transparent;
-  border: 2px solid #00ff00;
-  color: #00ff00;
+  background-color: var(--btn-bg);
+  border: 2px solid var(--border-primary);
+  color: var(--text-primary);
   padding: 10px;
   font-size: 1.2em;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: var(--font-family);
 }
 
 .music-button:hover,
 .music-button.active {
-  background-color: #00ff00;
-  color: #001100;
+  background-color: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
 }
 
 h1,
 h2 {
   font-weight: 700;
   text-transform: uppercase;
-  text-shadow: 0 0 10px #00ff00, 0 0 20px rgba(0, 255, 0, 0.5);
+  text-shadow: 0 0 10px var(--border-glow);
 }
 
 .hero {
@@ -579,15 +600,15 @@ h2 {
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  border: 2px solid #00ff00;
-  box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), 0 0 40px rgba(0, 255, 0, 0.1);
+  border: 2px solid var(--border-primary);
+  box-shadow: 0 0 20px var(--border-glow);
   filter: saturate(0.7) brightness(1.1);
   transition: all 0.3s ease;
 }
 
 .profile-photo:hover {
   filter: saturate(1) brightness(1.2);
-  box-shadow: 0 0 30px rgba(0, 255, 0, 0.6), 0 0 60px rgba(0, 255, 0, 0.2);
+  box-shadow: 0 0 30px var(--border-glow);
 }
 
 .hero-text {
@@ -613,18 +634,18 @@ h2 {
 }
 
 .contact-link {
-  color: #00ffff;
-  border: 1px solid #00ffff;
+  color: var(--link-color);
+  border: 1px solid var(--link-color);
   padding: 6px 14px;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-family);
   font-size: 0.85em;
   transition: all 0.3s ease;
   text-decoration: none;
 }
 
 .contact-link:hover {
-  background: #00ffff;
-  color: #001100;
+  background: var(--link-color);
+  color: var(--bg-primary);
 }
 
 .contact-link i {
@@ -653,7 +674,7 @@ h2 {
 
 .about-block {
   padding: 20px;
-  border: 1px solid #00ff00;
+  border: 1px solid var(--border-primary);
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
@@ -661,8 +682,8 @@ h2 {
   margin: 0 0 12px 0;
   text-transform: uppercase;
   font-size: 0.95em;
-  color: #ffff00;
-  text-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+  color: var(--text-accent);
+  text-shadow: 0 0 8px var(--border-glow);
 }
 
 .about-block ul {
@@ -683,7 +704,7 @@ h2 {
   content: ">";
   position: absolute;
   left: -18px;
-  color: #00ff00;
+  color: var(--text-primary);
   opacity: 0.6;
 }
 
@@ -710,7 +731,7 @@ h2 {
 
 .timeline-item {
   padding: 20px;
-  border: 1px solid #00ff00;
+  border: 1px solid var(--border-primary);
   margin-bottom: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -719,7 +740,7 @@ h2 {
 
 .timeline-item:hover,
 .timeline-item.active {
-  background-color: #002200;
+  background-color: var(--bg-secondary);
 }
 
 .timeline-item h3 {
@@ -727,26 +748,25 @@ h2 {
 }
 
 .timeline-content a {
-  color: #00ffff;
-  border-bottom: 1px solid #00ffff;
+  color: var(--link-color);
+  border-bottom: 1px solid var(--link-color);
   transition: all 0.3s ease;
 }
 
 .timeline-content a:hover {
-  color: #ffff00;
-  border-bottom-color: #ffff00;
-  text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
+  color: var(--link-hover);
+  border-bottom-color: var(--link-hover);
+  text-shadow: 0 0 5px var(--border-glow);
 }
 
 @keyframes glow-pulse {
   0%,
   100% {
-    box-shadow: 0 0 5px rgba(0, 255, 0, 0.3),
-      inset 0 0 5px rgba(0, 255, 0, 0.05);
+    box-shadow: 0 0 5px var(--border-glow), inset 0 0 5px var(--bg-overlay);
   }
   50% {
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.6), 0 0 30px rgba(0, 255, 0, 0.2),
-      inset 0 0 10px rgba(0, 255, 0, 0.1);
+    box-shadow: 0 0 15px var(--border-glow), 0 0 30px var(--bg-overlay),
+      inset 0 0 10px var(--bg-overlay);
   }
 }
 
@@ -757,7 +777,7 @@ h2 {
 .education {
   margin-top: 20px;
   padding: 20px;
-  border: 1px solid #00ff00;
+  border: 1px solid var(--border-primary);
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
@@ -775,7 +795,7 @@ h2 {
 .passion-item {
   text-align: center;
   padding: 20px 10px;
-  border: 1px solid #00ff00;
+  border: 1px solid var(--border-primary);
   transition: all 0.3s ease;
   animation: glow-pulse 3s ease-in-out infinite;
   position: relative;
@@ -786,14 +806,14 @@ h2 {
 }
 
 .passion-item.clickable:hover {
-  background-color: #002200;
+  background-color: var(--bg-secondary);
 }
 
 .play-hint {
   display: block;
   font-size: 0.7em;
   opacity: 0;
-  color: #ffff00;
+  color: var(--text-accent);
   margin-top: 5px;
   transition: opacity 0.3s ease;
 }
@@ -815,15 +835,15 @@ h2 {
 
 .passion-icon.active {
   transform: scale(1.15);
-  color: #ffff00;
-  text-shadow: 0 0 15px rgba(255, 255, 0, 0.7);
+  color: var(--text-accent);
+  text-shadow: 0 0 15px var(--border-glow);
 }
 
 footer {
   margin-top: 50px;
   text-align: center;
   font-size: 0.9em;
-  border-top: 1px solid #00ff00;
+  border-top: 1px solid var(--border-primary);
   padding-top: 20px;
 }
 

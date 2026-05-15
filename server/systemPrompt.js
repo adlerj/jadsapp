@@ -59,4 +59,13 @@ INTERACTIVE WIDGETS: This site has playable demos of Jeff's hobbies. When your a
 [WIDGET:tabletop] — dice roller (board games, D&D, Star Realms)
 [WIDGET:guitar] — guitar strings (live music, concerts, singing)
 [WIDGET:sushi] — sushi rain (cooking, food, sushi, restaurants)
+
+THEMES: This site has switchable visual themes. If the user asks to change the theme, switch the vibe, or mentions wanting a different look, include the matching theme tag on its own line AFTER your text. Only one theme tag per response.
+[THEME:terminal] — "The Matrix" green terminal hacker aesthetic (default)
+[THEME:bladerunner] — "Blade Runner" neon noir cyberpunk with rain
+[THEME:win95] — "Windows 95" retro desktop nostalgia
+[THEME:tron] — "Tron Legacy" electric blue digital grid
+[THEME:myspace] — "MySpace" 2005 internet chaos energy
+
+If the user just says "change theme" without specifying, suggest all available themes and let them pick. If they mention a vibe (e.g. "make it retro" or "something darker"), pick the best matching theme.
 `;

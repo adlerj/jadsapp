@@ -66,6 +66,7 @@
 import { ref, nextTick, watch, onMounted, onUnmounted } from "vue";
 import { marked } from "marked";
 import { useChat } from "../composables/useChat";
+import { useTheme } from "../composables/useTheme";
 import { WIDGET_CATALOG } from "../constants/widgets";
 
 export default {
@@ -78,6 +79,7 @@ export default {
   setup(props, { emit }) {
     const { messages, isReady, error, isGenerating, sendMessage, reset } =
       useChat();
+    const { setTheme, themes } = useTheme();
 
     const userInput = ref("");
     const terminalBody = ref(null);
@@ -110,19 +112,30 @@ export default {
       let text = content;
       if (isGenerating.value) {
         text = text.replace(/\[WIDGET:[^\]]*$/, "");
+        text = text.replace(/\[THEME:[^\]]*$/, "");
       }
       text = text.replace(/\[WIDGET:(\w+)\]/g, (_, type) => {
         const w = WIDGET_CATALOG[type];
         if (!w) return "";
         return `<button class="widget-btn" data-widget="${type}">${w.icon} ${w.label}</button>`;
       });
+      text = text.replace(/\[THEME:(\w+)\]/g, (_, id) => {
+        const t = themes[id];
+        if (!t) return "";
+        return `<button class="widget-btn theme-btn" data-theme="${id}">${t.icon} Switch to ${t.name}</button>`;
+      });
       return marked.parse(text);
     };
 
-    const handleWidgetClick = (e) => {
-      const btn = e.target.closest("[data-widget]");
-      if (btn) {
-        emit("launch-widget", btn.dataset.widget);
+    const handleInteraction = (e) => {
+      const widgetBtn = e.target.closest("[data-widget]");
+      if (widgetBtn) {
+        emit("launch-widget", widgetBtn.dataset.widget);
+        return;
+      }
+      const themeBtn = e.target.closest("[data-theme]");
+      if (themeBtn) {
+        setTheme(themeBtn.dataset.theme);
       }
     };
 
@@ -138,16 +151,21 @@ export default {
     watch(isGenerating, (generating) => {
       if (!generating) {
         nextTick(() => inputField.value?.focus());
+        const lastMsg = messages.value[messages.value.length - 1];
+        if (lastMsg && lastMsg.role === "assistant") {
+          const themeMatch = lastMsg.content.match(/\[THEME:(\w+)\]/);
+          if (themeMatch) setTheme(themeMatch[1]);
+        }
       }
     });
 
     onMounted(() => {
       nextTick(() => inputField.value?.focus());
-      terminalBody.value?.addEventListener("click", handleWidgetClick);
+      terminalBody.value?.addEventListener("click", handleInteraction);
     });
 
     onUnmounted(() => {
-      terminalBody.value?.removeEventListener("click", handleWidgetClick);
+      terminalBody.value?.removeEventListener("click", handleInteraction);
     });
 
     return {
@@ -181,9 +199,8 @@ export default {
   width: 100%;
   max-width: 800px;
   max-height: calc(100vh - 80px);
-  border: 1px solid #00ff00;
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3),
-    inset 0 0 15px rgba(0, 255, 0, 0.05);
+  border: 1px solid var(--border-primary);
+  box-shadow: 0 0 15px var(--border-glow), inset 0 0 15px var(--bg-overlay);
 }
 
 .chat-header {
@@ -191,8 +208,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 12px 20px;
-  border-bottom: 1px solid #00ff00;
-  background: rgba(0, 255, 0, 0.03);
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-overlay);
   flex-shrink: 0;
 }
 
@@ -205,7 +222,7 @@ export default {
 .chat-header h1 {
   font-size: 1.2em;
   margin: 0;
-  text-shadow: 0 0 10px #00ff00, 0 0 20px rgba(0, 255, 0, 0.5);
+  text-shadow: 0 0 10px var(--border-glow);
 }
 
 .version {
@@ -220,10 +237,10 @@ export default {
 
 .header-btn {
   background: transparent;
-  border: 1px solid #00ff00;
-  color: #00ff00;
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
   padding: 5px 12px;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-family);
   font-size: 0.85em;
   cursor: pointer;
   text-decoration: none;
@@ -231,8 +248,8 @@ export default {
 }
 
 .header-btn:hover {
-  background: #00ff00;
-  color: #001100;
+  background: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
 }
 
 .terminal-body {
@@ -269,15 +286,15 @@ export default {
 }
 
 .message.user .prompt-prefix {
-  color: #00ffff;
+  color: var(--text-accent2);
 }
 
 .message.assistant .prompt-prefix {
-  color: #ffff00;
+  color: var(--text-accent);
 }
 
 .message.user .message-content {
-  color: #00ffff;
+  color: var(--text-accent2);
 }
 
 .message-content :deep(p) {
@@ -289,7 +306,7 @@ export default {
 }
 
 .message-content :deep(strong) {
-  color: #ffff00;
+  color: var(--text-accent);
   font-weight: bold;
 }
 
@@ -309,8 +326,8 @@ export default {
 }
 
 .message-content :deep(a) {
-  color: #001100;
-  background: #00ffff;
+  color: var(--bg-primary);
+  background: var(--link-color);
   padding: 4px 12px;
   text-decoration: none;
   font-weight: bold;
@@ -322,12 +339,12 @@ export default {
 }
 
 .message-content :deep(a:hover) {
-  background: #00ff00;
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  background: var(--btn-hover-bg);
+  box-shadow: 0 0 10px var(--border-glow);
 }
 
 .message-content :deep(code) {
-  background: rgba(0, 255, 0, 0.1);
+  background: var(--bg-overlay);
   padding: 0.1em 0.3em;
   border-radius: 2px;
 }
@@ -336,12 +353,12 @@ export default {
 .message-content :deep(h2),
 .message-content :deep(h3) {
   font-size: 1em;
-  color: #ffff00;
+  color: var(--text-accent);
   margin: 0.5em 0 0.3em 0;
 }
 
 .message.user .message-content :deep(strong) {
-  color: #00ffff;
+  color: var(--text-accent2);
 }
 
 .message-content :deep(.widget-btn) {
@@ -389,8 +406,8 @@ export default {
   display: flex;
   align-items: center;
   padding: 12px 20px;
-  border-top: 1px solid #00ff00;
-  background: rgba(0, 255, 0, 0.03);
+  border-top: 1px solid var(--border-primary);
+  background: var(--bg-overlay);
   flex-shrink: 0;
 }
 
@@ -404,15 +421,16 @@ export default {
   flex: 1;
   background: transparent;
   border: none;
-  color: #00ff00;
-  font-family: "Courier New", monospace;
+  color: var(--text-primary);
+  font-family: var(--font-family);
   font-size: 1em;
   outline: none;
-  caret-color: #00ff00;
+  caret-color: var(--text-primary);
 }
 
 .terminal-input::placeholder {
-  color: rgba(0, 255, 0, 0.3);
+  color: var(--text-secondary);
+  opacity: 0.4;
 }
 
 .terminal-input:disabled {
