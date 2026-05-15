@@ -1,161 +1,111 @@
 <template>
-  <div class="terminal-chat">
-    <header class="chat-header">
-      <div class="header-left">
-        <h1>SOLARIS TERMINAL</h1>
-        <span class="version">v2.0</span>
-      </div>
-      <div class="header-right">
-        <button @click="resetChat" class="header-btn" aria-label="Clear chat">
-          CLEAR
-        </button>
-        <router-link to="/" class="header-btn">BACK</router-link>
-      </div>
-    </header>
-
-    <div class="terminal-body" ref="terminalBody">
-      <!-- Loading State -->
-      <div v-if="isLoading" class="loading-section">
-        <p class="system-line">&gt; INITIALIZING NEURAL CORE...</p>
-        <p class="system-line">&gt; MODEL: {{ modelName }}</p>
-        <div class="progress-bar">
-          <p class="system-line">
-            &gt; DOWNLOADING: [{{ progressBar }}] {{ loadingPercent }}%
-          </p>
+  <div :class="inline ? 'terminal-inline' : 'terminal-page'">
+    <div class="terminal-window">
+      <header class="chat-header">
+        <div class="header-left">
+          <h1>JADBOT TERMINAL</h1>
+          <span class="version">v3.0</span>
         </div>
-        <p class="system-line status-text">&gt; {{ loadingProgress }}</p>
-      </div>
+        <div class="header-right">
+          <button @click="resetChat" class="header-btn" aria-label="Clear chat">
+            CLEAR
+          </button>
+          <router-link v-if="!inline" to="/" class="header-btn"
+            >BACK</router-link
+          >
+        </div>
+      </header>
 
-      <!-- WebGPU Not Supported -->
-      <div v-else-if="error === 'NO_WEBGPU'" class="error-section">
-        <p class="system-line error">&gt; ERROR: WebGPU NOT AVAILABLE</p>
-        <p class="system-line">&gt; This terminal requires WebGPU support.</p>
-        <p class="system-line">&gt; Recommended: Chrome 113+, Edge 113+</p>
-        <div class="fallback-faq">
-          <p class="system-line">&gt; LOADING STATIC BRIEFING...</p>
-          <br />
-          <p class="faq-item">
-            <strong>Q: Who is Jeff Adler?</strong><br />
-            A: Director of Engineering at Dropbox, leading the AI Experiences
-            org (30+ engineers). Previously Staff Engineer at Reddit and Google.
-          </p>
-          <p class="faq-item">
-            <strong>Q: What is Dash?</strong><br />
-            A: Dropbox's flagship AI product — universal search across SaaS
-            tools. Hit $1M ARR in year one, used by 300K+ Teams accounts.
-          </p>
-          <p class="faq-item">
-            <strong>Q: What are his interests?</strong><br />
-            A: Snowboarding, mountain biking, disc golf, and live music. Based
-            in Denver, CO.
-          </p>
-          <p class="faq-item">
-            <strong>Q: Technical expertise?</strong><br />
-            A: AI/ML (RAG, agentic systems), full-stack client platforms (iOS,
-            Android, web, desktop), engineering leadership, and infrastructure.
-          </p>
+      <div class="terminal-body" ref="terminalBody">
+        <!-- Error -->
+        <div v-if="error" class="error-section">
+          <p class="system-line error">&gt; ERROR: CONNECTION FAILED</p>
+          <p class="system-line">&gt; {{ error }}</p>
+        </div>
+
+        <!-- Chat Messages -->
+        <div v-else class="messages">
+          <div
+            v-for="(msg, i) in messages"
+            :key="i"
+            class="message"
+            :class="msg.role"
+          >
+            <span class="prompt-prefix"
+              >{{ msg.role === "user" ? "USER" : "JADBOT" }}&gt;
+            </span>
+            <span
+              class="message-content"
+              v-html="formatMessage(msg.content)"
+            ></span>
+          </div>
+          <div v-if="isGenerating" class="generating">
+            <span class="cursor-blink">_</span>
+          </div>
         </div>
       </div>
 
-      <!-- Load Failed -->
-      <div v-else-if="error === 'LOAD_FAILED'" class="error-section">
-        <p class="system-line error">&gt; ERROR: MODEL LOAD FAILED</p>
-        <p class="system-line">&gt; {{ loadingProgress }}</p>
-        <button @click="retryLoad" class="retry-btn">RETRY</button>
+      <!-- Input -->
+      <div class="input-section" v-if="!error">
+        <span class="input-prompt">&gt;</span>
+        <input
+          ref="inputField"
+          v-model="userInput"
+          @keydown.enter="handleSend"
+          :disabled="isGenerating"
+          placeholder="Ask about Jeff..."
+          class="terminal-input"
+          autofocus
+        />
       </div>
-
-      <!-- Chat Messages -->
-      <div v-else-if="isReady" class="messages">
-        <div
-          v-for="(msg, i) in messages"
-          :key="i"
-          class="message"
-          :class="msg.role"
-        >
-          <span class="prompt-prefix"
-            >{{ msg.role === "user" ? "USER" : "SOLARIS" }}&gt;
-          </span>
-          <span
-            class="message-content"
-            v-html="formatMessage(msg.content)"
-          ></span>
-        </div>
-        <div v-if="isGenerating" class="generating">
-          <span class="cursor-blink">_</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Input -->
-    <div class="input-section" v-if="isReady && !error">
-      <span class="input-prompt">&gt;</span>
-      <input
-        ref="inputField"
-        v-model="userInput"
-        @keydown.enter="handleSend"
-        :disabled="isGenerating"
-        placeholder="Ask about Jeff..."
-        class="terminal-input"
-        autofocus
-      />
     </div>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, nextTick, watch } from "vue";
-import { useWebLLM } from "../composables/useWebLLM";
+import { ref, nextTick, watch, onMounted } from "vue";
+import { marked } from "marked";
+import { useChat } from "../composables/useChat";
 
 export default {
   name: "TerminalChat",
+  props: {
+    inline: { type: Boolean, default: false },
+  },
 
   setup() {
-    const {
-      messages,
-      isLoading,
-      isReady,
-      loadingProgress,
-      loadingPercent,
-      error,
-      isGenerating,
-      initialize,
-      sendMessage,
-      reset,
-    } = useWebLLM();
+    const { messages, isReady, error, isGenerating, sendMessage, reset } =
+      useChat();
 
     const userInput = ref("");
     const terminalBody = ref(null);
     const inputField = ref(null);
-    const modelName = "Llama-3.2-1B-Instruct";
-
-    const progressBar = computed(() => {
-      const filled = Math.floor(loadingPercent.value / 5);
-      const empty = 20 - filled;
-      return "■".repeat(filled) + "·".repeat(empty);
-    });
 
     const handleSend = () => {
       const msg = userInput.value.trim();
       if (!msg || isGenerating.value) return;
       userInput.value = "";
       sendMessage(msg);
+      nextTick(() => inputField.value?.focus());
     };
 
     const resetChat = () => {
       reset();
     };
 
-    const retryLoad = () => {
-      error.value = null;
-      initialize();
-    };
+    const renderer = new marked.Renderer();
+    renderer.link = ({ href, text }) =>
+      `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+
+    marked.setOptions({
+      breaks: true,
+      gfm: true,
+      renderer,
+    });
 
     const formatMessage = (content) => {
-      return content
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\n/g, "<br>");
+      if (!content) return "";
+      return marked.parse(content);
     };
 
     const scrollToBottom = () => {
@@ -167,32 +117,26 @@ export default {
     };
 
     watch(messages, scrollToBottom, { deep: true });
-    watch(isReady, (ready) => {
-      if (ready) {
+    watch(isGenerating, (generating) => {
+      if (!generating) {
         nextTick(() => inputField.value?.focus());
       }
     });
 
     onMounted(() => {
-      initialize();
+      nextTick(() => inputField.value?.focus());
     });
 
     return {
       messages,
-      isLoading,
       isReady,
-      loadingProgress,
-      loadingPercent,
       error,
       isGenerating,
       userInput,
       terminalBody,
       inputField,
-      modelName,
-      progressBar,
       handleSend,
       resetChat,
-      retryLoad,
       formatMessage,
     };
   },
@@ -200,20 +144,32 @@ export default {
 </script>
 
 <style scoped>
-.terminal-chat {
+.terminal-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 40px);
+  padding: 20px 0;
+}
+
+.terminal-window {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 40px);
-  max-width: 900px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+  max-height: calc(100vh - 80px);
+  border: 1px solid #00ff00;
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3),
+    inset 0 0 15px rgba(0, 255, 0, 0.05);
 }
 
 .chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0;
+  padding: 12px 20px;
   border-bottom: 1px solid #00ff00;
+  background: rgba(0, 255, 0, 0.03);
   flex-shrink: 0;
 }
 
@@ -254,14 +210,14 @@ export default {
 .header-btn:hover {
   background: #00ff00;
   color: #001100;
-  border-bottom: 1px solid #00ff00;
 }
 
 .terminal-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 0;
+  padding: 20px;
   scroll-behavior: smooth;
+  min-height: 200px;
 }
 
 .system-line {
@@ -272,46 +228,6 @@ export default {
 
 .system-line.error {
   color: #ff4444;
-}
-
-.status-text {
-  opacity: 0.6;
-  font-size: 0.85em;
-}
-
-.progress-bar {
-  margin: 8px 0;
-}
-
-.fallback-faq {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #00ff00;
-}
-
-.faq-item {
-  margin: 15px 0;
-  line-height: 1.5;
-}
-
-.faq-item strong {
-  color: #ffff00;
-}
-
-.retry-btn {
-  margin-top: 15px;
-  background: transparent;
-  border: 1px solid #00ff00;
-  color: #00ff00;
-  padding: 8px 20px;
-  font-family: "Courier New", monospace;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.retry-btn:hover {
-  background: #00ff00;
-  color: #001100;
 }
 
 .messages {
@@ -341,6 +257,70 @@ export default {
   color: #00ffff;
 }
 
+.message-content :deep(p) {
+  margin: 0 0 0.5em 0;
+}
+
+.message-content :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.message-content :deep(strong) {
+  color: #ffff00;
+  font-weight: bold;
+}
+
+.message-content :deep(em) {
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.message-content :deep(ul),
+.message-content :deep(ol) {
+  margin: 0.3em 0;
+  padding-left: 1.5em;
+}
+
+.message-content :deep(li) {
+  margin: 0.2em 0;
+}
+
+.message-content :deep(a) {
+  color: #001100;
+  background: #00ffff;
+  padding: 4px 12px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9em;
+  border-radius: 2px;
+  display: inline-block;
+  margin: 4px 0;
+  transition: all 0.3s ease;
+}
+
+.message-content :deep(a:hover) {
+  background: #00ff00;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.message-content :deep(code) {
+  background: rgba(0, 255, 0, 0.1);
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+}
+
+.message-content :deep(h1),
+.message-content :deep(h2),
+.message-content :deep(h3) {
+  font-size: 1em;
+  color: #ffff00;
+  margin: 0.5em 0 0.3em 0;
+}
+
+.message.user .message-content :deep(strong) {
+  color: #00ffff;
+}
+
 .generating {
   padding: 5px 0;
 }
@@ -363,8 +343,9 @@ export default {
 .input-section {
   display: flex;
   align-items: center;
-  padding: 15px 0;
+  padding: 12px 20px;
   border-top: 1px solid #00ff00;
+  background: rgba(0, 255, 0, 0.03);
   flex-shrink: 0;
 }
 
@@ -393,7 +374,6 @@ export default {
   opacity: 0.5;
 }
 
-.loading-section,
 .error-section {
   animation: fadeIn 0.3s ease;
 }
@@ -408,14 +388,41 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .terminal-page {
+    padding: 0;
+    align-items: stretch;
+    min-height: calc(100vh - 40px);
+  }
+
+  .terminal-window {
+    max-height: none;
+    height: calc(100vh - 40px);
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
+  }
+
   .chat-header {
     flex-direction: column;
     gap: 10px;
     align-items: flex-start;
   }
 
-  .terminal-chat {
-    height: calc(100vh - 60px);
+  .terminal-body {
+    padding: 15px;
   }
+
+  .input-section {
+    padding: 12px 15px;
+  }
+}
+
+.terminal-inline {
+  width: 100%;
+}
+
+.terminal-inline .terminal-window {
+  max-width: none;
+  max-height: 500px;
 }
 </style>

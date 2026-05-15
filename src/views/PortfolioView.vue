@@ -14,7 +14,9 @@
             <a href="#passions" @click.prevent="navigateTo('passions')"
               >Passions</a
             >
-            <router-link to="/chat" class="nav-link">Terminal</router-link>
+            <a href="#terminal" @click.prevent="navigateTo('terminal')"
+              >Terminal</a
+            >
           </nav>
         </div>
         <button
@@ -29,14 +31,88 @@
 
       <main>
         <section id="about">
-          <h2>System Info</h2>
-          <div class="typing-animation">
-            <h3>{{ typewriterText }}<span class="cursor">_</span></h3>
+          <div class="hero">
+            <div class="hero-photo">
+              <img
+                src="/jeff-adler.png"
+                alt="Jeff Adler"
+                class="profile-photo"
+              />
+            </div>
+            <div class="hero-text">
+              <div class="typing-animation">
+                <h3>{{ typewriterText }}<span class="cursor">_</span></h3>
+              </div>
+              <p class="hero-summary">
+                Engineering leader building AI products from zero to one and
+                scaling them post-PMF. Currently directing engineering orgs at
+                Dropbox. Based in Denver, CO.
+              </p>
+              <div class="hero-links">
+                <a
+                  href="https://linkedin.com/in/jeff-adler-2bbb9828"
+                  target="_blank"
+                  class="contact-link"
+                  ><i class="fab fa-linkedin"></i> LinkedIn</a
+                >
+              </div>
+            </div>
           </div>
-          <p>
-            Status: Directing AI Experiences at Dropbox. Building agentic
-            systems. Mountain life in Colorado.
-          </p>
+
+          <div id="terminal" class="terminal-section">
+            <TerminalChat :inline="true" />
+          </div>
+
+          <h2>About Me</h2>
+          <div class="about-details">
+            <div class="about-block">
+              <h3>What I Build</h3>
+              <ul>
+                <li>
+                  AI-powered products from concept to scale, taking ideas from
+                  zero to one and driving them through product-market fit
+                </li>
+                <li>
+                  Foundational platforms at massive scale, building and owning
+                  core infrastructure used by hundreds of millions of users
+                </li>
+                <li>
+                  Multi-surface platforms spanning web, desktop, mobile, and
+                  browser extensions with shared-code architectures
+                </li>
+                <li>
+                  Agentic development workflows that fundamentally change how
+                  engineering teams ship software
+                </li>
+              </ul>
+            </div>
+            <div class="about-block">
+              <h3>How I Lead</h3>
+              <ul>
+                <li>
+                  Transforming legacy engineering organizations to adopt agentic
+                  coding practices, accelerating teams to build in the AI-native
+                  era
+                </li>
+                <li>
+                  Scaling engineering organizations through intentional org
+                  design and hiring
+                </li>
+                <li>
+                  Growing people by building career development systems and
+                  creating environments where engineers get promoted
+                </li>
+                <li>
+                  Disciplined execution through operating rhythms, portfolio
+                  prioritization, and explicit cut lines
+                </li>
+                <li>
+                  Conviction with humility, pushing hard on what matters while
+                  staying genuinely open to better ideas
+                </li>
+              </ul>
+            </div>
+          </div>
         </section>
 
         <section id="experience">
@@ -72,20 +148,21 @@
           <div class="education">
             <h3>Education</h3>
             <p>
-              Rutgers University — B.S. Computer & Electrical Engineering, Minor
+              Rutgers University, B.S. Computer & Electrical Engineering, Minor
               in CS
             </p>
           </div>
         </section>
 
         <section id="passions">
-          <h2>Personal Modules</h2>
+          <h2>Off the Clock</h2>
           <div class="passions-grid">
             <div
               v-for="(passion, index) in passions"
               :key="index"
               class="passion-item"
-              :style="{ animationDelay: index * 0.7 + 's' }"
+              :class="{ clickable: passion.action }"
+              :style="{ animationDelay: index * 0.5 + 's' }"
               role="button"
               tabindex="0"
               @mouseover="activatePassion(index)"
@@ -101,6 +178,7 @@
                 <i :class="passion.icon"></i>
               </div>
               <h3>{{ passion.name }}</h3>
+              <span v-if="passion.action" class="play-hint">Click to play</span>
             </div>
           </div>
         </section>
@@ -113,24 +191,43 @@
       </footer>
 
       <transition name="fade">
-        <SnowboardGame
-          v-if="showSnowboardGame"
-          @close-game="showSnowboardGame = false"
-        />
+        <div v-if="showSnowboardGame" class="game-overlay">
+          <SnowboardGame @close-game="showSnowboardGame = false" />
+        </div>
       </transition>
 
       <transition name="fade">
-        <MountainBikeGame
-          v-if="showMountainBikeGame"
-          @close="showMountainBikeGame = false"
-        />
+        <div v-if="showMountainBikeGame" class="game-overlay">
+          <MountainBikeGame @close="showMountainBikeGame = false" />
+        </div>
       </transition>
 
       <transition name="fade">
-        <DiscGolfGame
-          v-if="showDiscGolfGame"
-          @close-game="showDiscGolfGame = false"
-        />
+        <div v-if="showDiscGolfGame" class="game-overlay">
+          <DiscGolfGame @close-game="showDiscGolfGame = false" />
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div v-if="showVolleyballGame" class="game-overlay">
+          <SlimeVolleyball @close-game="showVolleyballGame = false" />
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div v-if="showTabletopGame" class="game-overlay">
+          <TabletopGame @close-game="showTabletopGame = false" />
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div v-if="showGuitarStrum" class="game-overlay">
+          <GuitarStrum @close="showGuitarStrum = false" />
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <SushiRain v-if="showSushiRain" @close="showSushiRain = false" />
       </transition>
 
       <WebampPlayer :isVisible="showWebamp" @close="showWebamp = false" />
@@ -143,8 +240,13 @@ import { ref, onMounted, onUnmounted } from "vue";
 import SnowboardGame from "../components/SnowboardGame.vue";
 import MountainBikeGame from "../components/MountainBikeGame.vue";
 import DiscGolfGame from "../components/DiscGolfGame.vue";
+import SlimeVolleyball from "../components/SlimeVolleyball.vue";
+import TabletopGame from "../components/TabletopGame.vue";
+import GuitarStrum from "../components/GuitarStrum.vue";
+import SushiRain from "../components/SushiRain.vue";
 import WebampPlayer from "../components/WebampPlayer.vue";
 import BootSequence from "../components/BootSequence.vue";
+import TerminalChat from "../views/TerminalChat.vue";
 
 export default {
   name: "PortfolioView",
@@ -152,39 +254,48 @@ export default {
     SnowboardGame,
     MountainBikeGame,
     DiscGolfGame,
+    SlimeVolleyball,
+    TabletopGame,
+    GuitarStrum,
+    SushiRain,
     WebampPlayer,
     BootSequence,
+    TerminalChat,
   },
 
   setup() {
     const typewriterText = ref("");
     const phrases = [
       "Director of Engineering",
-      "AI Experiences Leader",
-      "Agentic Systems Builder",
-      "Mountain Biker",
-      "Snowboarding shredder",
-      "Disc golf ripper",
+      "AI Product Builder",
+      "Engineering Leader",
+      "Zero to One Builder",
+      "Denver, Colorado",
     ];
     const activeJob = ref(null);
     const activePassion = ref(null);
     const showSnowboardGame = ref(false);
     const showMountainBikeGame = ref(false);
     const showDiscGolfGame = ref(false);
+    const showVolleyballGame = ref(false);
+    const showTabletopGame = ref(false);
+    const showGuitarStrum = ref(false);
+    const showSushiRain = ref(false);
     const showWebamp = ref(false);
     const showBoot = ref(!sessionStorage.getItem("bootComplete"));
     let typewriterTimeout = null;
 
     const jobHistory = [
       {
-        title: "Director of Engineering, AI Experiences",
+        title: "Director of Engineering",
         company: "Dropbox",
-        duration: "Jul 2025 - Present",
+        duration: "May 2023 - Present",
         details: [
-          "Directing Dropbox's AI Experiences org — 30+ person cross-functional team spanning iOS, Android, Web, Desktop, and ML.",
-          "Dash hit $1M ARR in its first year with 300K+ Dropbox Teams accounts.",
-          "Converted all engineering teams to agentic development — 80%+ AI-generated code.",
-          "End-to-end ownership: roadmap, engineering, QA, release, SOC 2 & HIPAA compliance.",
+          "Directing engineering orgs across 5 teams owning Dropbox's flagship AI product, Dash.",
+          "Scaled the organization through intentional hiring and org design.",
+          "Took the product from early prototype to $1M ARR with 300K+ enterprise accounts.",
+          "Led the transition to agentic development with 80%+ AI-generated code across all teams.",
+          "End-to-end ownership: product strategy, engineering, QA, compliance, and release management.",
           {
             isLink: true,
             url: "https://blog.dropbox.com/topics/company/dash-for-business-launch-2024",
@@ -193,32 +304,12 @@ export default {
         ],
       },
       {
-        title: "Senior Engineering Manager, AI Experiences",
-        company: "Dropbox",
-        duration: "Aug 2023 - Jul 2025",
-        details: [
-          "Founded the AI Experiences engineering organization from scratch, scaling from 6 to 30+ engineers across 5 teams.",
-          "Shipped Dash for Business from pilot to GA — 20K+ self-serve users.",
-          "Led multi-surface AI platform: web, desktop, mobile, browser extensions.",
-          "Drove shared component architecture for Dash.ai & Desktop.",
-        ],
-      },
-      {
         title: "Staff Software Engineer",
-        company: "Dropbox",
-        duration: "May 2023 - Aug 2023",
-        details: [
-          "IC bridge role building the initial Dash client architecture before transitioning to management.",
-        ],
-      },
-      {
-        title: "Staff Software Engineer",
-        company: "Reddit, Inc.",
+        company: "Reddit",
         duration: "Nov 2021 - May 2023",
         details: [
-          "Technical lead for iOS platform supporting 100+ engineer consumer product organization.",
-          "Modernized the full iOS development stack across Reddit.",
-          "Architected SliceKit, a declarative MVVM-C presentation framework adopted broadly across Reddit iOS.",
+          "iOS platform tech lead for a 100+ engineer consumer product organization.",
+          "Architected SliceKit, a declarative presentation framework adopted across Reddit iOS.",
           "Re-architected media infrastructure, reducing video playback errors by 22%.",
           {
             isLink: true,
@@ -232,8 +323,8 @@ export default {
         company: "Dropbox",
         duration: "Apr 2019 - Nov 2021",
         details: [
-          "Led development and launch for HelloSign Mobile Apps, Dropbox Scan, File Transfers, Family Plan.",
-          "Defined reusable mobile architectures that became the adopted standard for building new apps at Dropbox.",
+          "Led development and launch for HelloSign Mobile, Dropbox Scan, File Transfers, and Family Plan.",
+          "Defined reusable mobile architectures that became the standard for new apps at Dropbox.",
         ],
       },
       {
@@ -241,8 +332,8 @@ export default {
         company: "Google",
         duration: "Jul 2016 - Apr 2019",
         details: [
-          "Technical lead for Google Drive iOS — Material Design 2 redesign and core ML integration.",
-          "Re-architected core app navigation and network/data/view layers of Google Search iOS app.",
+          "Technical lead for Google Drive iOS, leading the Material Design 2 redesign and on-device ML integration.",
+          "Re-architected core navigation and network layers of Google Search iOS.",
         ],
       },
       {
@@ -251,16 +342,24 @@ export default {
         duration: "2014 - 2016",
         details: [
           "iOS platform engineering at TrackVia (enterprise low-code platform).",
-          "Built mPilot, an IFR navigation app used by Lufthansa and 70+ major airlines.",
+          "Built mPilot, an IFR navigation app used by 70+ major airlines.",
         ],
       },
     ];
 
     const passions = [
-      { name: "Snowboarding", icon: "fas fa-snowboarding" },
-      { name: "Mountain Biking", icon: "fas fa-biking" },
-      { name: "Disc Golf", icon: "fas fa-compact-disc" },
-      { name: "Live Music", icon: "fas fa-music" },
+      { name: "Snowboarding", icon: "fas fa-snowboarding", action: "game" },
+      { name: "Mountain Biking", icon: "fas fa-biking", action: "game" },
+      { name: "Disc Golf", icon: "fas fa-compact-disc", action: "game" },
+      { name: "Volleyball", icon: "fas fa-volleyball-ball", action: "game" },
+      { name: "DJing", icon: "fas fa-headphones-alt", action: "music" },
+      { name: "Live Music", icon: "fas fa-guitar", action: "guitar" },
+      { name: "Food", icon: "fas fa-utensils", action: "sushi" },
+      {
+        name: "Tabletop Games",
+        icon: "fas fa-dice-d20",
+        action: "game",
+      },
     ];
 
     const typeWriter = () => {
@@ -328,15 +427,17 @@ export default {
     };
 
     const activatePassionFeature = (index) => {
-      if (index === 0) {
-        showSnowboardGame.value = true;
-      } else if (index === 1) {
+      const passion = passions[index];
+      if (!passion) return;
+      if (passion.name === "Snowboarding") showSnowboardGame.value = true;
+      else if (passion.name === "Mountain Biking")
         showMountainBikeGame.value = true;
-      } else if (index === 2) {
-        showDiscGolfGame.value = true;
-      } else if (index === 3) {
-        showWebamp.value = true;
-      }
+      else if (passion.name === "Disc Golf") showDiscGolfGame.value = true;
+      else if (passion.name === "Volleyball") showVolleyballGame.value = true;
+      else if (passion.name === "Tabletop Games") showTabletopGame.value = true;
+      else if (passion.action === "music") showWebamp.value = true;
+      else if (passion.action === "guitar") showGuitarStrum.value = true;
+      else if (passion.action === "sushi") showSushiRain.value = true;
     };
 
     const toggleWebamp = () => {
@@ -358,6 +459,10 @@ export default {
       showSnowboardGame,
       showMountainBikeGame,
       showDiscGolfGame,
+      showVolleyballGame,
+      showTabletopGame,
+      showGuitarStrum,
+      showSushiRain,
       showWebamp,
       showBoot,
       setActiveJob,
@@ -443,10 +548,71 @@ h2 {
   text-shadow: 0 0 10px #00ff00, 0 0 20px rgba(0, 255, 0, 0.5);
 }
 
+.hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  margin: 20px 0 30px;
+}
+
+.hero-photo {
+  flex-shrink: 0;
+}
+
+.profile-photo {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 2px solid #00ff00;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), 0 0 40px rgba(0, 255, 0, 0.1);
+  filter: saturate(0.7) brightness(1.1);
+  transition: all 0.3s ease;
+}
+
+.profile-photo:hover {
+  filter: saturate(1) brightness(1.2);
+  box-shadow: 0 0 30px rgba(0, 255, 0, 0.6), 0 0 60px rgba(0, 255, 0, 0.2);
+}
+
+.hero-text {
+  flex: 1;
+}
+
 .typing-animation {
   font-size: 1.5em;
-  margin: 20px 0;
+  margin: 0 0 15px;
   min-height: 1.6em;
+}
+
+.hero-summary {
+  font-size: 1.05em;
+  line-height: 1.7;
+  margin: 0 0 15px;
+  opacity: 0.9;
+}
+
+.hero-links {
+  display: flex;
+  gap: 15px;
+}
+
+.contact-link {
+  color: #00ffff;
+  border: 1px solid #00ffff;
+  padding: 6px 14px;
+  font-family: "Courier New", monospace;
+  font-size: 0.85em;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.contact-link:hover {
+  background: #00ffff;
+  color: #001100;
+}
+
+.contact-link i {
+  margin-right: 6px;
 }
 
 .cursor {
@@ -460,6 +626,64 @@ h2 {
   }
   50% {
     opacity: 0;
+  }
+}
+
+.about-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.about-block {
+  padding: 20px;
+  border: 1px solid #00ff00;
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.about-block h3 {
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  font-size: 0.95em;
+  color: #ffff00;
+  text-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+.about-block ul {
+  margin: 0;
+  padding-left: 18px;
+  list-style: none;
+}
+
+.about-block li {
+  position: relative;
+  padding-left: 0;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.about-block li::before {
+  content: ">";
+  position: absolute;
+  left: -18px;
+  color: #00ff00;
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-links {
+    justify-content: center;
+  }
+
+  .about-details {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -510,8 +734,12 @@ h2 {
   }
 }
 
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
 .education {
-  margin-top: 30px;
+  margin-top: 20px;
   padding: 20px;
   border: 1px solid #00ff00;
   animation: glow-pulse 3s ease-in-out infinite;
@@ -524,27 +752,53 @@ h2 {
 
 .passions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
 }
 
 .passion-item {
   text-align: center;
-  padding: 20px;
+  padding: 20px 10px;
   border: 1px solid #00ff00;
   transition: all 0.3s ease;
-  cursor: pointer;
   animation: glow-pulse 3s ease-in-out infinite;
+  position: relative;
+}
+
+.passion-item.clickable {
+  cursor: pointer;
+}
+
+.passion-item.clickable:hover {
+  background-color: #002200;
+}
+
+.play-hint {
+  display: block;
+  font-size: 0.7em;
+  opacity: 0;
+  color: #ffff00;
+  margin-top: 5px;
+  transition: opacity 0.3s ease;
+}
+
+.passion-item.clickable:hover .play-hint {
+  opacity: 0.7;
+}
+
+.passion-item h3 {
+  font-size: 0.85em;
+  margin: 0;
 }
 
 .passion-icon {
-  font-size: 3em;
-  margin-bottom: 10px;
+  font-size: 2.5em;
+  margin-bottom: 8px;
   transition: all 0.3s ease;
 }
 
 .passion-icon.active {
-  transform: scale(1.2);
+  transform: scale(1.15);
   color: #ffff00;
   text-shadow: 0 0 15px rgba(255, 255, 0, 0.7);
 }
@@ -555,6 +809,19 @@ footer {
   font-size: 0.9em;
   border-top: 1px solid #00ff00;
   padding-top: 20px;
+}
+
+.game-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
 }
 
 @keyframes glitch {
@@ -610,6 +877,10 @@ footer {
   nav .nav-link {
     margin-left: 10px;
   }
+
+  .passions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -627,5 +898,21 @@ footer {
   .glitch {
     animation: none;
   }
+}
+
+.terminal-section {
+  padding: 40px 0 50px;
+}
+
+.terminal-section h2 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.terminal-section .section-subtitle {
+  text-align: center;
+  opacity: 0.6;
+  margin-bottom: 20px;
+  font-size: 0.9em;
 }
 </style>

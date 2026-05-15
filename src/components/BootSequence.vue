@@ -23,7 +23,7 @@ export default {
 
     const bootLines = [
       { text: "", delay: 300 },
-      { text: "SOLARIS OS v2.0 [BUILD 2026.05]", delay: 400 },
+      { text: "JADBOT OS v2.0 [BUILD 2026.05]", delay: 400 },
       { text: "═══════════════════════════════════════════", delay: 200 },
       { text: "", delay: 200 },
       { text: "BIOS CHECK.............. OK", delay: 300 },

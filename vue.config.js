@@ -12,5 +12,15 @@ module.exports = defineConfig({
   },
   devServer: {
     historyApiFallback: true,
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        onProxyRes(proxyRes) {
+          proxyRes.headers["cache-control"] = "no-cache";
+          proxyRes.headers["x-accel-buffering"] = "no";
+        },
+      },
+    },
   },
 });
