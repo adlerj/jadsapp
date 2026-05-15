@@ -100,6 +100,7 @@ export default {
           });
         })
         .catch((error) => {
+          // eslint-disable-next-line no-console
           console.error("Error initializing Webamp:", error);
         });
     };
