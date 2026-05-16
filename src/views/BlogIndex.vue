@@ -99,16 +99,82 @@ export default {
     const url = "https://jads.app/blog";
     const desc =
       "Jeff Adler's engineering blog. AI, agentic engineering, leadership, iOS architecture, and technical deep dives from Google, Dropbox, and Reddit.";
-    setMeta("property", "og:title", "Jads Blog — Jeff Adler");
+    setMeta("property", "og:title", "Jads Blog - Jeff Adler");
     setMeta("property", "og:description", desc);
     setMeta("property", "og:url", url);
     setMeta("property", "og:type", "website");
     setMeta("property", "og:site_name", "Jeff Adler — jads.app");
     setMeta("property", "og:image", "https://jads.app/jeff-adler.png");
+    setMeta("property", "og:locale", "en_US");
     setMeta("name", "twitter:card", "summary");
-    setMeta("name", "twitter:title", "Jads Blog — Jeff Adler");
+    setMeta("name", "twitter:title", "Jads Blog - Jeff Adler");
     setMeta("name", "twitter:description", desc);
+    setMeta("name", "twitter:site", "@JadlerOS");
+    setMeta("name", "twitter:creator", "@JadlerOS");
+    setMeta("name", "twitter:image", "https://jads.app/jeff-adler.png");
     setLink("canonical", url);
+
+    let feedLink = document.querySelector('link[type="application/rss+xml"]');
+    if (!feedLink) {
+      feedLink = document.createElement("link");
+      feedLink.setAttribute("rel", "alternate");
+      feedLink.setAttribute("type", "application/rss+xml");
+      feedLink.setAttribute("title", "Jads Blog - Jeff Adler");
+      feedLink.setAttribute("href", "https://jads.app/feed.xml");
+      document.head.appendChild(feedLink);
+    }
+
+    let blogLd = document.querySelector("script[data-blog-index-ld]");
+    if (!blogLd) {
+      blogLd = document.createElement("script");
+      blogLd.setAttribute("type", "application/ld+json");
+      blogLd.setAttribute("data-blog-index-ld", "true");
+      document.head.appendChild(blogLd);
+    }
+    const allPosts = Object.values(getPostsByYear())
+      .flat()
+      .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    blogLd.textContent = JSON.stringify([
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "Jads Blog",
+        description: desc,
+        url: url,
+        author: {
+          "@type": "Person",
+          name: "Jeff Adler",
+          url: "https://jads.app",
+          jobTitle: "Director of Engineering",
+          worksFor: { "@type": "Organization", name: "Dropbox" },
+        },
+        mainEntityOfPage: { "@type": "WebPage", "@id": url },
+        hasPart: allPosts.slice(0, 20).map((p) => ({
+          "@type": "BlogPosting",
+          headline: p.title,
+          url: `https://jads.app/blog/${p.slug}`,
+          datePublished: p.date,
+        })),
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://jads.app",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Blog",
+            item: url,
+          },
+        ],
+      },
+    ]);
 
     const postsByYear = computed(() => getPostsByYear());
     const years = computed(() =>

@@ -153,9 +153,12 @@ export default {
 
     watchEffect(() => {
       if (post.value) {
-        const title = `${post.value.title} — Jeff Adler`;
+        const title = `${post.value.title} - Jeff Adler`;
         const desc = post.value.description || "";
         const url = `https://jads.app/blog/${route.params.slug}`;
+        const wordCount = (post.value.body || "")
+          .split(/\s+/)
+          .filter(Boolean).length;
 
         document.title = title;
         setMeta("name", "description", desc);
@@ -166,48 +169,93 @@ export default {
         setMeta("property", "og:type", "article");
         setMeta("property", "og:site_name", "Jeff Adler — jads.app");
         setMeta("property", "og:image", "https://jads.app/jeff-adler.png");
+        setMeta("property", "og:locale", "en_US");
         if (post.value.date) {
           setMeta("property", "article:published_time", post.value.date);
         }
         setMeta("property", "article:author", "https://jads.app/");
+        if (post.value.tags) {
+          post.value.tags.forEach((tag) => {
+            let el = document.querySelector(
+              `meta[property="article:tag"][content="${tag}"]`
+            );
+            if (!el) {
+              el = document.createElement("meta");
+              el.setAttribute("property", "article:tag");
+              el.setAttribute("content", tag);
+              document.head.appendChild(el);
+            }
+          });
+        }
 
         setMeta("name", "twitter:card", "summary");
         setMeta("name", "twitter:title", post.value.title);
         setMeta("name", "twitter:description", desc);
         setMeta("name", "twitter:image", "https://jads.app/jeff-adler.png");
+        setMeta("name", "twitter:site", "@JadlerOS");
+        setMeta("name", "twitter:creator", "@JadlerOS");
 
         setLink("canonical", url);
 
-        let ld = document.querySelector('script[data-blog-ld]');
+        let ld = document.querySelector("script[data-blog-ld]");
         if (!ld) {
           ld = document.createElement("script");
           ld.setAttribute("type", "application/ld+json");
           ld.setAttribute("data-blog-ld", "true");
           document.head.appendChild(ld);
         }
-        ld.textContent = JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BlogPosting",
-          headline: post.value.title,
-          description: desc,
-          datePublished: post.value.date,
-          url: url,
-          author: {
-            "@type": "Person",
-            name: "Jeff Adler",
-            url: "https://jads.app",
-            jobTitle: "Director of Engineering",
-            worksFor: { "@type": "Organization", name: "Dropbox" },
+        ld.textContent = JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: post.value.title,
+            description: desc,
+            datePublished: post.value.date,
+            dateModified: post.value.date,
+            wordCount: wordCount,
+            url: url,
+            author: {
+              "@type": "Person",
+              name: "Jeff Adler",
+              url: "https://jads.app",
+              jobTitle: "Director of Engineering",
+              worksFor: { "@type": "Organization", name: "Dropbox" },
+            },
+            publisher: {
+              "@type": "Person",
+              name: "Jeff Adler",
+              url: "https://jads.app",
+            },
+            mainEntityOfPage: { "@type": "WebPage", "@id": url },
+            image: "https://jads.app/jeff-adler.png",
+            inLanguage: "en-US",
+            keywords: (post.value.tags || []).join(", "),
           },
-          publisher: {
-            "@type": "Person",
-            name: "Jeff Adler",
-            url: "https://jads.app",
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: "https://jads.app",
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Blog",
+                item: "https://jads.app/blog",
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: post.value.title,
+                item: url,
+              },
+            ],
           },
-          mainEntityOfPage: { "@type": "WebPage", "@id": url },
-          image: "https://jads.app/jeff-adler.png",
-          keywords: (post.value.tags || []).join(", "),
-        });
+        ]);
       }
     });
 

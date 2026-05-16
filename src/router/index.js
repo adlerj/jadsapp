@@ -64,6 +64,13 @@ router.beforeEach((to, from, next) => {
   if (blogLd && to.name !== "blog-post") {
     blogLd.remove();
   }
+  const blogIndexLd = document.querySelector("script[data-blog-index-ld]");
+  if (blogIndexLd && to.name !== "blog") {
+    blogIndexLd.remove();
+  }
+  document
+    .querySelectorAll('meta[property="article:tag"]')
+    .forEach((el) => el.remove());
   next();
 });
 
