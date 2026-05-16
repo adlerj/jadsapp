@@ -5,6 +5,8 @@ const {
   createPost,
   updatePost,
   deletePost,
+  getPostHistory,
+  getPostVersion,
 } = require("../db");
 const { requireAuth } = require("../auth");
 
@@ -76,6 +78,35 @@ router.delete("/api/posts/:slug", requireAuth, (req, res) => {
   deletePost(req.params.slug);
   if (global.reloadBlogData) global.reloadBlogData();
   res.json({ deleted: req.params.slug });
+});
+
+router.get("/api/posts/:slug/history", requireAuth, (req, res) => {
+  const versions = getPostHistory(req.params.slug);
+  res.json(versions);
+});
+
+router.get("/api/posts/:slug/history/:id", requireAuth, (req, res) => {
+  const version = getPostVersion(parseInt(req.params.id, 10));
+  if (!version || version.slug !== req.params.slug) {
+    return res.status(404).json({ error: "Version not found" });
+  }
+  res.json(version);
+});
+
+router.post("/api/posts/:slug/restore/:id", requireAuth, (req, res) => {
+  const version = getPostVersion(parseInt(req.params.id, 10));
+  if (!version || version.slug !== req.params.slug) {
+    return res.status(404).json({ error: "Version not found" });
+  }
+  const current = getPostBySlug(req.params.slug);
+  let post;
+  if (current) {
+    post = updatePost(req.params.slug, version);
+  } else {
+    post = createPost(version);
+  }
+  if (global.reloadBlogData) global.reloadBlogData();
+  res.json(post);
 });
 
 module.exports = router;

@@ -225,6 +225,58 @@ function verify(filePath) {
   console.log(`OK: ${slug} (${meta.title})`);
 }
 
+async function history(slug) {
+  if (!slug) {
+    console.error("Usage: blog history <slug>");
+    process.exit(1);
+  }
+  const versions = await apiFetch(`/api/posts/${slug}/history`, { auth: true });
+  if (versions.length === 0) {
+    console.log("No version history (post has not been updated yet).");
+    return;
+  }
+  console.log("ID".padEnd(8) + "DATE".padEnd(14) + "ACTION".padEnd(10) + "SAVED AT".padEnd(22) + "TITLE");
+  console.log("-".repeat(80));
+  for (const v of versions) {
+    console.log(
+      String(v.id).padEnd(8) +
+        (v.date || "").padEnd(14) +
+        v.action.padEnd(10) +
+        v.version_at.padEnd(22) +
+        v.title
+    );
+  }
+  console.log(`\n${versions.length} version(s)`);
+}
+
+async function restore(slug, versionId) {
+  if (!slug || !versionId) {
+    console.error("Usage: blog restore <slug> <version-id>");
+    process.exit(1);
+  }
+  const version = await apiFetch(`/api/posts/${slug}/history/${versionId}`, { auth: true });
+  console.log(`Restoring version ${version.id} from ${version.versionAt}:`);
+  console.log(`  Title: ${version.title}`);
+  console.log(`  Date: ${version.date}`);
+  console.log(`  Action that replaced it: ${version.action}`);
+
+  const readline = require("readline");
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const answer = await new Promise((resolve) =>
+    rl.question("Restore this version? (y/N) ", resolve)
+  );
+  rl.close();
+  if (answer.toLowerCase() !== "y") {
+    console.log("Cancelled");
+    return;
+  }
+  const post = await apiFetch(`/api/posts/${slug}/restore/${versionId}`, {
+    method: "POST",
+    auth: true,
+  });
+  console.log(`Restored: ${post.slug} (${post.title})`);
+}
+
 const [, , command, ...args] = process.argv;
 
 switch (command) {
@@ -245,15 +297,23 @@ switch (command) {
   case "verify":
     verify(args[0]);
     break;
+  case "history":
+    history(args[0]);
+    break;
+  case "restore":
+    restore(args[0], args[1]);
+    break;
   default:
     console.log(`Usage: blog <command>
 
 Commands:
-  list (ls)         List all posts
-  get <slug>        Get a post as markdown
-  push <file.md>    Create or update a post
-  delete (rm) <slug>  Delete a post
-  verify <file.md>  Validate locally without pushing
+  list (ls)              List all posts
+  get <slug>             Get a post as markdown
+  push <file.md>         Create or update a post
+  delete (rm) <slug>     Delete a post
+  verify <file.md>       Validate locally without pushing
+  history <slug>         Show version history for a post
+  restore <slug> <id>    Restore a previous version
 
 Environment:
   BLOG_API_URL    API base URL (default: https://jads.app)

@@ -30,6 +30,20 @@ function getDb() {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS idx_posts_date ON posts(date DESC);
+    CREATE TABLE IF NOT EXISTS post_versions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug TEXT NOT NULL,
+      title TEXT NOT NULL,
+      date TEXT NOT NULL,
+      description TEXT NOT NULL,
+      tags TEXT NOT NULL,
+      series TEXT,
+      part INTEGER,
+      body TEXT NOT NULL,
+      version_at TEXT NOT NULL DEFAULT (datetime('now')),
+      action TEXT NOT NULL DEFAULT 'update'
+    );
+    CREATE INDEX IF NOT EXISTS idx_versions_slug ON post_versions(slug, version_at DESC);
   `);
   console.log("  Database initialized OK");
   return db;
@@ -81,7 +95,19 @@ function createPost(data) {
   return getPostBySlug(data.slug);
 }
 
+function snapshotPost(slug, action) {
+  const row = getDb().prepare("SELECT * FROM posts WHERE slug = ?").get(slug);
+  if (!row) return;
+  getDb()
+    .prepare(
+      `INSERT INTO post_versions (slug, title, date, description, tags, series, part, body, action)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run(row.slug, row.title, row.date, row.description, row.tags, row.series, row.part, row.body, action);
+}
+
 function updatePost(slug, data) {
+  snapshotPost(slug, "update");
   getDb()
     .prepare(
       `UPDATE posts SET title = ?, date = ?, description = ?, tags = ?,
@@ -102,8 +128,34 @@ function updatePost(slug, data) {
 }
 
 function deletePost(slug) {
+  snapshotPost(slug, "delete");
   const result = getDb().prepare("DELETE FROM posts WHERE slug = ?").run(slug);
   return result.changes > 0;
+}
+
+function getPostHistory(slug) {
+  return getDb()
+    .prepare("SELECT id, slug, title, date, tags, version_at, action FROM post_versions WHERE slug = ? ORDER BY version_at DESC")
+    .all(slug)
+    .map((r) => ({ ...r, tags: JSON.parse(r.tags) }));
+}
+
+function getPostVersion(id) {
+  const row = getDb().prepare("SELECT * FROM post_versions WHERE id = ?").get(id);
+  if (!row) return null;
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    date: row.date,
+    description: row.description,
+    tags: JSON.parse(row.tags),
+    series: row.series || null,
+    part: row.part || null,
+    body: row.body,
+    versionAt: row.version_at,
+    action: row.action,
+  };
 }
 
 function getPostCount() {
@@ -118,4 +170,6 @@ module.exports = {
   updatePost,
   deletePost,
   getPostCount,
+  getPostHistory,
+  getPostVersion,
 };
