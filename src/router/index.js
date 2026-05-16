@@ -13,14 +13,28 @@ const routes = [
     },
   },
   {
-    path: "/chat",
-    name: "chat",
-    component: () => import("../views/TerminalChat.vue"),
+    path: "/blog",
+    name: "blog",
+    component: () => import("../views/BlogIndex.vue"),
     meta: {
       title:
-        "Chat with Jeff Adler's AI — Ask About Dropbox, AI, Engineering Leadership | jads.app",
+        "Jads Blog — Jeff Adler | Engineering Leadership, AI, Agentic Development",
       description:
-        "Ask Jeff Adler's AI assistant about his career at Dropbox, Reddit, and Google, his work with LLMs, Claude, agentic engineering, or his hobbies like mountain biking.",
+        "Articles on engineering leadership, AI product development, agentic engineering, and building teams. By Jeff Adler, Director of Engineering at Dropbox.",
+    },
+  },
+  {
+    path: "/blog/from-tech-lead-to-director",
+    redirect: "/blog/staff-to-senior-manager-90-percent-same-job",
+  },
+  {
+    path: "/blog/:slug",
+    name: "blog-post",
+    component: () => import("../views/BlogPost.vue"),
+    meta: {
+      title: "Jads Blog — Jeff Adler",
+      description:
+        "Blog post by Jeff Adler, Director of Engineering at Dropbox.",
     },
   },
 ];

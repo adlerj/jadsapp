@@ -17,6 +17,7 @@
             <a href="#terminal" @click.prevent="navigateTo('terminal')"
               >Terminal</a
             >
+            <router-link to="/blog">Blog</router-link>
           </nav>
         </div>
         <div class="header-actions">

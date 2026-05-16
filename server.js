@@ -13,6 +13,88 @@ const Anthropic = require("@anthropic-ai/sdk").default;
 const rateLimit = require("express-rate-limit");
 const { systemPrompt } = require("./server/systemPrompt");
 
+const SITE_URL = "https://jads.app";
+const blogDir = path.join(__dirname, "src/content/blog");
+let blogContent = "";
+let sitemapXml = "";
+
+function parseFrontmatter(raw) {
+  if (!raw.startsWith("---")) return { frontmatter: "", body: raw };
+  const fmEnd = raw.indexOf("---", 3);
+  if (fmEnd === -1) return { frontmatter: "", body: raw };
+  return {
+    frontmatter: raw.slice(3, fmEnd),
+    body: raw.slice(fmEnd + 3).trim(),
+  };
+}
+
+function getFmField(fm, field) {
+  const match = fm.match(new RegExp(`^${field}:\\s*"?([^"\\n]+)"?`, "m"));
+  return match ? match[1].trim() : null;
+}
+
+function reloadBlogData() {
+  try {
+    const blogFiles = fs.readdirSync(blogDir).filter((f) => f.endsWith(".md"));
+    const posts = blogFiles.map((file) => {
+      const raw = fs.readFileSync(path.join(blogDir, file), "utf8");
+      const { frontmatter, body } = parseFrontmatter(raw);
+      const title = getFmField(frontmatter, "title") || file.replace(".md", "");
+      const date = getFmField(frontmatter, "date");
+      const slug = file.replace(".md", "");
+      return { title, date, slug, body };
+    });
+
+    blogContent =
+      "\n\nJEFF'S BLOG POSTS (use these to answer questions about Jeff's writing, opinions, and technical experience):\n\n" +
+      posts.map((p) => `### ${p.title}\n${p.body}`).join("\n\n---\n\n");
+
+    const today = new Date().toISOString().split("T")[0];
+    const urls = [
+      { loc: "/", priority: "1.0", changefreq: "monthly", lastmod: today },
+      { loc: "/blog", priority: "0.8", changefreq: "weekly", lastmod: today },
+      ...posts.map((p) => ({
+        loc: `/blog/${p.slug}`,
+        priority: "0.6",
+        changefreq: "monthly",
+        lastmod: p.date || today,
+      })),
+    ];
+    sitemapXml =
+      `<?xml version="1.0" encoding="UTF-8"?>\n` +
+      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+      urls
+        .map(
+          (u) =>
+            `  <url>\n` +
+            `    <loc>${SITE_URL}${u.loc}</loc>\n` +
+            `    <lastmod>${u.lastmod}</lastmod>\n` +
+            `    <changefreq>${u.changefreq}</changefreq>\n` +
+            `    <priority>${u.priority}</priority>\n` +
+            `  </url>`
+        )
+        .join("\n") +
+      `\n</urlset>\n`;
+
+    console.log(
+      `Loaded ${posts.length} blog posts (RAG: ${blogContent.length} chars, sitemap: ${urls.length} URLs)`
+    );
+  } catch (e) {
+    console.warn("Could not load blog data:", e.message);
+  }
+}
+
+reloadBlogData();
+
+let reloadTimer = null;
+fs.watch(blogDir, { persistent: false }, () => {
+  if (reloadTimer) clearTimeout(reloadTimer);
+  reloadTimer = setTimeout(() => {
+    console.log("Blog content changed, reloading...");
+    reloadBlogData();
+  }, 500);
+});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -29,7 +111,9 @@ let anthropic;
 if (process.env.ANTHROPIC_API_KEY) {
   anthropic = new Anthropic();
 } else {
-  console.warn("WARNING: ANTHROPIC_API_KEY not set. /api/chat will return errors.");
+  console.warn(
+    "WARNING: ANTHROPIC_API_KEY not set. /api/chat will return errors."
+  );
 }
 
 app.post("/api/chat", chatLimiter, async (req, res) => {
@@ -58,7 +142,13 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
       model: "claude-haiku-4-5-20251001",
       max_tokens: 400,
       temperature: 0.3,
-      system: customSystemPrompt || systemPrompt,
+      system: [
+        {
+          type: "text",
+          text: customSystemPrompt || systemPrompt + blogContent,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
       messages: trimmed,
     });
 
@@ -85,6 +175,11 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
     res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
     res.end();
   }
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  res.set("Content-Type", "application/xml");
+  res.send(sitemapXml);
 });
 
 app.use(express.static(path.join(__dirname, "dist")));
