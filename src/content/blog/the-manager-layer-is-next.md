@@ -13,7 +13,7 @@ The question is: which managers are actually load-bearing?
 
 ## The scale-up era created management debt
 
-Between 2019 and 2022, engineering organizations hired fast and structured even faster. Every team needed a manager. Every manager needed a skip (their skip-level, one rung above). The result was coordination layers that produced more meetings than output. [Elena Verna makes the case](https://www.elenaverna.com/p/ic-work-is-the-new-career-flex) that AI is making it possible for senior ICs (individual contributors -- engineers who build, not manage) to drive company-level impact solo -- which reframes everything. [a16z is asking the structural version](https://www.a16z.news/p/is-software-losing-its-head): do software orgs still need the same layered headcount?
+Between 2019 and 2022, engineering organizations hired fast and structured even faster. Every team needed a manager. Every manager needed a skip (their skip-level, one rung above). The result was coordination layers that produced more meetings than output. [Elena Verna makes the case](https://www.elenaverna.com/p/ic-work-is-the-new-career-flex) that AI is making it possible for senior ICs (individual contributors -- engineers who build, not manage) to drive company-level impact solo -- which reframes everything.
 
 A lot of that structure was justified by the real complexity of coordinating large teams. But it was also justified by something simpler: when teams are big enough, someone has to handle the status updates, the ticket grooming, the "what's the status on this?" Slack messages. Someone has to be the human who ferries information between levels. That's the work AI is absorbing first. Not the strategic decisions. The information routing.
 

@@ -17,7 +17,7 @@ This made sense. Writing good code was hard, and the gap between a junior's firs
 
 ## The compression
 
-I've written about [what 80% AI-generated code looks like in practice](/blog/eighty-percent-of-our-code-is-ai-generated) and about [how org structures need to adapt](/blog/engineers-are-becoming-agent-managers). But I haven't addressed the question that individual engineers actually care about: what does this mean for my career?
+I've written about [how org structures need to adapt](/blog/engineers-are-becoming-agent-managers). But I haven't addressed the question that individual engineers actually care about: what does this mean for my career?
 
 A junior engineer with Cursor or Claude now produces code that would have taken a mid-level engineer a full sprint two years ago. Not always. Not perfectly. But consistently enough that "writes better code" is no longer the differentiator it was. Anthropic's [SWE-bench results](https://www.anthropic.com/research/swe-bench-sonnet) showed Claude 3.5 Sonnet autonomously solving 49% of real-world software engineering tasks in January. By now, that number has climbed further. The raw act of writing code is being commoditized, and the compression is accelerating.
 
