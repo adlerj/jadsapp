@@ -18,9 +18,9 @@ const routes = [
     component: () => import("../views/BlogIndex.vue"),
     meta: {
       title:
-        "Jads Blog — Jeff Adler | Engineering Leadership, AI, Agentic Development",
+        "Jads Blog - Jeff Adler | Engineering Leadership, AI, Agentic Development",
       description:
-        "Articles on engineering leadership, AI product development, agentic engineering, and building teams. By Jeff Adler, Director of Engineering at Dropbox.",
+        "Jeff Adler's engineering blog. AI, agentic engineering, leadership, iOS architecture, and technical deep dives from Google, Dropbox, and Reddit.",
     },
   },
   {

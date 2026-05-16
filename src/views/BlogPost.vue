@@ -94,10 +94,12 @@
 </template>
 
 <script>
-import { computed, watchEffect } from "vue";
+import { ref, computed, watchEffect, watch } from "vue";
 import { useRoute } from "vue-router";
 import {
   getPost,
+  fetchPost,
+  fetchAllPosts,
   renderMarkdown,
   getPostsBySeries,
   getAdjacentPosts,
@@ -108,8 +110,26 @@ export default {
   name: "BlogPost",
   setup() {
     const route = useRoute();
+    const fetchTrigger = ref(0);
 
-    const post = computed(() => getPost(route.params.slug));
+    async function loadPost(slug) {
+      await fetchAllPosts();
+      await fetchPost(slug);
+      fetchTrigger.value++;
+    }
+
+    loadPost(route.params.slug);
+    watch(
+      () => route.params.slug,
+      (slug) => {
+        if (slug) loadPost(slug);
+      }
+    );
+
+    const post = computed(() => {
+      void fetchTrigger.value;
+      return getPost(route.params.slug);
+    });
 
     const renderedContent = computed(() => {
       if (!post.value) return "";
@@ -173,6 +193,12 @@ export default {
         if (post.value.date) {
           setMeta("property", "article:published_time", post.value.date);
         }
+        const modifiedDate = post.value.updatedAt
+          ? post.value.updatedAt.split(" ")[0]
+          : post.value.date;
+        if (modifiedDate) {
+          setMeta("property", "article:modified_time", modifiedDate);
+        }
         setMeta("property", "article:author", "https://jads.app/");
         if (post.value.tags) {
           post.value.tags.forEach((tag) => {
@@ -211,7 +237,9 @@ export default {
             headline: post.value.title,
             description: desc,
             datePublished: post.value.date,
-            dateModified: post.value.date,
+            dateModified: post.value.updatedAt
+              ? post.value.updatedAt.split(" ")[0]
+              : post.value.date,
             wordCount: wordCount,
             url: url,
             author: {

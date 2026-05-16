@@ -1,12 +1,6 @@
 # Build stage
 FROM node:20 AS build-stage
 WORKDIR /app
-RUN if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
-      apt-get update && apt-get install -y --no-install-recommends chromium \
-      && rm -rf /var/lib/apt/lists/*; \
-    fi
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 COPY package*.json ./
 RUN npm install
 COPY . .
@@ -19,7 +13,15 @@ COPY --from=build-stage /app/dist ./dist
 COPY --from=build-stage /app/public/tunes ./dist/tunes
 COPY server.js ./
 COPY server/ ./server/
-RUN npm init -y && npm install express@^4.21.0 @anthropic-ai/sdk@^0.39.0 express-rate-limit@^7.5.0
+COPY scripts/migrate-posts.js ./scripts/
+COPY src/content/blog/ ./src/content/blog/
+RUN apk add --no-cache python3 make g++ && \
+    npm init -y && \
+    npm install express@^4.21.0 @anthropic-ai/sdk@^0.39.0 express-rate-limit@^7.5.0 better-sqlite3@^11.0.0 marked@^18.0.3 && \
+    apk del python3 make g++
+RUN mkdir -p /app/data
 ENV PORT=80
+ENV DB_PATH=/app/data/blog.db
 EXPOSE 80
-CMD ["node", "server.js"]
+VOLUME ["/app/data"]
+CMD ["sh", "-c", "node scripts/migrate-posts.js && node server.js"]

@@ -71,7 +71,7 @@
 
 <script>
 import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
-import { getPostsByYear } from "../composables/useBlog";
+import { getPostsByYear, fetchAllPosts } from "../composables/useBlog";
 
 function setMeta(attr, key, content) {
   let el = document.querySelector(`meta[${attr}="${key}"]`);
@@ -239,7 +239,9 @@ export default {
       });
     }
 
-    onMounted(() => {
+    onMounted(async () => {
+      await fetchAllPosts();
+
       nextTick(() => {
         if (years.value.length) activeYear.value = years.value[0];
 

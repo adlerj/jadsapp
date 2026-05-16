@@ -1,17 +1,21 @@
 {
   "name": "jadsapp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "prebuild": "node scripts/generate-sitemap.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate": "node scripts/migrate-posts.js"
+  },
+  "bin": {
+    "blog": "./cli/blog-cli.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@fortawesome/fontawesome-free": "^6.6.0",
+    "better-sqlite3": "^11.10.0",
     "core-js": "^3.8.3",
     "express": "^4.21.0",
     "express-rate-limit": "^7.5.0",
@@ -23,8 +27,6 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
-    "@prerenderer/renderer-puppeteer": "^1.2.4",
-    "@prerenderer/webpack-plugin": "^5.3.10",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",

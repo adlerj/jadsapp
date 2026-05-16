@@ -1,61 +1,65 @@
 import { marked } from "marked";
+import { ref } from "vue";
 
-const blogContext = require.context("../content/blog", false, /\.md$/);
+const postsCache = ref([]);
+const postCache = ref({});
+let indexFetched = false;
 
-function parseFrontmatter(raw) {
-  if (!raw.startsWith("---")) return { meta: {}, content: raw };
-  const end = raw.indexOf("---", 3);
-  if (end === -1) return { meta: {}, content: raw };
-
-  const block = raw.slice(3, end).trim();
-  const meta = {};
-  for (const line of block.split("\n")) {
-    const idx = line.indexOf(":");
-    if (idx === -1) continue;
-    const key = line.slice(0, idx).trim();
-    let value = line.slice(idx + 1).trim();
-    if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.slice(1, -1);
-    }
-    if (key === "tags") {
-      meta[key] = value.split(",").map((t) => t.trim());
-    } else if (key === "part") {
-      meta[key] = parseInt(value, 10);
-    } else {
-      meta[key] = value;
-    }
+function hydrateFromSSR() {
+  if (window.__SSR_POSTS__ && !indexFetched) {
+    postsCache.value = window.__SSR_POSTS__;
+    indexFetched = true;
   }
-
-  const content = raw.slice(end + 3).trim();
-  return { meta, content };
+  if (window.__SSR_POST__) {
+    const p = window.__SSR_POST__;
+    postCache.value[p.slug] = p;
+  }
 }
 
-function loadPosts() {
-  return blogContext
-    .keys()
-    .map((key) => {
-      const raw = blogContext(key);
-      const { meta, content } = parseFrontmatter(raw);
-      const slug = key.replace("./", "").replace(".md", "");
-      return { slug, ...meta, body: content };
-    })
-    .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+hydrateFromSSR();
+
+export async function fetchAllPosts() {
+  if (indexFetched && postsCache.value.length) return postsCache.value;
+  try {
+    const res = await fetch("/api/posts");
+    if (!res.ok) throw new Error(res.statusText);
+    postsCache.value = await res.json();
+    indexFetched = true;
+  } catch (e) {
+    console.warn("Failed to fetch posts:", e.message);
+  }
+  return postsCache.value;
 }
 
-let cachedPosts = null;
+export async function fetchPost(slug) {
+  if (postCache.value[slug]) return postCache.value[slug];
+  try {
+    const res = await fetch(`/api/posts/${slug}`);
+    if (!res.ok) throw new Error(res.statusText);
+    const post = await res.json();
+    postCache.value[slug] = post;
+    return post;
+  } catch (e) {
+    console.warn("Failed to fetch post:", e.message);
+    return null;
+  }
+}
 
 export function getAllPosts() {
-  if (!cachedPosts) cachedPosts = loadPosts();
-  return cachedPosts;
+  return postsCache.value;
 }
 
 export function getPost(slug) {
-  return getAllPosts().find((p) => p.slug === slug) || null;
+  return (
+    postCache.value[slug] ||
+    postsCache.value.find((p) => p.slug === slug) ||
+    null
+  );
 }
 
 export function getPostsByYear() {
   const grouped = {};
-  for (const post of getAllPosts()) {
+  for (const post of postsCache.value) {
     const year = post.date ? post.date.slice(0, 4) : "undated";
     if (!grouped[year]) grouped[year] = [];
     grouped[year].push(post);
@@ -64,13 +68,13 @@ export function getPostsByYear() {
 }
 
 export function getPostsBySeries(seriesName) {
-  return getAllPosts()
+  return postsCache.value
     .filter((p) => p.series === seriesName)
     .sort((a, b) => (a.part || 0) - (b.part || 0));
 }
 
 export function getAdjacentPosts(slug) {
-  const posts = getAllPosts();
+  const posts = postsCache.value;
   const idx = posts.findIndex((p) => p.slug === slug);
   return {
     prev: idx < posts.length - 1 ? posts[idx + 1] : null,
@@ -82,7 +86,7 @@ export function getRelatedPosts(slug, limit = 3) {
   const post = getPost(slug);
   if (!post || !post.tags) return [];
   const tags = new Set(post.tags);
-  return getAllPosts()
+  return postsCache.value
     .filter((p) => p.slug !== slug && p.tags && p.tags.some((t) => tags.has(t)))
     .slice(0, limit);
 }

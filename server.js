@@ -12,28 +12,18 @@ const path = require("path");
 const Anthropic = require("@anthropic-ai/sdk").default;
 const rateLimit = require("express-rate-limit");
 const { systemPrompt } = require("./server/systemPrompt");
+const { getAllPosts, getPostBySlug } = require("./server/db");
+const blogRoutes = require("./server/routes/blog");
+const {
+  SITE_URL,
+  escapeHtml,
+  renderBlogPost,
+  renderBlogIndex,
+} = require("./server/ssr");
 
-const SITE_URL = "https://jads.app";
-const blogDir = path.join(__dirname, "src/content/blog");
 let blogContent = "";
 let sitemapXml = "";
 let feedXml = "";
-let blogPosts = [];
-
-function parseFrontmatter(raw) {
-  if (!raw.startsWith("---")) return { frontmatter: "", body: raw };
-  const fmEnd = raw.indexOf("---", 3);
-  if (fmEnd === -1) return { frontmatter: "", body: raw };
-  return {
-    frontmatter: raw.slice(3, fmEnd),
-    body: raw.slice(fmEnd + 3).trim(),
-  };
-}
-
-function getFmField(fm, field) {
-  const match = fm.match(new RegExp(`^${field}:\\s*"?([^"\\n]+)"?`, "m"));
-  return match ? match[1].trim() : null;
-}
 
 function escapeXml(s) {
   return s
@@ -43,37 +33,9 @@ function escapeXml(s) {
     .replace(/"/g, "&quot;");
 }
 
-function escapeHtml(s) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 function reloadBlogData() {
   try {
-    const blogFiles = fs.readdirSync(blogDir).filter((f) => f.endsWith(".md"));
-    const posts = blogFiles
-      .map((file) => {
-        const raw = fs.readFileSync(path.join(blogDir, file), "utf8");
-        const { frontmatter, body } = parseFrontmatter(raw);
-        const title =
-          getFmField(frontmatter, "title") || file.replace(".md", "");
-        const date = getFmField(frontmatter, "date");
-        const description = getFmField(frontmatter, "description") || "";
-        const tagsRaw = getFmField(frontmatter, "tags");
-        const tags = tagsRaw
-          ? tagsRaw.split(",").map((t) => t.trim())
-          : [];
-        const slug = file.replace(".md", "");
-        const wordCount = body.split(/\s+/).filter(Boolean).length;
-        return { title, date, description, tags, slug, body, wordCount };
-      })
-      .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-
-    blogPosts = posts;
+    const posts = getAllPosts();
 
     blogContent =
       "\n\nJEFF'S BLOG POSTS (use these to answer questions about Jeff's writing, opinions, and technical experience):\n\n" +
@@ -87,7 +49,7 @@ function reloadBlogData() {
         loc: `/blog/${p.slug}`,
         priority: "0.6",
         changefreq: "monthly",
-        lastmod: p.date || today,
+        lastmod: p.updatedAt ? p.updatedAt.split(" ")[0] : p.date || today,
       })),
     ];
     sitemapXml =
@@ -133,7 +95,9 @@ function reloadBlogData() {
             (p.date
               ? `    <pubDate>${new Date(p.date + "T12:00:00Z").toUTCString()}</pubDate>\n`
               : "") +
-            p.tags.map((t) => `    <category>${escapeXml(t)}</category>\n`).join("") +
+            p.tags
+              .map((t) => `    <category>${escapeXml(t)}</category>\n`)
+              .join("") +
             `  </item>`
         )
         .join("\n") +
@@ -147,16 +111,8 @@ function reloadBlogData() {
   }
 }
 
+global.reloadBlogData = reloadBlogData;
 reloadBlogData();
-
-let reloadTimer = null;
-fs.watch(blogDir, { persistent: false }, () => {
-  if (reloadTimer) clearTimeout(reloadTimer);
-  reloadTimer = setTimeout(() => {
-    console.log("Blog content changed, reloading...");
-    reloadBlogData();
-  }, 500);
-});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -240,6 +196,8 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
   }
 });
 
+app.use(blogRoutes);
+
 app.get("/sitemap.xml", (req, res) => {
   res.set("Content-Type", "application/xml");
   res.send(sitemapXml);
@@ -250,8 +208,6 @@ app.get("/feed.xml", (req, res) => {
   res.send(feedXml);
 });
 
-app.use(express.static(path.join(__dirname, "dist")));
-
 const indexHtmlPath = path.join(__dirname, "dist", "index.html");
 let cachedIndexHtml = "";
 try {
@@ -260,207 +216,25 @@ try {
   console.warn("Could not read dist/index.html:", e.message);
 }
 
-function injectMeta(html, meta) {
-  const tags = [];
-  tags.push(`<title>${escapeHtml(meta.title)}</title>`);
-  tags.push(
-    `<meta name="description" content="${escapeHtml(meta.description)}">`
-  );
-  tags.push(`<link rel="canonical" href="${meta.url}">`);
-  tags.push(
-    `<meta property="og:title" content="${escapeHtml(meta.ogTitle || meta.title)}">`
-  );
-  tags.push(
-    `<meta property="og:description" content="${escapeHtml(meta.description)}">`
-  );
-  tags.push(`<meta property="og:url" content="${meta.url}">`);
-  tags.push(`<meta property="og:type" content="${meta.ogType || "website"}">`);
-  tags.push(
-    `<meta property="og:site_name" content="Jeff Adler — jads.app">`
-  );
-  tags.push(
-    `<meta property="og:image" content="${SITE_URL}/jeff-adler.png">`
-  );
-  tags.push(`<meta property="og:locale" content="en_US">`);
-  if (meta.ogType === "article") {
-    if (meta.publishedTime) {
-      tags.push(
-        `<meta property="article:published_time" content="${meta.publishedTime}">`
-      );
-    }
-    tags.push(`<meta property="article:author" content="${SITE_URL}/">`);
-  }
-  if (meta.articleTags) {
-    for (const tag of meta.articleTags) {
-      tags.push(
-        `<meta property="article:tag" content="${escapeHtml(tag)}">`
-      );
-    }
-  }
-  tags.push(`<meta name="twitter:card" content="summary">`);
-  tags.push(`<meta name="twitter:site" content="@JadlerOS">`);
-  tags.push(`<meta name="twitter:creator" content="@JadlerOS">`);
-  tags.push(
-    `<meta name="twitter:title" content="${escapeHtml(meta.ogTitle || meta.title)}">`
-  );
-  tags.push(
-    `<meta name="twitter:description" content="${escapeHtml(meta.description)}">`
-  );
-  tags.push(
-    `<meta name="twitter:image" content="${SITE_URL}/jeff-adler.png">`
-  );
-  if (meta.jsonLd) {
-    const safeJson = JSON.stringify(meta.jsonLd).replace(/</g, "\\u003c");
-    tags.push(
-      `<script type="application/ld+json">${safeJson}</script>`
-    );
-  }
-  const injected = tags.join("\n    ");
-  return html
-    .replace(/<title>[^<]*<\/title>/, "")
-    .replace(/<meta name="description"[^>]*>/, "")
-    .replace(/<link rel="canonical"[^>]*>/, "")
-    .replace(/<meta property="og:[^"]*"[^>]*>/g, "")
-    .replace(/<meta property="article:[^"]*"[^>]*>/g, "")
-    .replace(/<meta property="profile:[^"]*"[^>]*>/g, "")
-    .replace(/<meta name="twitter:[^"]*"[^>]*>/g, "")
-    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, "")
-    .replace(/\n\s*\n/g, "\n")
-    .replace("</head>", `    ${injected}\n  </head>`);
-}
+app.get("/blog", (req, res) => {
+  const posts = getAllPosts();
+  res.send(renderBlogIndex(cachedIndexHtml, posts));
+});
+
+app.get("/blog/from-tech-lead-to-director", (req, res) => {
+  res.redirect(301, "/blog/staff-to-senior-manager-90-percent-same-job");
+});
+
+app.get("/blog/:slug", (req, res, next) => {
+  if (!/^[a-z0-9-]+$/.test(req.params.slug)) return next();
+  const post = getPostBySlug(req.params.slug);
+  if (!post) return res.status(404).sendFile(indexHtmlPath);
+  res.send(renderBlogPost(cachedIndexHtml, post));
+});
+
+app.use(express.static(path.join(__dirname, "dist")));
 
 app.get("*", (req, res) => {
-  const reqPath = req.path.replace(/\/+$/, "") || "/";
-
-  const blogPostMatch = reqPath.match(/^\/blog\/([a-z0-9-]+)$/);
-  if (blogPostMatch) {
-    const slug = blogPostMatch[1];
-    const post = blogPosts.find((p) => p.slug === slug);
-    if (post) {
-      const url = `${SITE_URL}/blog/${slug}`;
-      const jsonLd = [
-        {
-          "@context": "https://schema.org",
-          "@type": "BlogPosting",
-          headline: post.title,
-          description: post.description,
-          datePublished: post.date,
-          dateModified: post.date,
-          url: url,
-          wordCount: post.wordCount,
-          author: {
-            "@type": "Person",
-            name: "Jeff Adler",
-            url: SITE_URL,
-            jobTitle: "Director of Engineering",
-            worksFor: { "@type": "Organization", name: "Dropbox" },
-          },
-          publisher: {
-            "@type": "Person",
-            name: "Jeff Adler",
-            url: SITE_URL,
-          },
-          mainEntityOfPage: { "@type": "WebPage", "@id": url },
-          image: `${SITE_URL}/jeff-adler.png`,
-          inLanguage: "en-US",
-          keywords: post.tags.join(", "),
-        },
-        {
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            {
-              "@type": "ListItem",
-              position: 1,
-              name: "Home",
-              item: SITE_URL,
-            },
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: "Blog",
-              item: `${SITE_URL}/blog`,
-            },
-            {
-              "@type": "ListItem",
-              position: 3,
-              name: post.title,
-              item: url,
-            },
-          ],
-        },
-      ];
-      return res.send(
-        injectMeta(cachedIndexHtml, {
-          title: `${post.title} - Jeff Adler`,
-          ogTitle: post.title,
-          description: post.description,
-          url: url,
-          ogType: "article",
-          publishedTime: post.date,
-          articleTags: post.tags,
-          jsonLd: jsonLd,
-        })
-      );
-    }
-  }
-
-  if (reqPath === "/blog") {
-    const url = `${SITE_URL}/blog`;
-    const desc =
-      "Jeff Adler's engineering blog. AI, agentic engineering, leadership, iOS architecture, and technical deep dives from Google, Dropbox, and Reddit.";
-    const jsonLd = [
-      {
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        name: "Jads Blog",
-        description: desc,
-        url: url,
-        author: {
-          "@type": "Person",
-          name: "Jeff Adler",
-          url: SITE_URL,
-          jobTitle: "Director of Engineering",
-          worksFor: { "@type": "Organization", name: "Dropbox" },
-        },
-        mainEntityOfPage: { "@type": "WebPage", "@id": url },
-        hasPart: blogPosts.slice(0, 20).map((p) => ({
-          "@type": "BlogPosting",
-          headline: p.title,
-          url: `${SITE_URL}/blog/${p.slug}`,
-          datePublished: p.date,
-        })),
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: SITE_URL,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Blog",
-            item: url,
-          },
-        ],
-      },
-    ];
-    return res.send(
-      injectMeta(cachedIndexHtml, {
-        title: "Jads Blog - Jeff Adler | Engineering Leadership, AI, Agentic Development",
-        ogTitle: "Jads Blog - Jeff Adler",
-        description: desc,
-        url: url,
-        jsonLd: jsonLd,
-      })
-    );
-  }
-
   res.sendFile(indexHtmlPath);
 });
 
