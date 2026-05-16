@@ -40,7 +40,7 @@ Group related articles into 2-3 thematic clusters. Each cluster should have at l
 
 ### 3. Read Existing Posts
 
-Read the file listing in `src/content/blog/` and scan titles to avoid pitching something Jeff has already written about. The pitch should extend or challenge existing thinking, not rehash it.
+Run `node cli/blog-cli.js list` to get the current list of published posts and scan titles to avoid pitching something Jeff has already written about. The pitch should extend or challenge existing thinking, not rehash it.
 
 ### 4. Pitch the Post
 
@@ -88,6 +88,8 @@ Use WebSearch and WebFetch to find:
 - If a thought leader's take directly contradicts or supports Jeff's thesis, surface it -- it sharpens the argument
 - Don't pad with weak sources. One strong reference beats three thin ones.
 
+**Reference accuracy rule (mandatory):** Before including any external link, use WebFetch to read the actual article and confirm it supports the specific claim being made in context. Do not cite an article based on its title or summary alone. The claim in the post and the article's actual argument must match. If they don't, cut the link or find a better source.
+
 ### 7. Comms Risk Screening (before writing)
 
 Before drafting anything, audit Jeff's opinion blurb and any facts from his internal experience for comms risk. This step is mandatory and cannot be skipped.
@@ -114,11 +116,12 @@ Do not proceed to writing until every flagged item is resolved. If there are no 
 ### 8. Write or Save
 
 If Jeff says write it:
-- Draft the full post in `src/content/blog/` following BLOG_STYLE.md
+- Draft the full post as a .md file in `src/content/blog/` following BLOG_STYLE.md
 - Use today's date
 - Weave in the source article references as inline links (from Step 1 and Step 6)
 - Incorporate Jeff's opinion blurb directly into the post. Do NOT use `[JEFF: ...]` placeholders for content Jeff has already provided. The goal is a complete first draft with Jeff's voice baked in.
 - Only use `[JEFF: ...]` markers for specific anecdotes or data points Jeff hasn't provided but that would strengthen the post
+- After validation passes in Step 9, publish via: `node cli/blog-cli.js push src/content/blog/<slug>.md`
 - Proceed to Step 9
 
 If Jeff says save for later:
@@ -134,6 +137,7 @@ Run the automated verification pipeline on the new post:
 3. Grep the new file for em dashes (`grep -n '—' src/content/blog/<new-file>.md`) and fix any found
 4. Confirm frontmatter has all required fields (title, date, description under 160 chars, tags)
 5. Confirm all inline links resolve to real URLs (external) or existing slugs (internal `/blog/` links)
+6. **External link accuracy audit:** For each external link in the post, re-read the surrounding sentence and verify the link actually supports the claim. Use WebFetch to spot-check any link that was added during Step 6 research rather than from a primary source you read in full. Cut or replace any link where the article's argument doesn't match what the post says it says.
 
 Fix all issues before proceeding to Step 10.
 
