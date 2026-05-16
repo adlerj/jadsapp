@@ -126,6 +126,13 @@ function reloadBlogData() {
 global.reloadBlogData = reloadBlogData;
 reloadBlogData();
 
+// Prevent unhandled promise rejections from crashing the process.
+// Individual handlers (stream.on("error"), catch blocks) handle errors where
+// possible; this is a last-resort safety net.
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled rejection:", reason);
+});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -168,6 +175,21 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
   res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders();
 
+  let responded = false;
+  function sendError(err) {
+    if (responded) return;
+    responded = true;
+    const isRateLimit = err.status === 429 || err.message?.includes("rate limit");
+    const msg = isRateLimit
+      ? "Jadbot is getting too many requests right now. Try again in a minute."
+      : err.message || "Something went wrong";
+    console.error("Chat error:", err.status || "", err.message);
+    try {
+      res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
+      res.end();
+    } catch (_) {}
+  }
+
   try {
     const stream = anthropic.messages.stream({
       model: "claude-haiku-4-5-20251001",
@@ -183,28 +205,28 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
       messages: trimmed,
     });
 
+    // Suppress unhandled rejection on the SDK's internal promise -- errors
+    // are handled via the "error" event below.
+    stream.done().catch(() => {});
+
     stream.on("text", (text) => {
-      res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
+      if (!responded) res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
     });
 
     stream.on("end", () => {
+      if (responded) return;
+      responded = true;
       res.write("data: [DONE]\n\n");
       res.end();
     });
 
-    stream.on("error", (err) => {
-      console.error("Stream error:", err.message);
-      res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
-      res.end();
-    });
+    stream.on("error", sendError);
 
     req.on("close", () => {
       stream.abort();
     });
   } catch (err) {
-    console.error("API error:", err.message);
-    res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
-    res.end();
+    sendError(err);
   }
 });
 
