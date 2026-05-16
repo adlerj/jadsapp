@@ -96,6 +96,7 @@ export default {
     };
 
     const resetChat = () => {
+      trackEvent("jadbot_chat_cleared");
       reset();
     };
 
@@ -132,11 +133,15 @@ export default {
     const handleInteraction = (e) => {
       const widgetBtn = e.target.closest("[data-widget]");
       if (widgetBtn) {
+        trackEvent("jadbot_widget_clicked", {
+          widget: widgetBtn.dataset.widget,
+        });
         emit("launch-widget", widgetBtn.dataset.widget);
         return;
       }
       const themeBtn = e.target.closest("[data-theme]");
       if (themeBtn) {
+        trackEvent("jadbot_theme_clicked", { theme: themeBtn.dataset.theme });
         setTheme(themeBtn.dataset.theme);
       }
     };

@@ -1,6 +1,6 @@
 <template>
   <div class="portfolio">
-    <BootSequence v-if="showBoot" @complete="showBoot = false" />
+    <BootSequence v-if="showBoot" @complete="onBootComplete" />
 
     <template v-if="!showBoot">
       <header>
@@ -65,6 +65,11 @@
                   href="https://linkedin.com/in/jeff-adler-2bbb9828"
                   target="_blank"
                   class="contact-link"
+                  @click="
+                    trackEvent('outbound_link_clicked', {
+                      destination: 'linkedin',
+                    })
+                  "
                   ><i class="fab fa-linkedin"></i> LinkedIn</a
                 >
               </div>
@@ -212,42 +217,55 @@
 
       <transition name="fade">
         <div v-if="showSnowboardGame" class="game-overlay">
-          <SnowboardGame @close-game="showSnowboardGame = false" />
+          <SnowboardGame
+            @close-game="closeGame('Snowboarding', showSnowboardGame)"
+          />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showMountainBikeGame" class="game-overlay">
-          <MountainBikeGame @close="showMountainBikeGame = false" />
+          <MountainBikeGame
+            @close="closeGame('Mountain Biking', showMountainBikeGame)"
+          />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showDiscGolfGame" class="game-overlay">
-          <DiscGolfGame @close-game="showDiscGolfGame = false" />
+          <DiscGolfGame
+            @close-game="closeGame('Disc Golf', showDiscGolfGame)"
+          />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showVolleyballGame" class="game-overlay">
-          <SlimeVolleyball @close-game="showVolleyballGame = false" />
+          <SlimeVolleyball
+            @close-game="closeGame('Volleyball', showVolleyballGame)"
+          />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showTabletopGame" class="game-overlay">
-          <TabletopGame @close-game="showTabletopGame = false" />
+          <TabletopGame
+            @close-game="closeGame('Tabletop Games', showTabletopGame)"
+          />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showGuitarStrum" class="game-overlay">
-          <GuitarStrum @close="showGuitarStrum = false" />
+          <GuitarStrum @close="closeGame('Guitar', showGuitarStrum)" />
         </div>
       </transition>
 
       <transition name="fade">
-        <SushiRain v-if="showSushiRain" @close="showSushiRain = false" />
+        <SushiRain
+          v-if="showSushiRain"
+          @close="closeGame('Sushi', showSushiRain)"
+        />
       </transition>
 
       <WebampPlayer :isVisible="showWebamp" @close="showWebamp = false" />
@@ -427,6 +445,9 @@ export default {
 
     const setActiveJob = (index) => {
       activeJob.value = activeJob.value === index ? null : index;
+      if (activeJob.value !== null) {
+        trackEvent("timeline_clicked", { company: jobHistory[index].company });
+      }
     };
 
     const activatePassion = (index) => {
@@ -445,12 +466,30 @@ export default {
     };
 
     const navigateTo = (section) => {
+      trackEvent("section_navigated", { section });
       document.getElementById(section).scrollIntoView({ behavior: "smooth" });
+    };
+
+    let gameOpenedAt = null;
+
+    const onBootComplete = () => {
+      showBoot.value = false;
+      trackEvent("boot_completed");
+    };
+
+    const closeGame = (game, ref) => {
+      ref.value = false;
+      const duration = gameOpenedAt
+        ? Math.round((Date.now() - gameOpenedAt) / 1000)
+        : 0;
+      gameOpenedAt = null;
+      trackEvent("game_closed", { game, duration_seconds: duration });
     };
 
     const activatePassionFeature = (index) => {
       const passion = passions[index];
       if (!passion) return;
+      gameOpenedAt = Date.now();
       trackEvent("game_opened", { game: passion.name || passion.action });
       if (passion.name === "Snowboarding") showSnowboardGame.value = true;
       else if (passion.name === "Mountain Biking")
@@ -518,6 +557,9 @@ export default {
       openThemePicker,
       handleWidgetLaunch,
       typeWriter,
+      onBootComplete,
+      closeGame,
+      trackEvent,
     };
   },
 

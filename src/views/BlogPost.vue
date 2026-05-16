@@ -42,13 +42,19 @@
           :to="`/blog/${sp.slug}`"
           class="series-part"
           :class="{ current: sp.slug === post.slug }"
+          @click="trackNav('series', sp.slug)"
         >
           Part {{ sp.part }}<span class="part-title">{{ sp.title }}</span>
         </router-link>
       </div>
     </nav>
 
-    <article class="post-content" v-html="renderedContent"></article>
+    <article
+      class="post-content"
+      ref="postContent"
+      v-html="renderedContent"
+    ></article>
+    <div ref="scrollSentinel" class="scroll-sentinel"></div>
 
     <footer class="post-footer">
       <div v-if="related.length" class="related-posts">
@@ -59,6 +65,7 @@
             :key="rp.slug"
             :to="`/blog/${rp.slug}`"
             class="related-card"
+            @click="trackNav('related', rp.slug)"
           >
             <span class="related-title">{{ rp.title }}</span>
             <time>{{ formatDate(rp.date) }}</time>
@@ -71,6 +78,7 @@
           v-if="adjacent.prev"
           :to="`/blog/${adjacent.prev.slug}`"
           class="adj-link adj-prev"
+          @click="trackNav('adjacent', adjacent.prev.slug)"
         >
           <span class="adj-label">Older</span>
           <span class="adj-title">{{ adjacent.prev.title }}</span>
@@ -79,6 +87,7 @@
           v-if="adjacent.next"
           :to="`/blog/${adjacent.next.slug}`"
           class="adj-link adj-next"
+          @click="trackNav('adjacent', adjacent.next.slug)"
         >
           <span class="adj-label">Newer</span>
           <span class="adj-title">{{ adjacent.next.title }}</span>
@@ -94,7 +103,7 @@
 </template>
 
 <script>
-import { ref, computed, watchEffect, watch } from "vue";
+import { ref, computed, watchEffect, watch, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import {
   getPost,
@@ -105,6 +114,7 @@ import {
   getAdjacentPosts,
   getRelatedPosts,
 } from "../composables/useBlog";
+import { trackEvent } from "../composables/useAnalytics";
 
 export default {
   name: "BlogPost",
@@ -297,6 +307,56 @@ export default {
       });
     }
 
+    function trackNav(type, target) {
+      trackEvent("blog_nav_clicked", { type, target });
+    }
+
+    const postContent = ref(null);
+    const scrollSentinel = ref(null);
+    const firedDepths = new Set();
+    let scrollObserver = null;
+
+    function setupScrollDepth() {
+      firedDepths.clear();
+      if (scrollObserver) scrollObserver.disconnect();
+      if (!postContent.value) return;
+      const thresholds = [0.25, 0.5, 0.75, 1.0];
+      scrollObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting || !post.value) return;
+            const ratio = entry.intersectionRatio;
+            for (const t of thresholds) {
+              const depth = Math.round(t * 100);
+              if (ratio >= t && !firedDepths.has(depth)) {
+                firedDepths.add(depth);
+                trackEvent("blog_scroll_depth", {
+                  slug: route.params.slug,
+                  depth,
+                });
+              }
+            }
+          });
+        },
+        { threshold: thresholds }
+      );
+      scrollObserver.observe(postContent.value);
+    }
+
+    watch(renderedContent, () => {
+      if (renderedContent.value) {
+        setTimeout(setupScrollDepth, 100);
+      }
+    });
+
+    onMounted(() => {
+      if (postContent.value) setupScrollDepth();
+    });
+
+    onUnmounted(() => {
+      if (scrollObserver) scrollObserver.disconnect();
+    });
+
     return {
       post,
       renderedContent,
@@ -304,6 +364,9 @@ export default {
       adjacent,
       related,
       formatDate,
+      trackNav,
+      postContent,
+      scrollSentinel,
     };
   },
 };
@@ -651,5 +714,10 @@ export default {
     text-align: left;
     grid-column: 1;
   }
+}
+
+.scroll-sentinel {
+  height: 1px;
+  visibility: hidden;
 }
 </style>

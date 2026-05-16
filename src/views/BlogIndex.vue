@@ -72,6 +72,7 @@
 <script>
 import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import { getPostsByYear, fetchAllPosts } from "../composables/useBlog";
+import { trackEvent } from "../composables/useAnalytics";
 
 function setMeta(attr, key, content) {
   let el = document.querySelector(`meta[${attr}="${key}"]`);
@@ -215,11 +216,13 @@ export default {
     }
 
     function scrollToYear(year) {
+      trackEvent("blog_filter_clicked", { year: String(year) });
       const el = yearRefs[year];
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function scrollToMonth(year, month) {
+      trackEvent("blog_filter_clicked", { year: String(year), month });
       const posts = postsByYear.value[year] || [];
       const matchesMonth = (p) => p.date && p.date.slice(5, 7) === month;
       const post = posts.find(matchesMonth);
