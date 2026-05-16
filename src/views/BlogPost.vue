@@ -120,14 +120,15 @@ export default {
   name: "BlogPost",
   setup() {
     const route = useRoute();
-    const fetchTrigger = ref(0);
+    const post = ref(null);
     const loading = ref(true);
 
     async function loadPost(slug) {
       loading.value = true;
+      post.value = null;
       await fetchAllPosts();
       await fetchPost(slug);
-      fetchTrigger.value++;
+      post.value = getPost(slug);
       loading.value = false;
     }
 
@@ -138,11 +139,6 @@ export default {
         if (slug) loadPost(slug);
       }
     );
-
-    const post = computed(() => {
-      void fetchTrigger.value;
-      return getPost(route.params.slug);
-    });
 
     const renderedContent = computed(() => {
       if (!post.value) return "";
