@@ -11,7 +11,7 @@ RUN mkdir /server-deps && cd /server-deps && npm init -y && \
     npm install express@^4.21.0 @anthropic-ai/sdk@^0.39.0 express-rate-limit@^7.5.0 better-sqlite3@^11.0.0 marked@^18.0.3
 
 # Production stage
-FROM node:20-alpine AS production-stage
+FROM node:20-slim AS production-stage
 WORKDIR /app
 COPY --from=build-stage /app/dist ./dist
 COPY --from=build-stage /app/public/tunes ./dist/tunes
