@@ -241,4 +241,4 @@ export const THEMES = {
 };
 
 export const THEME_IDS = Object.keys(THEMES);
-export const DEFAULT_THEME = "terminal";
+export const DEFAULT_THEME = "bladerunner";

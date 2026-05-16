@@ -327,7 +327,6 @@ a {
 
 .theme-terminal .profile-photo,
 .theme-terminal .hero-photo img {
-  filter: hue-rotate(90deg) saturate(2) brightness(0.8);
   border-color: #00ff00;
   box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
 }

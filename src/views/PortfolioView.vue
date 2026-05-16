@@ -54,11 +54,11 @@
                 <h3>{{ typewriterText }}<span class="cursor">_</span></h3>
               </div>
               <p class="hero-summary">
-                Engineering leader building AI products from zero to one using
-                LLMs, Claude, and agentic orchestration — then scaling them
-                post-PMF. Currently directing engineering orgs at Dropbox.
-                Previously Staff iOS Engineer at Reddit and Senior Engineer at
-                Google. Based in Denver, CO.
+                Engineering leader with a decade of building and scaling
+                platforms at Google, Reddit, and Dropbox -- now directing AI
+                product engineering at Dropbox. From iOS architecture to release
+                systems to agentic orchestration, I build things that ship.
+                Based in Denver, CO.
               </p>
               <div class="hero-links">
                 <a
