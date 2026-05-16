@@ -33,20 +33,36 @@ function parseFrontmatter(raw) {
 }
 
 function migrate() {
+  console.log("=== migrate-posts.js starting ===");
+  console.log(`  Seed directory: ${BLOG_DIR}`);
+  console.log(`  DB_PATH: ${process.env.DB_PATH || "(default)"}`);
+
   const count = getPostCount();
+  console.log(`  Current post count: ${count}`);
   if (count > 0) {
-    console.log(
-      `Database already has ${count} posts, skipping seed migration.`
-    );
+    console.log(`  Database already has ${count} posts, skipping seed migration.`);
     return;
   }
 
   if (!fs.existsSync(BLOG_DIR)) {
-    console.log(`Blog seed directory not found: ${BLOG_DIR}`);
+    console.error(`  ERROR: Blog seed directory not found: ${BLOG_DIR}`);
+    console.error(`  CWD: ${process.cwd()}`);
+    console.error(`  __dirname: ${__dirname}`);
+    try {
+      const parent = path.dirname(BLOG_DIR);
+      if (fs.existsSync(parent)) {
+        console.error(`  Contents of ${parent}:`, fs.readdirSync(parent));
+      } else {
+        console.error(`  Parent ${parent} also does not exist`);
+      }
+    } catch (e) {
+      console.error(`  Could not list parent:`, e.message);
+    }
     return;
   }
 
   const files = fs.readdirSync(BLOG_DIR).filter((f) => f.endsWith(".md"));
+  console.log(`  Found ${files.length} markdown files`);
   let migrated = 0;
 
   for (const file of files) {
@@ -67,7 +83,7 @@ function migrate() {
     migrated++;
   }
 
-  console.log(`Migrated ${migrated} posts from ${BLOG_DIR}`);
+  console.log(`  Migrated ${migrated} posts from ${BLOG_DIR}`);
 }
 
 migrate();

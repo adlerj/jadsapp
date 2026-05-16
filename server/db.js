@@ -2,13 +2,18 @@ const Database = require("better-sqlite3");
 const path = require("path");
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "..", "data", "blog.db");
+console.log(`  DB_PATH resolved to: ${DB_PATH}`);
 
 let db = null;
 
 function getDb() {
   if (db) return db;
   const fs = require("fs");
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+  const dir = path.dirname(DB_PATH);
+  console.log(`  Creating DB directory: ${dir}`);
+  fs.mkdirSync(dir, { recursive: true });
+  const existed = fs.existsSync(DB_PATH);
+  console.log(`  Opening database: ${DB_PATH} (${existed ? "exists" : "new"})`);
   db = new Database(DB_PATH);
   db.pragma("journal_mode = WAL");
   db.exec(`
@@ -26,6 +31,7 @@ function getDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_posts_date ON posts(date DESC);
   `);
+  console.log("  Database initialized OK");
   return db;
 }
 

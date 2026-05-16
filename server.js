@@ -7,12 +7,22 @@ if (fs.existsSync(envPath)) {
   }
 }
 
+console.log("=== jadsapp server starting ===");
+console.log(`  Node ${process.version} | PID ${process.pid}`);
+console.log(`  CWD: ${process.cwd()}`);
+console.log(`  DB_PATH: ${process.env.DB_PATH || "(default)"}`);
+console.log(`  NODE_ENV: ${process.env.NODE_ENV || "(not set)"}`);
+console.log(`  ANTHROPIC_API_KEY: ${process.env.ANTHROPIC_API_KEY ? "set" : "NOT SET"}`);
+console.log(`  BLOG_API_KEY: ${process.env.BLOG_API_KEY ? "set" : "NOT SET"}`);
+
 const express = require("express");
 const path = require("path");
 const Anthropic = require("@anthropic-ai/sdk").default;
 const rateLimit = require("express-rate-limit");
 const { systemPrompt } = require("./server/systemPrompt");
+console.log("  Loading database...");
 const { getAllPosts, getPostBySlug } = require("./server/db");
+console.log("  Database loaded OK");
 const blogRoutes = require("./server/routes/blog");
 const {
   SITE_URL,
@@ -20,6 +30,7 @@ const {
   renderBlogPost,
   renderBlogIndex,
 } = require("./server/ssr");
+console.log("  All modules loaded OK");
 
 let blogContent = "";
 let sitemapXml = "";
@@ -107,7 +118,8 @@ function reloadBlogData() {
       `Loaded ${posts.length} blog posts (RAG: ${blogContent.length} chars, sitemap: ${urls.length} URLs)`
     );
   } catch (e) {
-    console.warn("Could not load blog data:", e.message);
+    console.error("Could not load blog data:", e.message);
+    console.error("  Stack:", e.stack);
   }
 }
 
@@ -239,5 +251,5 @@ app.get("*", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`=== jadsapp server ready on port ${PORT} ===`);
 });
