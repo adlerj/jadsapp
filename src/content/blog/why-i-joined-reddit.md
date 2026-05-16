@@ -1,11 +1,11 @@
 ---
-title: Why I Left Dropbox to Lead iOS Platform at Reddit
+title: Why I Left Dropbox for Reddit
 date: 2021-11-19
-description: After three years at Dropbox, I'm joining Reddit to lead iOS platform engineering. A decade of lurking, a cake day hire, and the chance to build at the scale of the 12th most-used website.
+description: After three years at Dropbox, I joined Reddit to lead iOS platform engineering for the 12th most-visited website.
 tags: career, reddit, ios, platform
 ---
 
-# Why I Left Dropbox to Lead iOS Platform at Reddit
+# Why I Left Dropbox for Reddit
 
 I accepted my Reddit offer on my ten-year cake day. That wasn't planned, but it felt right.
 

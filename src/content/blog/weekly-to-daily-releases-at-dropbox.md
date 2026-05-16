@@ -1,11 +1,11 @@
 ---
-title: "Weekly to Daily Releases at Dropbox: AI Made Us Do It"
+title: Weekly to Daily Releases at Dropbox
 date: 2026-03-14
-description: How we moved the Dropbox desktop client from weekly to daily releases to keep pace with AI iteration speed, using release rings and automated quality gates.
+description: How we moved the Dropbox desktop client from weekly to daily releases using release rings and automated quality gates.
 tags: devops, release-engineering, desktop, leadership, ai
 ---
 
-# Weekly to Daily Releases at Dropbox: AI Made Us Do It
+# Weekly to Daily Releases at Dropbox
 
 We're in a race. Every AI feature we ship needs to be validated in market the next day. We make a change, we want to see if it works, and the feedback cycle from "code merged" to "users have it" determines how fast we learn. Weekly releases meant we were always a week behind our own insights.
 

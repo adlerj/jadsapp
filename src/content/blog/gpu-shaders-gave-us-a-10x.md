@@ -1,7 +1,7 @@
 ---
 title: GPU Shaders Gave Us a 10x on Document Scanning
 date: 2020-11-20
-description: How we achieved a 10x performance improvement in mobile document scanning by moving from CPU-bound C++ to GPU shaders, and why image processing on mobile demands the GPU pipeline.
+description: How my team at Dropbox achieved a 10x performance gain in mobile document scanning by moving from CPU-bound C++ to GPU shaders.
 tags: mobile, gpu, performance, ios
 ---
 

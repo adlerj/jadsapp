@@ -1,7 +1,7 @@
 ---
 title: Inside iOS at Google Scale
 date: 2018-01-19
-description: Inside the build system, source control, and tooling that powers iOS development at Google, and why hour-long builds change how you write code.
+description: Inside the build system, source control, and tooling that powers iOS development at Google, and why hour-long builds change everything.
 tags: ios, google, build-systems, tooling
 ---
 

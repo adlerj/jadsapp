@@ -1,11 +1,11 @@
 ---
-title: "Mandates Fail, Examples Win: Building for 100 Engineers"
+title: "Mandates Fail, Examples Win"
 date: 2022-11-04
-description: The human side of scaling engineering practices. Why mandates fail, examples win, and consistency comes from tooling, not enforcement.
+description: Scaling engineering practices to 100+ engineers at Reddit. Why mandates fail and consistency comes from tooling, not enforcement.
 tags: platform, leadership, scale, ios
 ---
 
-# Mandates Fail, Examples Win: Building for 100 Engineers
+# Mandates Fail, Examples Win
 
 When you're painting a mural with a hundred artists, you want everyone using the same brushes and paint. Not because any single brush is objectively correct, but because a mural painted with oils, acrylics, watercolors, and spray paint simultaneously isn't a mural. It's a mess.
 

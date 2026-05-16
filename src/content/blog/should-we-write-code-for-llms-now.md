@@ -1,7 +1,7 @@
 ---
 title: "Should We Write Code for LLMs Now?"
 date: 2025-01-24
-description: The audience for code is shifting. If LLMs increasingly read, write, and modify our code, should our conventions optimize for them too?
+description: If LLMs increasingly read and modify our code at Dropbox, should our conventions optimize for them instead of humans?
 tags: ai, llm, code-quality, hot-take
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: VIPER Is Half Dead in Modern Swift
 date: 2018-07-14
-description: VIPER was a breakthrough in iOS architecture, but modern Swift makes half its layers unnecessary. A simplified, protocol-driven alternative.
+description: VIPER was a breakthrough in iOS architecture, but modern Swift makes half its layers unnecessary. A protocol-driven alternative.
 tags: ios, architecture, swift, viper
 ---
 

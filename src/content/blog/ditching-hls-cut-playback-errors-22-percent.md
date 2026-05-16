@@ -1,7 +1,7 @@
 ---
 title: "We Ditched HLS and Cut Playback Errors by 22%"
 date: 2022-08-12
-description: How I'm rebuilding video playback for short-form content by ditching HLS, building an LRU-based prefetch cache, and cutting playback errors by 22%.
+description: How I rebuilt Reddit video playback by ditching HLS for an LRU-based prefetch cache, cutting playback errors by 22%.
 tags: video, mobile, performance, ios
 ---
 

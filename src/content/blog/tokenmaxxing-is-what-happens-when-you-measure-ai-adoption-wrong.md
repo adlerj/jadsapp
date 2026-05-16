@@ -1,11 +1,11 @@
 ---
-title: Tokenmaxxing Is What Happens When You Measure AI Adoption Wrong
+title: Tokenmaxxing Is What Happens When You Measure Wrong
 date: 2026-05-15
-description: Mandating AI tool usage is correct. Measuring AI tool usage is a trap. The difference is whether you measure outcomes or inputs.
+description: Mandating AI tool usage is correct. Measuring it is a trap. How Dropbox avoids tokenmaxxing by measuring outcomes, not inputs.
 tags: ai, leadership, org-design, engineering
 ---
 
-# Tokenmaxxing Is What Happens When You Measure AI Adoption Wrong
+# Tokenmaxxing Is What Happens When You Measure Wrong
 
 Amazon employees are [inflating their AI tool usage metrics](https://arstechnica.com/ai/2026/05/amazon-employees-are-tokenmaxxing-due-to-pressure-to-use-ai-tools/) to satisfy organizational pressure. They're calling it "tokenmaxxing."
 

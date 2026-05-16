@@ -1,13 +1,13 @@
 ---
-title: "Minerva: The Coordinator Pattern Done Right (Part 3)"
+title: "Minerva: The Coordinator Pattern Done Right"
 date: 2019-05-10
-description: Part 3 of the Minerva deep dive. The Coordinator and Navigator protocols create testable, reusable navigation by separating what to present from how to present it. Deep linking becomes a natural consequence.
+description: Part 3: Testable navigation by separating what to present from how to present it. Deep linking becomes a natural consequence.
 tags: ios, coordinators, navigation, swift
 series: Minerva Deep Dive
 part: 3
 ---
 
-# Minerva: The Coordinator Pattern Done Right (Part 3)
+# Minerva: The Coordinator Pattern Done Right
 
 The iOS community has been talking about "coordinators" since Soroush Khanlou's 2015 blog post popularized the term. Paul Hudson [just published a coordinator tutorial](https://www.hackingwithswift.com/articles/71/how-to-use-the-coordinator-pattern-in-ios-apps) for Hacking with Swift in March, and the Swift by Sundell podcast [devoted an episode to architecture](https://www.swiftbysundell.com/podcast/45/) with Chris Eidhof and Matt Gallagher last month. Clearly the pattern has legs. But I was using this pattern at Google before it had a name, extracting navigation logic from view controllers into dedicated objects that managed the flow between screens. What I've learned since then is that the coordinator concept is only half the solution. The other half is separating the act of navigation from the mechanics of presentation.
 

@@ -1,13 +1,13 @@
 ---
-title: "Minerva: Why I Built an iOS Framework Nobody Asked For (Part 1)"
+title: "Minerva: An iOS Framework Nobody Asked For"
 date: 2019-02-08
-description: Minerva is an open-source iOS framework for coordinators and list management. Part 1 of the deep dive covers why I'm building it, what existing solutions get wrong, and the core Coordinator protocol.
+description: Part 1: Why I built an open-source iOS coordinator and list framework, what existing solutions get wrong, and the core protocol.
 tags: ios, minerva, open-source, swift
 series: Minerva Deep Dive
 part: 1
 ---
 
-# Minerva: Why I Built an iOS Framework Nobody Asked For (Part 1)
+# Minerva: An iOS Framework Nobody Asked For
 
 iOS apps at scale have two hard problems that nobody has solved well together: navigation and list management. There are good solutions for each in isolation. There's nothing that handles both as a cohesive architecture.
 

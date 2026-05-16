@@ -1,7 +1,7 @@
 ---
 title: Shipping AI When Nothing Works Yet
 date: 2023-08-25
-description: The messy operational reality of shipping LLM-powered features when you have existing users, real latency budgets, and a cost model that doesn't work yet.
+description: The messy reality of shipping LLM-powered features at Dropbox with real users, real latency budgets, and a cost model that doesn't work.
 tags: ai, product-strategy, llm, leadership
 ---
 

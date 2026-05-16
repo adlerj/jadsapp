@@ -1,11 +1,11 @@
 ---
-title: "iOS Architecture at Google: Everything Is Built from Scratch"
+title: iOS Architecture at Google
 date: 2018-03-22
-description: What iOS development looks like inside a company that builds everything from scratch, has three internal promises frameworks, and spent years resisting Swift.
+description: What iOS development looks like inside Google: three internal promises frameworks, years resisting Swift, and everything built from scratch.
 tags: ios, architecture, google, swift
 ---
 
-# iOS Architecture at Google: Everything Is Built from Scratch
+# iOS Architecture at Google
 
 I wrote about the [build system, source control, and tooling](/blog/building-ios-at-google-scale) that powers Google iOS development. That post was about the environment. This one is about what we built inside it.
 

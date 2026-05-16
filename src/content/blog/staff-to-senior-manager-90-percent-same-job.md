@@ -1,11 +1,11 @@
 ---
-title: "From Staff Engineer to Senior Manager: 90% the Same Job"
+title: "Staff to Senior Manager: 90% the Same Job"
 date: 2023-11-15
-description: I went from Staff Engineer to Senior Engineering Manager in three months and was surprised how much of the job I was already doing.
+description: I went from Staff Engineer to Senior Engineering Manager at Dropbox in three months and was surprised how much I was already doing.
 tags: leadership, career, management, staff-engineering
 ---
 
-# From Staff Engineer to Senior Manager: 90% the Same Job
+# Staff to Senior Manager: 90% the Same Job
 
 I came back to Dropbox in May 2023 as a Staff Engineer. Three months later I was a Senior Engineering Manager. That transition scared me more than it should have.
 

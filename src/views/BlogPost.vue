@@ -131,13 +131,83 @@ export default {
       return getRelatedPosts(route.params.slug, 3);
     });
 
+    function setMeta(attr, key, content) {
+      let el = document.querySelector(`meta[${attr}="${key}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    }
+
+    function setLink(rel, href) {
+      let el = document.querySelector(`link[rel="${rel}"]`);
+      if (!el) {
+        el = document.createElement("link");
+        el.setAttribute("rel", rel);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("href", href);
+    }
+
     watchEffect(() => {
       if (post.value) {
-        document.title = `${post.value.title} — Jeff Adler`;
-        const desc = document.querySelector('meta[name="description"]');
-        if (desc && post.value.description) {
-          desc.setAttribute("content", post.value.description);
+        const title = `${post.value.title} — Jeff Adler`;
+        const desc = post.value.description || "";
+        const url = `https://jads.app/blog/${route.params.slug}`;
+
+        document.title = title;
+        setMeta("name", "description", desc);
+
+        setMeta("property", "og:title", post.value.title);
+        setMeta("property", "og:description", desc);
+        setMeta("property", "og:url", url);
+        setMeta("property", "og:type", "article");
+        setMeta("property", "og:site_name", "Jeff Adler — jads.app");
+        setMeta("property", "og:image", "https://jads.app/jeff-adler.png");
+        if (post.value.date) {
+          setMeta("property", "article:published_time", post.value.date);
         }
+        setMeta("property", "article:author", "https://jads.app/");
+
+        setMeta("name", "twitter:card", "summary");
+        setMeta("name", "twitter:title", post.value.title);
+        setMeta("name", "twitter:description", desc);
+        setMeta("name", "twitter:image", "https://jads.app/jeff-adler.png");
+
+        setLink("canonical", url);
+
+        let ld = document.querySelector('script[data-blog-ld]');
+        if (!ld) {
+          ld = document.createElement("script");
+          ld.setAttribute("type", "application/ld+json");
+          ld.setAttribute("data-blog-ld", "true");
+          document.head.appendChild(ld);
+        }
+        ld.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: post.value.title,
+          description: desc,
+          datePublished: post.value.date,
+          url: url,
+          author: {
+            "@type": "Person",
+            name: "Jeff Adler",
+            url: "https://jads.app",
+            jobTitle: "Director of Engineering",
+            worksFor: { "@type": "Organization", name: "Dropbox" },
+          },
+          publisher: {
+            "@type": "Person",
+            name: "Jeff Adler",
+            url: "https://jads.app",
+          },
+          mainEntityOfPage: { "@type": "WebPage", "@id": url },
+          image: "https://jads.app/jeff-adler.png",
+          keywords: (post.value.tags || []).join(", "),
+        });
       }
     });
 

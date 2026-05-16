@@ -1,7 +1,7 @@
 ---
 title: Relaunching This Blog for the AI Era
 date: 2026-05-15
-description: After eight years of writing about iOS architecture, mobile platforms, and engineering leadership, I'm relaunching this blog for the AI era.
+description: Jeff Adler's engineering blog, eight years of iOS architecture and leadership. Now relaunching for the AI era.
 tags: meta, ai, leadership
 ---
 

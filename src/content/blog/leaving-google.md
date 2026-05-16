@@ -1,7 +1,7 @@
 ---
 title: Leaving Google After Two and a Half Years
 date: 2018-11-02
-description: After two and a half years building iOS at Google, I'm moving on. Here's what I learned, what I'm taking with me, and what I'm looking for next.
+description: After building iOS at Google, I'm moving on. What I learned about massive refactors, build systems, and when a company is too big.
 tags: career, google, mobile, architecture
 ---
 

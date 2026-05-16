@@ -52,6 +52,18 @@ router.beforeEach((to, from, next) => {
   if (desc && to.meta.description) {
     desc.setAttribute("content", to.meta.description);
   }
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) {
+    canonical.setAttribute("href", `https://jads.app${to.path}`);
+  }
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  if (ogUrl) {
+    ogUrl.setAttribute("content", `https://jads.app${to.path}`);
+  }
+  const blogLd = document.querySelector("script[data-blog-ld]");
+  if (blogLd && to.name !== "blog-post") {
+    blogLd.remove();
+  }
   next();
 });
 

@@ -73,9 +73,43 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import { getPostsByYear } from "../composables/useBlog";
 
+function setMeta(attr, key, content) {
+  let el = document.querySelector(`meta[${attr}="${key}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
+
+function setLink(rel, href) {
+  let el = document.querySelector(`link[rel="${rel}"]`);
+  if (!el) {
+    el = document.createElement("link");
+    el.setAttribute("rel", rel);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("href", href);
+}
+
 export default {
   name: "BlogIndex",
   setup() {
+    const url = "https://jads.app/blog";
+    const desc =
+      "Jeff Adler's engineering blog. AI, agentic engineering, leadership, iOS architecture, and technical deep dives from Google, Dropbox, and Reddit.";
+    setMeta("property", "og:title", "Jads Blog — Jeff Adler");
+    setMeta("property", "og:description", desc);
+    setMeta("property", "og:url", url);
+    setMeta("property", "og:type", "website");
+    setMeta("property", "og:site_name", "Jeff Adler — jads.app");
+    setMeta("property", "og:image", "https://jads.app/jeff-adler.png");
+    setMeta("name", "twitter:card", "summary");
+    setMeta("name", "twitter:title", "Jads Blog — Jeff Adler");
+    setMeta("name", "twitter:description", desc);
+    setLink("canonical", url);
+
     const postsByYear = computed(() => getPostsByYear());
     const years = computed(() =>
       Object.keys(postsByYear.value).sort((a, b) => b.localeCompare(a))

@@ -1,13 +1,13 @@
 ---
-title: "SliceKit: Composition That Doesn't Collapse Under Testing (Part 2)"
+title: "SliceKit: Composition and Testing (Part 2)"
 date: 2022-05-06
-description: How SliceKit's composition model works in practice, plus the testing strategy and adoption philosophy that's getting 100+ engineers on board.
+description: How SliceKit's composition model works in practice, plus the testing strategy that got 100+ Reddit engineers on board.
 tags: ios, declarative-ui, testing, slicekit
 series: SliceKit
 part: 2
 ---
 
-# SliceKit: Composition That Doesn't Collapse Under Testing (Part 2)
+# SliceKit: Composition and Testing (Part 2)
 
 In [Part 1](/blog/slicekit-part-1-declarative-ui-at-reddit), I covered the problems SliceKit solves and the core abstraction. Now I want to get into the mechanics: how composition works, how you test it, and how we're convincing 100+ engineers to adopt a new framework without mandating it.
 

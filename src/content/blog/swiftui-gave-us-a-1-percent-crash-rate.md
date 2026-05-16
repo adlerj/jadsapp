@@ -1,11 +1,11 @@
 ---
-title: "We Shipped SwiftUI to a Million Users. It Crashed 1% of Them."
+title: "We Shipped SwiftUI. It Crashed 1% of Users."
 date: 2021-03-12
-description: We rolled out SwiftUI to a million users and hit a 1% crash rate. Here's why we chose UIKit + declarative frameworks instead, and what Combine's thread-safety model taught us about adopting Apple 1.0 technologies.
+description: We rolled out SwiftUI to a million Dropbox users and hit a 1% crash rate. Here's why we chose UIKit + declarative frameworks instead.
 tags: ios, swiftui, uikit, architecture
 ---
 
-# We Shipped SwiftUI to a Million Users. It Crashed 1% of Them.
+# We Shipped SwiftUI. It Crashed 1% of Users.
 
 Every WWDC is Christmas morning for iOS engineers. Apple unveils the next generation of something, the demo is flawless, and Twitter erupts with "this changes everything." SwiftUI's 2019 debut was the most intense version of this cycle I've seen. Declarative UI on Apple platforms, finally. No more `cellForRowAt`. No more Auto Layout constraint conflicts in the debugger. The future had arrived.
 

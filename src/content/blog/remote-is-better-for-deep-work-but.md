@@ -1,11 +1,11 @@
 ---
-title: "Remote Is Better for Deep Work. In-Person Unlocks Everything Else."
+title: Remote Is Better for Deep Work
 date: 2020-06-19
-description: Remote work is more productive for deep work, in-person unlocks things nothing else can, and your CI/CD pipeline becomes your most important team member when everyone's distributed.
+description: Remote is more productive for deep work at Dropbox. In-person unlocks everything else. CI/CD becomes your most important teammate.
 tags: remote-work, devops, mobile, leadership
 ---
 
-# Remote Is Better for Deep Work. In-Person Unlocks Everything Else.
+# Remote Is Better for Deep Work
 
 Three months into the pandemic, I have a confession: I'm more productive than I've ever been.
 

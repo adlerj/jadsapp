@@ -1,7 +1,7 @@
 ---
 title: Engineers Are Becoming Agent Managers
 date: 2024-06-07
-description: AI tools are flattening the engineering output curve. Engineers are becoming managers of agents. Org structures need to change.
+description: AI is flattening the engineering output curve at Dropbox. Engineers are managing agents now. Org structures need to change.
 tags: leadership, org-design, ai
 ---
 

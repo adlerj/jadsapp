@@ -1,7 +1,7 @@
 ---
 title: The Best Frameworks Come from Product Engineers
 date: 2021-06-25
-description: The best mobile frameworks come from product engineers who build them to solve their own problems, then hand them off to platform teams for maintenance and scale. Here's why origin matters.
+description: The best mobile frameworks come from product engineers solving their own problems at Dropbox, not platform teams building in a vacuum.
 tags: platform-engineering, mobile, leadership, architecture
 ---
 

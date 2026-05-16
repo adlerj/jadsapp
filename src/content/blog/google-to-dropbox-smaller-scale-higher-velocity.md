@@ -1,7 +1,7 @@
 ---
 title: "Google to Dropbox: Smaller Scale, Higher Velocity"
 date: 2019-01-18
-description: Moving from Google to Dropbox meant smaller scale but higher velocity. The cultural shift from building everything in-house to embracing the open-source ecosystem changed what was architecturally possible.
+description: Moving from Google to Dropbox meant smaller scale but higher velocity. Embracing open source changed what was architecturally possible.
 tags: career, dropbox, mobile, architecture
 ---
 

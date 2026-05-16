@@ -1,7 +1,7 @@
 ---
 title: Five RxSwift Patterns That Actually Work
 date: 2019-07-19
-description: Five practical RxSwift patterns that form the data flow backbone of a well-architected iOS app, from reactive mutable lists to the retain cycle trap nobody warns you about.
+description: Five practical RxSwift patterns for well-architected iOS apps, from reactive mutable lists to the retain cycle trap nobody warns you about.
 tags: ios, rxswift, reactive, architecture
 ---
 

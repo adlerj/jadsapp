@@ -1,7 +1,7 @@
 ---
 title: "AI Is Redefining What \"Senior Engineer\" Means"
 date: 2025-11-07
-description: Senior engineer used to mean "writes better code." AI is redefining it to mean system design, taste, and judgment.
+description: Senior engineer used to mean better code. AI is redefining it to mean system design, taste, and judgment. A Dropbox director's take.
 tags: career, ai, future-of-coding, leadership
 ---
 

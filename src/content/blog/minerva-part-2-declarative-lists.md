@@ -1,13 +1,13 @@
 ---
-title: "Minerva: Kill Your Imperative List Code (Part 2)"
+title: "Minerva: Kill Your Imperative List Code"
 date: 2019-03-22
-description: Part 2 of the Minerva deep dive. CellModels turn list management from imperative data source manipulation into declarative state descriptions. You say what you want, Minerva figures out how to get there.
+description: Part 2: CellModels turn iOS list management from imperative data source manipulation into declarative state descriptions.
 tags: ios, minerva, declarative-ui, swift
 series: Minerva Deep Dive
 part: 2
 ---
 
-# Minerva: Kill Your Imperative List Code (Part 2)
+# Minerva: Kill Your Imperative List Code
 
 In [Part 1](/blog/minerva-part-1-coordinators-and-lists) I covered Minerva's Coordinator architecture: how it manages view controller lifecycles and navigation. The structural half of the framework. This post covers the other half: how Minerva turns list management from an imperative headache into a declarative system.
 

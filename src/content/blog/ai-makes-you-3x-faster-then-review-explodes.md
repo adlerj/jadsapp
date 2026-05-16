@@ -1,11 +1,11 @@
 ---
-title: "AI Makes You 3x Faster, Then Code Review Explodes"
+title: "AI Makes You 3x Faster, Then Review Explodes"
 date: 2025-04-04
-description: AI tools help engineers ship 3-5x faster, but without the right processes you just create a traffic jam at code review.
+description: AI tools help Dropbox engineers ship 3-5x faster, but without the right processes you just create a traffic jam at code review.
 tags: ai, leadership, psychological-safety, engineering
 ---
 
-# AI Makes You 3x Faster, Then Code Review Explodes
+# AI Makes You 3x Faster, Then Review Explodes
 
 Every AI tool demo shows the same thing: an engineer producing code 3-5x faster. Nobody shows what happens after. The review queue. The QA backlog. The senior engineers drowning in pull requests they don't have time to evaluate properly. You've sped up the factory floor while keeping the same number of quality inspectors. The result isn't faster shipping. It's a pile-up at the review stage.
 

@@ -1,13 +1,13 @@
 ---
-title: "The Declarative Skeleton That Cut Our Code by 42%"
+title: "The Declarative Skeleton That Cut Code by 42%"
 date: 2019-10-25
-description: How I'm building a declarative app skeleton at Dropbox that cuts code by 42%, raises test coverage to 89%, and makes it nearly impossible for engineers to ship entire categories of bugs.
+description: How I built a declarative app skeleton at Dropbox that cut code by 42% and raised test coverage to 89%.
 tags: architecture, declarative, leadership, scale
 series: Scaling Architecture
 part: 1
 ---
 
-# The Declarative Skeleton That Cut Our Code by 42%
+# The Declarative Skeleton That Cut Code by 42%
 
 Here's the problem with imperative codebases: they scale linearly with team size, at best. Every new engineer adds code, and that code has to understand (and correctly interact with) all the code that came before it. The more engineers, the more implicit conventions. The more conventions, the more ways to violate them. The more violations, the more bugs.
 

@@ -1,7 +1,7 @@
 ---
 title: Agentic Workflows Are Harder Than You Think
 date: 2024-10-11
-description: The gap between an impressive agent demo and a production-ready agentic system is enormous. Here's what it takes to bridge it.
+description: The gap between an impressive agent demo and production at Dropbox is enormous. Here's what bridging it actually takes.
 tags: ai, agents, llm, production
 ---
 

@@ -1,13 +1,13 @@
 ---
-title: "SliceKit: Declarative UI for 100+ Engineers at Reddit (Part 1)"
+title: "SliceKit: Declarative UI at Reddit (Part 1)"
 date: 2022-03-18
-description: How I'm building a declarative UI framework for 100+ iOS engineers at Reddit, and why consistency at scale requires opinionated tooling.
+description: How I built a declarative UI framework for 100+ iOS engineers at Reddit, and why consistency at scale requires opinionated tooling.
 tags: ios, declarative-ui, reddit, platform, slicekit
 series: SliceKit
 part: 1
 ---
 
-# SliceKit: Declarative UI for 100+ Engineers at Reddit (Part 1)
+# SliceKit: Declarative UI at Reddit (Part 1)
 
 When you have 100+ iOS engineers committing to the same codebase, architecture isn't optional. It's survival.
 

@@ -1,13 +1,13 @@
 ---
-title: Breaking Apart an iOS Monolith with Dependency Inversion
+title: Breaking Apart an iOS Monolith
 date: 2019-12-06
-description: How I'm breaking apart an iOS monolith using protocol-first design, init injection, and scoped services, turning a tangled dependency graph into independently compilable modules.
+description: How I broke apart a Dropbox iOS monolith using protocol-first design, turning a tangled dependency graph into independent modules.
 tags: architecture, swift, testing, dependency-inversion
 series: Scaling Architecture
 part: 2
 ---
 
-# Breaking Apart an iOS Monolith with Dependency Inversion
+# Breaking Apart an iOS Monolith
 
 You know your codebase is a monolith when you change a file in the networking layer and the compiler rebuilds the entire app. When you open a pull request touching three files and get merge conflicts with four other PRs. When a new engineer asks "where does this dependency come from?" and the honest answer is "everywhere."
 

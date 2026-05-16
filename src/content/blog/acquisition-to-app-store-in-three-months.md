@@ -1,7 +1,7 @@
 ---
 title: Acquisition to App Store in Three Months
 date: 2020-03-13
-description: How we shipped a production mobile app in three months after an acquisition, by finding the right boundary between web and native and leveraging a declarative architecture.
+description: How my team at Dropbox shipped HelloSign Mobile in three months post-acquisition by finding the right boundary between web and native.
 tags: mobile, product, leadership, architecture
 ---
 
