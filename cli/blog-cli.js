@@ -59,6 +59,7 @@ async function apiFetch(endpoint, options = {}) {
   const res = await fetch(url, { ...options, headers });
   const data = await res.json();
   if (!res.ok) {
+    if (res.status === 404 && options.allow404) return null;
     console.error(`Error ${res.status}:`, JSON.stringify(data, null, 2));
     process.exit(1);
   }
@@ -131,12 +132,7 @@ async function push(filePath) {
     body: meta.body,
   };
 
-  let existing = null;
-  try {
-    existing = await apiFetch(`/api/posts/${slug}`);
-  } catch {
-    // 404 means create
-  }
+  const existing = await apiFetch(`/api/posts/${slug}`, { allow404: true });
 
   if (existing && existing.slug) {
     const result = await apiFetch(`/api/posts/${slug}`, {
