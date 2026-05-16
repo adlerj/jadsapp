@@ -89,7 +89,10 @@ export default {
     const handleSend = () => {
       const msg = userInput.value.trim();
       if (!msg || isGenerating.value) return;
-      trackEvent("jadbot_message");
+      const userMsgCount = messages.value.filter(
+        (m) => m.role === "user"
+      ).length;
+      trackEvent("jadbot_message", { depth: userMsgCount + 1 });
       userInput.value = "";
       sendMessage(msg);
       nextTick(() => inputField.value?.focus());

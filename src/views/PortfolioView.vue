@@ -155,9 +155,17 @@
                 <ul v-if="activeJob === index">
                   <li v-for="(detail, idx) in job.details" :key="idx">
                     <span v-if="!detail.isLink">{{ detail }}</span>
-                    <a v-else :href="detail.url" target="_blank">{{
-                      detail.text
-                    }}</a>
+                    <a
+                      v-else
+                      :href="detail.url"
+                      target="_blank"
+                      @click="
+                        trackEvent('outbound_link_clicked', {
+                          destination: detail.url,
+                        })
+                      "
+                      >{{ detail.text }}</a
+                    >
                   </li>
                 </ul>
               </div>
@@ -274,7 +282,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
 import SnowboardGame from "../components/SnowboardGame.vue";
 import MountainBikeGame from "../components/MountainBikeGame.vue";
 import DiscGolfGame from "../components/DiscGolfGame.vue";
@@ -441,6 +449,7 @@ export default {
 
     onUnmounted(() => {
       if (typewriterTimeout) clearTimeout(typewriterTimeout);
+      if (sectionObserver) sectionObserver.disconnect();
     });
 
     const setActiveJob = (index) => {
@@ -475,6 +484,7 @@ export default {
     const onBootComplete = () => {
       showBoot.value = false;
       trackEvent("boot_completed");
+      nextTick(setupSectionObserver);
     };
 
     const closeGame = (game, ref) => {
@@ -526,9 +536,30 @@ export default {
       if (target) target.value = true;
     };
 
+    const seenSections = new Set();
+    let sectionObserver = null;
+
+    function setupSectionObserver() {
+      const sections = document.querySelectorAll("main > section[id]");
+      if (!sections.length) return;
+      sectionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && !seenSections.has(entry.target.id)) {
+              seenSections.add(entry.target.id);
+              trackEvent("section_viewed", { section: entry.target.id });
+            }
+          });
+        },
+        { threshold: 0.3 }
+      );
+      sections.forEach((s) => sectionObserver.observe(s));
+    }
+
     onMounted(() => {
       if (!showBoot.value) {
         typeWriter();
+        nextTick(setupSectionObserver);
       }
     });
 

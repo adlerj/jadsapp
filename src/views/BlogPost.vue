@@ -130,6 +130,9 @@ export default {
       await fetchPost(slug);
       post.value = getPost(slug);
       loading.value = false;
+      if (post.value) {
+        trackEvent("blog_post_viewed", { slug, title: post.value.title });
+      }
     }
 
     loadPost(route.params.slug);
