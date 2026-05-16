@@ -1013,6 +1013,10 @@ footer {
   .passions-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .terminal-section {
+    padding: 20px 0 30px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -476,17 +476,24 @@ export default {
   }
 
   .chat-header {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
+    flex-direction: row;
+    gap: 0;
+    align-items: center;
+    padding: 10px 15px;
   }
 
   .terminal-body {
     padding: 15px;
+    min-height: 80px;
   }
 
   .input-section {
-    padding: 12px 15px;
+    padding: 14px 15px;
+    min-height: 52px;
+  }
+
+  .terminal-input {
+    font-size: 16px; /* prevent iOS auto-zoom */
   }
 }
 
@@ -497,5 +504,15 @@ export default {
 .terminal-inline .terminal-window {
   max-width: none;
   max-height: 500px;
+}
+
+@media (max-width: 768px) {
+  .terminal-inline .terminal-window {
+    max-height: 360px;
+  }
+
+  .terminal-inline .terminal-body {
+    min-height: 80px;
+  }
 }
 </style>

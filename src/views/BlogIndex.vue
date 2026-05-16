@@ -491,6 +491,10 @@ export default {
 
 /* Mobile */
 @media (max-width: 768px) {
+  .blog-index {
+    padding: 1.5rem 1rem;
+  }
+
   .blog-layout {
     grid-template-columns: 1fr;
     gap: 0;
@@ -505,7 +509,10 @@ export default {
     overflow-x: auto;
     overflow-y: hidden;
     max-height: none;
-    padding: 0.5rem 0;
+    /* break out of blog-index padding to go edge-to-edge */
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding: 0.5rem 1rem;
     margin-bottom: 1.5rem;
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-primary);
@@ -546,6 +553,14 @@ export default {
 
   .post-count {
     display: none;
+  }
+
+  .post-card {
+    padding: 1rem;
+  }
+
+  .post-card h3 {
+    font-size: 1.05rem;
   }
 }
 </style>

@@ -709,6 +709,20 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .blog-post {
+    padding: 1.25rem 1rem;
+  }
+
+  .post-header h1 {
+    font-size: 1.45rem;
+    line-height: 1.3;
+  }
+
+  /* arrows are in the footer already -- remove from header on mobile */
+  .header-nav-arrows {
+    display: none;
+  }
+
   .adjacent-nav {
     grid-template-columns: 1fr;
   }
@@ -716,6 +730,15 @@ export default {
   .adj-next {
     text-align: left;
     grid-column: 1;
+  }
+
+  .related-card {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .related-card time {
+    margin-left: 0;
   }
 }
 
