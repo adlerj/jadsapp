@@ -1,6 +1,6 @@
-# Pitch Blog Post from TLDR.tech
+# Pitch Blog Post from Industry Sources
 
-Scan TLDR.tech for trending topics, find clusters relevant to Jeff's expertise, and pitch a blog post idea with space for Jeff to shape the angle.
+Scan tech industry sources for trending topics, find clusters relevant to Jeff's expertise, and pitch a blog post idea with space for Jeff to shape the angle.
 
 ## Context
 
@@ -8,9 +8,22 @@ Jeff's blog covers: AI/agentic engineering, engineering leadership, org design, 
 
 ## Steps
 
-### 1. Fetch TLDR.tech
+### 1. Fetch Industry Sources
 
-Use WebFetch to retrieve `https://tldr.tech/`. Also fetch the AI-specific newsletter if available at `https://tldr.tech/ai`. Extract article headlines, summaries, and links.
+Fetch all of the following in parallel using WebFetch. Extract article headlines, summaries, and links from each.
+
+**Primary sources:**
+- `https://tldr.tech/` -- TLDR daily newsletter (tech, AI, DevOps, product, founders sections)
+- `https://tldr.tech/ai` -- TLDR AI edition if available
+- `https://news.ycombinator.com` -- Hacker News front page (tech discussion and community signal)
+
+**Secondary sources (fetch the most relevant 1-2 based on today's topic cluster):**
+- `https://www.lennysnewsletter.com` -- product and engineering leadership
+- `https://newsletter.pragmaticengineer.com` -- engineering management and tech
+- `https://www.theengineeringmanager.com` -- EM-focused content
+- `https://stratechery.com` -- tech strategy and analysis
+
+Scan all sources. Note which source each article comes from when grouping clusters.
 
 ### 2. Identify Relevant Clusters
 
@@ -54,21 +67,42 @@ Use AskUserQuestion to ask Jeff:
 
 After Jeff selects his answers, ask him for a blurb of his opinion in his own words. This is critical: the post should be anchored in Jeff's real experience and perspective, not a generic take. Prompt him with the specific "missing ingredient" questions from Step 4 to draw out concrete war stories, specific Dropbox/Reddit/Google experiences, and his actual stance on the topic. Wait for this blurb before writing.
 
-### 6. Write or Save
+### 6. Research Current Discourse (before writing)
+
+Before drafting, do a targeted sweep of what the industry is currently saying about the chosen topic. This grounds the post in live conversation, not just the TLDR snapshot.
+
+Use WebSearch and WebFetch to find:
+
+**Thought leader takes:**
+- Search Twitter/X for recent threads on the topic from known engineering leaders (e.g., site:twitter.com OR site:x.com + topic keywords + engineering/management/AI)
+- Fetch relevant threads or posts from people like Gergely Orosz, Will Larson, Lenny Rachitsky, Charity Majors, or others relevant to the topic
+- Look for counterarguments or complementary takes that make the post feel like part of a real conversation, not an opinion in a vacuum
+
+**Recent articles:**
+- WebSearch for articles published in the last 2-4 weeks on the specific topic angle
+- Look for: blog posts from engineering orgs (Stripe, Netflix, etc.), Substack newsletters, conference talks, or LinkedIn posts from credible voices
+- Aim for 2-3 additional external references beyond the original TLDR sources
+
+**What to do with the research:**
+- Weave 2-3 of the strongest references into the post as inline links with context ("As [Name] argued..." or "[Article] makes the case that...")
+- If a thought leader's take directly contradicts or supports Jeff's thesis, surface it -- it sharpens the argument
+- Don't pad with weak sources. One strong reference beats three thin ones.
+
+### 7. Write or Save
 
 If Jeff says write it:
 - Draft the full post in `src/content/blog/` following BLOG_STYLE.md
 - Use today's date
-- Weave in the TLDR article references as inline links
+- Weave in the source article references as inline links (from Step 1 and Step 6)
 - Incorporate Jeff's opinion blurb directly into the post. Do NOT use `[JEFF: ...]` placeholders for content Jeff has already provided. The goal is a complete first draft with Jeff's voice baked in.
 - Only use `[JEFF: ...]` markers for specific anecdotes or data points Jeff hasn't provided but that would strengthen the post
-- Proceed to Step 7
+- Proceed to Step 8
 
 If Jeff says save for later:
 - Write a brief note to `src/content/drafts/` (create directory if needed) with the pitch, links, and Jeff's notes from the conversation
-- Stop here (skip Steps 7-8)
+- Stop here (skip Steps 8-9)
 
-### 7. Validate
+### 8. Validate
 
 Run the automated verification pipeline on the new post:
 
@@ -78,9 +112,9 @@ Run the automated verification pipeline on the new post:
 4. Confirm frontmatter has all required fields (title, date, description under 160 chars, tags)
 5. Confirm all inline links resolve to real URLs (external) or existing slugs (internal `/blog/` links)
 
-Fix all issues before proceeding to Step 8.
+Fix all issues before proceeding to Step 9.
 
-### 8. Review Agent Pool
+### 9. Review Agent Pool
 
 Run the eight-reviewer panel from `/review-blog` against the new post slug only. Spawn 8 review agents in parallel, each reviewing from a different perspective:
 

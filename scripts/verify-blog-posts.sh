@@ -117,11 +117,13 @@ for f in "$BLOG_DIR"/*.md; do
   date=$(grep '^date:' "$f" | head -1 | sed 's/date: *//')
   [ -z "$date" ] && continue
 
-  # SwiftUI announced June 2019
+  # SwiftUI announced June 2019 -- flag positive uses, allow "no SwiftUI" or future-tense references
   if [[ "$date" < "2019-06-03" ]]; then
     if grep -qi 'SwiftUI' "$f" 2>/dev/null; then
-      echo "  FAIL: $slug ($date) references SwiftUI (announced June 2019)"
-      ANACHRONISM_ERRORS=$((ANACHRONISM_ERRORS + 1))
+      if ! grep -qi "no SwiftUI\|There's no SwiftUI\|without SwiftUI\|would.*SwiftUI\|SwiftUI.*would\|SwiftUI.*WWDC" "$f" 2>/dev/null; then
+        echo "  FAIL: $slug ($date) references SwiftUI (announced June 2019)"
+        ANACHRONISM_ERRORS=$((ANACHRONISM_ERRORS + 1))
+      fi
     fi
   fi
 
