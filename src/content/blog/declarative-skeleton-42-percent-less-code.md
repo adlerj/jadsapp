@@ -1,7 +1,7 @@
 ---
 title: "The Declarative Skeleton That Cut Code by 42%"
 date: 2019-10-25
-description: How I built a declarative app skeleton at Dropbox that cut code by 42% and raised test coverage to 89%.
+description: How I built a declarative app skeleton that eliminated boilerplate, cut code by over 40%, and made test coverage a byproduct of good architecture.
 tags: architecture, declarative, leadership, scale
 series: Scaling Architecture
 part: 1

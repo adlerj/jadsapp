@@ -88,7 +88,30 @@ Use WebSearch and WebFetch to find:
 - If a thought leader's take directly contradicts or supports Jeff's thesis, surface it -- it sharpens the argument
 - Don't pad with weak sources. One strong reference beats three thin ones.
 
-### 7. Write or Save
+### 7. Comms Risk Screening (before writing)
+
+Before drafting anything, audit Jeff's opinion blurb and any facts from his internal experience for comms risk. This step is mandatory and cannot be skipped.
+
+**Flag any fact that meets one or more of these criteria:**
+
+- A specific number (%, count, ratio, dollar amount, timeframe) that is attributed to Dropbox and has not appeared in a public Dropbox press release, earnings call, blog.dropbox.com post, or dropbox.tech post
+- A claim about Dropbox team structure, headcount, org size, or internal processes that Dropbox hasn't announced
+- A quote, policy, or internal guideline attributed to Dropbox
+- An unreleased product, feature, or roadmap item
+- Language that sounds like an official Dropbox statement ("We are building X", "Our team does Y") rather than a personal observation ("I work on X", "I've seen Y")
+
+**How to handle flagged items:**
+
+For each flagged fact, use AskUserQuestion to present it explicitly to Jeff with three options:
+1. **Remove it** -- cut the fact entirely; the post argues from principles, not internal data
+2. **Make it generic** -- reframe without attributing to Dropbox ("Teams I've worked with..." or "In my experience...")
+3. **Confirm it's public** -- Jeff confirms it has appeared in a public Dropbox source he can link to; include that link in the post
+
+Do not proceed to writing until every flagged item is resolved. If there are no flagged items, state that explicitly before proceeding.
+
+**Writing rule enforced during drafting:** Use "I" not "we" for all Dropbox-attributed observations, per BLOG_STYLE.md. "I watched this happen" not "We saw this." "I work on Dash" not "We're building Dash." The post is Jeff's personal perspective, not a Dropbox company statement.
+
+### 8. Write or Save
 
 If Jeff says write it:
 - Draft the full post in `src/content/blog/` following BLOG_STYLE.md
@@ -96,13 +119,13 @@ If Jeff says write it:
 - Weave in the source article references as inline links (from Step 1 and Step 6)
 - Incorporate Jeff's opinion blurb directly into the post. Do NOT use `[JEFF: ...]` placeholders for content Jeff has already provided. The goal is a complete first draft with Jeff's voice baked in.
 - Only use `[JEFF: ...]` markers for specific anecdotes or data points Jeff hasn't provided but that would strengthen the post
-- Proceed to Step 8
+- Proceed to Step 9
 
 If Jeff says save for later:
 - Write a brief note to `src/content/drafts/` (create directory if needed) with the pitch, links, and Jeff's notes from the conversation
-- Stop here (skip Steps 8-9)
+- Stop here (skip Steps 9-10)
 
-### 8. Validate
+### 9. Validate
 
 Run the automated verification pipeline on the new post:
 
@@ -112,9 +135,9 @@ Run the automated verification pipeline on the new post:
 4. Confirm frontmatter has all required fields (title, date, description under 160 chars, tags)
 5. Confirm all inline links resolve to real URLs (external) or existing slugs (internal `/blog/` links)
 
-Fix all issues before proceeding to Step 9.
+Fix all issues before proceeding to Step 10.
 
-### 9. Review Agent Pool
+### 10. Review Agent Pool
 
 Run the eight-reviewer panel from `/review-blog` against the new post slug only. Spawn 8 review agents in parallel, each reviewing from a different perspective:
 
