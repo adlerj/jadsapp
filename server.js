@@ -210,6 +210,48 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
 
 app.use(blogRoutes);
 
+// Umami analytics proxy -- keeps Umami internal and bypasses ad blockers
+const UMAMI_URL = process.env.UMAMI_URL;
+if (UMAMI_URL) {
+  const http = require(UMAMI_URL.startsWith("https") ? "https" : "http");
+
+  app.get("/u/script.js", (req, res) => {
+    http
+      .get(`${UMAMI_URL}/script.js`, (upstream) => {
+        res.set("Content-Type", "application/javascript");
+        res.set("Cache-Control", "public, max-age=86400");
+        upstream.pipe(res);
+      })
+      .on("error", () => res.status(502).end());
+  });
+
+  app.post("/u/api/send", (req, res) => {
+    const payload = JSON.stringify(req.body);
+    const url = new URL(`${UMAMI_URL}/api/send`);
+    const opts = {
+      hostname: url.hostname,
+      port: url.port,
+      path: url.pathname,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(payload),
+        "User-Agent": req.headers["user-agent"] || "",
+      },
+    };
+    const proxy = http.request(opts, (upstream) => {
+      res.status(upstream.statusCode);
+      upstream.pipe(res);
+    });
+    proxy.on("error", () => res.status(502).end());
+    proxy.end(payload);
+  });
+
+  console.log(`  Umami proxy enabled -> ${UMAMI_URL}`);
+} else {
+  console.log("  UMAMI_URL not set, analytics proxy disabled");
+}
+
 app.get("/sitemap.xml", (req, res) => {
   res.set("Content-Type", "application/xml");
   res.send(sitemapXml);

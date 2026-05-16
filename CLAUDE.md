@@ -86,12 +86,12 @@ See `BLOG_STYLE.md` for the full style guide. Key rules:
 
 ## Analytics
 
-Self-hosted Umami at `umami.jads.app`. Tracker script in `public/index.html` with `data-auto-track="false"` (SPA pages tracked manually via router).
+Self-hosted Umami proxied through Express (`/u/script.js`, `/u/api/send`). Set `UMAMI_URL` env var to the internal Umami address (e.g., `http://umami:3000`). Tracker script in `public/index.html` with `data-auto-track="false"` (SPA pages tracked manually via router).
 
 - `src/composables/useAnalytics.js` -- thin wrapper, no-ops if Umami isn't loaded
 - Page views: tracked in `src/router/index.js` afterEach hook
-- Events tracked: `game_opened` (with game name), `theme_changed` (with theme ID), `jadbot_message`, `webamp_opened`
-- Jeff needs to replace `UMAMI_WEBSITE_ID` in `public/index.html` after Umami setup
+- Events: 16 events across 4 user journeys (see plan file for full inventory)
+- Umami does NOT need to be publicly accessible -- the Express server proxies requests internally
 
 ## Commit Conventions
 
