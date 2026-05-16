@@ -225,55 +225,42 @@
 
       <transition name="fade">
         <div v-if="showSnowboardGame" class="game-overlay">
-          <SnowboardGame
-            @close-game="closeGame('Snowboarding', showSnowboardGame)"
-          />
+          <SnowboardGame @close-game="closeGame('Snowboarding')" />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showMountainBikeGame" class="game-overlay">
-          <MountainBikeGame
-            @close="closeGame('Mountain Biking', showMountainBikeGame)"
-          />
+          <MountainBikeGame @close="closeGame('Mountain Biking')" />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showDiscGolfGame" class="game-overlay">
-          <DiscGolfGame
-            @close-game="closeGame('Disc Golf', showDiscGolfGame)"
-          />
+          <DiscGolfGame @close-game="closeGame('Disc Golf')" />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showVolleyballGame" class="game-overlay">
-          <SlimeVolleyball
-            @close-game="closeGame('Volleyball', showVolleyballGame)"
-          />
+          <SlimeVolleyball @close-game="closeGame('Volleyball')" />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showTabletopGame" class="game-overlay">
-          <TabletopGame
-            @close-game="closeGame('Tabletop Games', showTabletopGame)"
-          />
+          <TabletopGame @close-game="closeGame('Tabletop Games')" />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-if="showGuitarStrum" class="game-overlay">
-          <GuitarStrum @close="closeGame('Guitar', showGuitarStrum)" />
+          <GuitarStrum @close="closeGame('Guitar')" />
         </div>
       </transition>
 
       <transition name="fade">
-        <SushiRain
-          v-if="showSushiRain"
-          @close="closeGame('Sushi', showSushiRain)"
-        />
+        <SushiRain v-if="showSushiRain" @close="closeGame('Sushi')" />
       </transition>
 
       <WebampPlayer :isVisible="showWebamp" @close="showWebamp = false" />
@@ -487,8 +474,19 @@ export default {
       nextTick(setupSectionObserver);
     };
 
-    const closeGame = (game, ref) => {
-      ref.value = false;
+    const gameRefMap = {
+      Snowboarding: showSnowboardGame,
+      "Mountain Biking": showMountainBikeGame,
+      "Disc Golf": showDiscGolfGame,
+      Volleyball: showVolleyballGame,
+      "Tabletop Games": showTabletopGame,
+      Guitar: showGuitarStrum,
+      Sushi: showSushiRain,
+    };
+
+    const closeGame = (game) => {
+      const gameRef = gameRefMap[game];
+      if (gameRef) gameRef.value = false;
       const duration = gameOpenedAt
         ? Math.round((Date.now() - gameOpenedAt) / 1000)
         : 0;
@@ -1001,11 +999,15 @@ footer {
 
   nav {
     margin-left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
   }
 
   nav a,
   nav .nav-link {
-    margin-left: 10px;
+    margin-left: 0;
   }
 
   .passions-grid {
