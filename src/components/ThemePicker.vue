@@ -31,6 +31,7 @@
 
 <script>
 import { useTheme } from "../composables/useTheme";
+import { trackEvent } from "../composables/useAnalytics";
 
 export default {
   name: "ThemePicker",
@@ -43,6 +44,7 @@ export default {
     const { currentThemeId, themes, themeIds, setTheme } = useTheme();
 
     const selectTheme = (id) => {
+      trackEvent("theme_changed", { theme: id });
       setTheme(id);
     };
 

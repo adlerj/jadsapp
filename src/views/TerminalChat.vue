@@ -68,6 +68,7 @@ import { marked } from "marked";
 import { useChat } from "../composables/useChat";
 import { useTheme } from "../composables/useTheme";
 import { WIDGET_CATALOG } from "../constants/widgets";
+import { trackEvent } from "../composables/useAnalytics";
 
 export default {
   name: "TerminalChat",
@@ -88,6 +89,7 @@ export default {
     const handleSend = () => {
       const msg = userInput.value.trim();
       if (!msg || isGenerating.value) return;
+      trackEvent("jadbot_message");
       userInput.value = "";
       sendMessage(msg);
       nextTick(() => inputField.value?.focus());

@@ -84,6 +84,15 @@ See `BLOG_STYLE.md` for the full style guide. Key rules:
 - `cli/blog-cli.js` -- Blog management CLI
 - `BLOG_STYLE.md` -- Writing style guide
 
+## Analytics
+
+Self-hosted Umami at `umami.jads.app`. Tracker script in `public/index.html` with `data-auto-track="false"` (SPA pages tracked manually via router).
+
+- `src/composables/useAnalytics.js` -- thin wrapper, no-ops if Umami isn't loaded
+- Page views: tracked in `src/router/index.js` afterEach hook
+- Events tracked: `game_opened` (with game name), `theme_changed` (with theme ID), `jadbot_message`, `webamp_opened`
+- Jeff needs to replace `UMAMI_WEBSITE_ID` in `public/index.html` after Umami setup
+
 ## Commit Conventions
 
 - Explain "why" not "what"

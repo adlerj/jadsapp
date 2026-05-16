@@ -267,6 +267,7 @@ import SushiRain from "../components/SushiRain.vue";
 import WebampPlayer from "../components/WebampPlayer.vue";
 import BootSequence from "../components/BootSequence.vue";
 import TerminalChat from "../views/TerminalChat.vue";
+import { trackEvent } from "../composables/useAnalytics";
 
 export default {
   name: "PortfolioView",
@@ -450,6 +451,7 @@ export default {
     const activatePassionFeature = (index) => {
       const passion = passions[index];
       if (!passion) return;
+      trackEvent("game_opened", { game: passion.name || passion.action });
       if (passion.name === "Snowboarding") showSnowboardGame.value = true;
       else if (passion.name === "Mountain Biking")
         showMountainBikeGame.value = true;
@@ -462,6 +464,7 @@ export default {
     };
 
     const toggleWebamp = () => {
+      if (!showWebamp.value) trackEvent("webamp_opened");
       showWebamp.value = !showWebamp.value;
     };
 

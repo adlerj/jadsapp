@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { trackPage } from "../composables/useAnalytics";
 
 const routes = [
   {
@@ -72,6 +73,7 @@ router.beforeEach((to, from, next) => {
     .querySelectorAll('meta[property="article:tag"]')
     .forEach((el) => el.remove());
   next();
+  trackPage();
 });
 
 export default router;
