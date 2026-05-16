@@ -218,11 +218,18 @@ if (UMAMI_URL) {
   app.get("/u/script.js", (req, res) => {
     http
       .get(`${UMAMI_URL}/script.js`, (upstream) => {
+        if (upstream.statusCode !== 200) {
+          console.error(`Umami script.js returned ${upstream.statusCode}`);
+          return res.status(upstream.statusCode).end();
+        }
         res.set("Content-Type", "application/javascript");
         res.set("Cache-Control", "public, max-age=86400");
         upstream.pipe(res);
       })
-      .on("error", () => res.status(502).end());
+      .on("error", (err) => {
+        console.error("Umami script.js proxy error:", err.message);
+        res.status(502).end();
+      });
   });
 
   app.post("/u/api/send", (req, res) => {
@@ -243,8 +250,34 @@ if (UMAMI_URL) {
       res.status(upstream.statusCode);
       upstream.pipe(res);
     });
-    proxy.on("error", () => res.status(502).end());
+    proxy.on("error", (err) => {
+      console.error("Umami send proxy error:", err.message);
+      res.status(502).end();
+    });
     proxy.end(payload);
+  });
+
+  app.get("/u/health", (req, res) => {
+    http
+      .get(`${UMAMI_URL}/api/heartbeat`, (upstream) => {
+        let body = "";
+        upstream.on("data", (c) => (body += c));
+        upstream.on("end", () => {
+          res.json({
+            status: upstream.statusCode === 200 ? "ok" : "error",
+            umamiUrl: UMAMI_URL,
+            umamiStatus: upstream.statusCode,
+            umamiResponse: body.slice(0, 200),
+          });
+        });
+      })
+      .on("error", (err) => {
+        res.json({
+          status: "unreachable",
+          umamiUrl: UMAMI_URL,
+          error: err.message,
+        });
+      });
   });
 
   console.log(`  Umami proxy enabled -> ${UMAMI_URL}`);

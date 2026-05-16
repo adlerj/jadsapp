@@ -96,7 +96,7 @@
     </footer>
   </div>
 
-  <div class="blog-post not-found" v-else>
+  <div class="blog-post not-found" v-else-if="!loading">
     <h1>Post not found</h1>
     <router-link to="/blog">Back to Jads Blog</router-link>
   </div>
@@ -121,11 +121,14 @@ export default {
   setup() {
     const route = useRoute();
     const fetchTrigger = ref(0);
+    const loading = ref(true);
 
     async function loadPost(slug) {
+      loading.value = true;
       await fetchAllPosts();
       await fetchPost(slug);
       fetchTrigger.value++;
+      loading.value = false;
     }
 
     loadPost(route.params.slug);
@@ -359,6 +362,7 @@ export default {
 
     return {
       post,
+      loading,
       renderedContent,
       seriesPosts,
       adjacent,
