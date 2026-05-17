@@ -93,6 +93,15 @@ Self-hosted Umami proxied through Express (`/u/script.js`, `/u/api/send`). Set `
 - Events: 16 events across 4 user journeys (see plan file for full inventory)
 - Umami does NOT need to be publicly accessible -- the Express server proxies requests internally
 
+## Security & npm audit
+
+`npm audit` reports ~18 vulnerabilities. These are accepted with eyes open, not unknown:
+
+- **16 are in Vue CLI 5.0.8 build tooling and its transitive deps** (`webpack-dev-server`, `serialize-javascript`, `postcss`, `cross-spawn`, `execa`, `yorkie`, etc.). The "fix" npm offers downgrades the entire toolchain to v3.x, which would break the build. Vue CLI is in maintenance mode; the real fix is to migrate to Vite (separate project, out of scope for routine sessions). None of these reach production: they run on the developer's machine during `npm run build` and never see end-user input.
+- **2 are in `webamp`'s transitive deps** (`music-metadata-browser`, `music-metadata` ASF parser DoS). The vulnerable code path is only reachable if Webamp loads an ASF file. The site only ships `.mp3` files under `/public/tunes/`, so the path is unreachable through normal use. Upgrading webamp to 2.x doesn't help -- 2.x carries the same chain plus a Sentry vuln.
+
+The web-facing surface (`express`, `helmet`, `@anthropic-ai/sdk`, `better-sqlite3`, etc.) is clean. Re-run `npm audit` after any dep change and re-evaluate if these numbers move materially.
+
 ## Commit Conventions
 
 - Explain "why" not "what"
