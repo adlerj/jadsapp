@@ -13,7 +13,7 @@ Personal website and blog for Jeff Adler (jads.app).
 
 ## Blog CMS
 
-Blog posts are stored in SQLite, NOT as static markdown files. The `src/content/blog/*.md` files are seed data only, used for initial migration.
+**Source of truth for blog posts is the SQLite CMS, not the repo.** To see what's actually published, run `node cli/blog-cli.js list`. The `src/content/blog/*.md` files are seed-only and stale -- do NOT rely on them to characterize current blog state.
 
 ### CLI Tool
 

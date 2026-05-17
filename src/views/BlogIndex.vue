@@ -10,14 +10,16 @@
     <div class="blog-layout">
       <aside class="timeline-nav">
         <div
-          v-for="year in years"
+          v-for="year in filteredYears"
           :key="year"
           class="timeline-year"
           :class="{ active: activeYear === year }"
         >
           <button class="year-btn" @click="scrollToYear(year)">
             {{ year }}
-            <span class="post-count">{{ postsByYear[year].length }}</span>
+            <span class="post-count">{{
+              filteredPostsByYear[year].length
+            }}</span>
           </button>
           <div v-if="activeYear === year" class="month-list">
             <button
@@ -33,8 +35,25 @@
       </aside>
 
       <div class="post-list" ref="postListRef">
+        <div v-if="showCategoryChips" class="category-chips" role="tablist">
+          <button
+            v-for="chip in categoryChips"
+            :key="chip.value"
+            type="button"
+            role="tab"
+            class="category-chip"
+            :class="{ active: selectedCategory === chip.value }"
+            :aria-selected="selectedCategory === chip.value"
+            @click="selectCategory(chip.value)"
+          >
+            {{ chip.label }}
+          </button>
+        </div>
+        <p v-if="filteredYears.length === 0" class="empty-state">
+          No posts in this category yet.
+        </p>
         <div
-          v-for="year in years"
+          v-for="year in filteredYears"
           :key="year"
           class="year-group"
           :id="'year-' + year"
@@ -42,7 +61,7 @@
         >
           <h2 class="year-header">{{ year }}</h2>
           <router-link
-            v-for="post in postsByYear[year]"
+            v-for="post in filteredPostsByYear[year]"
             :key="post.slug"
             :to="`/blog/${post.slug}`"
             class="post-card"
@@ -70,9 +89,23 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { getPostsByYear, fetchAllPosts } from "../composables/useBlog";
 import { trackEvent } from "../composables/useAnalytics";
+
+const CATEGORY_TAGS = ["tech", "life", "travel", "gear"];
+const CATEGORY_CHIPS = [
+  { value: "all", label: "All" },
+  { value: "tech", label: "Tech" },
+  { value: "life", label: "Life" },
+  { value: "travel", label: "Travel" },
+  { value: "gear", label: "Gear" },
+];
+
+function postMatchesCategory(post, category) {
+  if (category === "all") return true;
+  return Array.isArray(post.tags) && post.tags.includes(category);
+}
 
 function setMeta(attr, key, content) {
   let el = document.querySelector(`meta[${attr}="${key}"]`);
@@ -177,20 +210,53 @@ export default {
       },
     ]);
 
-    const postsByYear = computed(() => getPostsByYear());
-    const years = computed(() =>
-      Object.keys(postsByYear.value).sort((a, b) => b.localeCompare(a))
+    const allPostsByYear = computed(() => getPostsByYear());
+    const selectedCategory = ref("all");
+
+    const filteredPostsByYear = computed(() => {
+      const cat = selectedCategory.value;
+      if (cat === "all") return allPostsByYear.value;
+      const filtered = {};
+      for (const [year, posts] of Object.entries(allPostsByYear.value)) {
+        const matched = posts.filter((p) => postMatchesCategory(p, cat));
+        if (matched.length) filtered[year] = matched;
+      }
+      return filtered;
+    });
+
+    const filteredYears = computed(() =>
+      Object.keys(filteredPostsByYear.value).sort((a, b) => b.localeCompare(a))
     );
+
+    const showCategoryChips = computed(() => {
+      const cats = new Set();
+      for (const posts of Object.values(allPostsByYear.value)) {
+        for (const p of posts) {
+          for (const t of p.tags || []) {
+            if (CATEGORY_TAGS.includes(t)) cats.add(t);
+          }
+        }
+      }
+      return cats.size > 1;
+    });
+
+    function selectCategory(value) {
+      if (selectedCategory.value === value) return;
+      selectedCategory.value = value;
+      trackEvent("blog_category_filter", { category: value });
+    }
+
     const activeYear = ref(null);
     const yearRefs = {};
     let observer = null;
 
     function setYearRef(year, el) {
       if (el) yearRefs[year] = el;
+      else delete yearRefs[year];
     }
 
     function monthsForYear(year) {
-      const posts = postsByYear.value[year] || [];
+      const posts = filteredPostsByYear.value[year] || [];
       const months = new Set(
         posts.map((p) => (p.date ? p.date.slice(5, 7) : "01"))
       );
@@ -223,7 +289,7 @@ export default {
 
     function scrollToMonth(year, month) {
       trackEvent("blog_filter_clicked", { year: String(year), month });
-      const posts = postsByYear.value[year] || [];
+      const posts = filteredPostsByYear.value[year] || [];
       const matchesMonth = (p) => p.date && p.date.slice(5, 7) === month;
       const post = posts.find(matchesMonth);
       if (post) {
@@ -242,11 +308,22 @@ export default {
       });
     }
 
+    function observeYears() {
+      if (!observer) return;
+      observer.disconnect();
+      for (const year of filteredYears.value) {
+        const el = yearRefs[year];
+        if (el) observer.observe(el);
+      }
+    }
+
     onMounted(async () => {
       await fetchAllPosts();
 
       nextTick(() => {
-        if (years.value.length) activeYear.value = years.value[0];
+        if (filteredYears.value.length) {
+          activeYear.value = filteredYears.value[0];
+        }
 
         observer = new IntersectionObserver(
           (entries) => {
@@ -260,10 +337,20 @@ export default {
           { rootMargin: "-80px 0px -60% 0px", threshold: 0 }
         );
 
-        for (const year of years.value) {
-          const el = yearRefs[year];
-          if (el) observer.observe(el);
+        observeYears();
+      });
+    });
+
+    watch(filteredYears, () => {
+      nextTick(() => {
+        if (filteredYears.value.length) {
+          if (!filteredYears.value.includes(activeYear.value)) {
+            activeYear.value = filteredYears.value[0];
+          }
+        } else {
+          activeYear.value = null;
         }
+        observeYears();
       });
     });
 
@@ -272,8 +359,12 @@ export default {
     });
 
     return {
-      postsByYear,
-      years,
+      filteredPostsByYear,
+      filteredYears,
+      showCategoryChips,
+      categoryChips: CATEGORY_CHIPS,
+      selectedCategory,
+      selectCategory,
       activeYear,
       setYearRef,
       monthsForYear,
@@ -487,6 +578,46 @@ export default {
   background: var(--bg-primary);
   color: var(--link-color);
   border: 1px solid var(--border-primary);
+}
+
+/* Category chips */
+.category-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.category-chip {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--link-color);
+}
+
+.category-chip.active {
+  background: var(--link-color);
+  color: var(--bg-primary);
+  border-color: var(--link-color);
+  box-shadow: 0 0 8px var(--glow-color, transparent);
+}
+
+.empty-state {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  padding: 2rem 0;
+  text-align: center;
+  opacity: 0.7;
 }
 
 /* Mobile */
