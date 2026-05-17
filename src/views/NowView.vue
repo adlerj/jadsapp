@@ -65,7 +65,7 @@ export default {
             text: "Leading engineering for Dropbox Dash, our AI-powered universal search product. Five teams, end-to-end ownership.",
           },
           {
-            text: "Pushing agentic development practices across the org. 80%+ of new code is AI-generated today; the next bar is review and judgment.",
+            text: "Thinking about 0 to 1 in an agentic-native world.",
           },
         ],
       },
@@ -91,10 +91,13 @@ export default {
         heading: "Reading",
         items: [
           {
-            text: "Anything on the AI-org transition: Elena Verna on IC work, Engineers Codex on misaligned incentives.",
+            text: "The War of Art, by Steven Pressfield.",
           },
           {
-            text: "Replace this with whatever book or longform you're actually in right now.",
+            text: "The One Thing, by Gary Keller and Jay Papasan.",
+          },
+          {
+            text: "The Art of Possibility, by Rosamund and Benjamin Zander.",
           },
         ],
       },
@@ -103,7 +106,7 @@ export default {
         items: [
           {
             label: "Snow",
-            text: "A-Basin season, condo crew, annual birthday party on the mountain.",
+            text: "A-Basin season with the condo crew.",
           },
           {
             label: "Bikes",

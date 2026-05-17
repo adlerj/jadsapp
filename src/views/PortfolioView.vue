@@ -95,8 +95,10 @@
 
           <ul class="hero-stats" aria-label="Career highlights">
             <li>
-              <span class="stat-value">5</span>
-              <span class="stat-label">teams led at Dropbox Dash</span>
+              <span class="stat-value">3B+</span>
+              <span class="stat-label"
+                >users on Drive, Search, Dropbox, Reddit</span
+              >
             </li>
             <li>
               <span class="stat-value">100+</span>
