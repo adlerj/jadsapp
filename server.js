@@ -7,6 +7,14 @@ if (fs.existsSync(envPath)) {
   }
 }
 
+const Sentry = require("@sentry/node");
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || "development",
+  });
+}
+
 console.log("=== jadsapp server starting ===");
 console.log(`  Node ${process.version} | PID ${process.pid}`);
 console.log(`  CWD: ${process.cwd()}`);
@@ -14,6 +22,7 @@ console.log(`  DB_PATH: ${process.env.DB_PATH || "(default)"}`);
 console.log(`  NODE_ENV: ${process.env.NODE_ENV || "(not set)"}`);
 console.log(`  ANTHROPIC_API_KEY: ${process.env.ANTHROPIC_API_KEY ? "set" : "NOT SET"}`);
 console.log(`  BLOG_API_KEY: ${process.env.BLOG_API_KEY ? "set" : "NOT SET"}`);
+console.log(`  SENTRY_DSN: ${process.env.SENTRY_DSN ? "set" : "NOT SET"}`);
 
 const express = require("express");
 const path = require("path");
@@ -126,10 +135,8 @@ function reloadBlogData() {
 global.reloadBlogData = reloadBlogData;
 reloadBlogData();
 
-// Prevent unhandled promise rejections from crashing the process.
-// Individual handlers (stream.on("error"), catch blocks) handle errors where
-// possible; this is a last-resort safety net.
-process.on("unhandledRejection", (reason, promise) => {
+process.on("unhandledRejection", (reason) => {
+  if (process.env.SENTRY_DSN) Sentry.captureException(reason);
   console.error("Unhandled rejection:", reason);
 });
 
@@ -184,6 +191,7 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
       ? "Jadbot is getting too many requests right now. Try again in a minute."
       : err.message || "Something went wrong";
     console.error("Chat error:", err.status || "", err.message);
+    if (process.env.SENTRY_DSN && !isRateLimit) Sentry.captureException(err);
     try {
       res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
       res.end();
