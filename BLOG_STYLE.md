@@ -36,6 +36,21 @@ Voice and rules for all blog content on jads.app. This file is used by AI agents
 - **2023-2024 (Director era):** Leadership-heavy. AI strategy. Org design. Technical lens is "how do I get 50 engineers to adopt this."
 - **2025-2026 (AI-native era):** Provocative, forward-looking. Challenges conventions. Thinks about what coding looks like in 2-3 years.
 
+## Personal Posts
+
+Not every post on this blog is about engineering. Travel, life, and gear posts coexist with the technical content. They share the voice, not the topic.
+
+- **Same voice rules apply.** Direct, opinionated, concrete, first-person, no hedging, no em dashes (use `--`).
+- **No forced business takeaway.** A Japan post is about Japan. A plumber post is about plumbers. If a parallel to engineering appears naturally, fine. If it would be forced, leave it out. Avoid the LinkedIn "what X taught me about B2B sales" pattern.
+- **Earn the post.** Every personal post needs ONE of: a strong opinion, a concrete story with stakes, or a useful detail the reader didn't already have. Diary entries don't ship.
+- **Open with a moment, an opinion, or a question.** Never open with "I recently went to..." or "Last year my wife and I..."
+- **Length target:** 600-1500 words. Travel posts can run longer if the material justifies it.
+- **Cross-references stay in cluster.** Personal posts can cross-reference other personal posts ("unlike Japan, where I over-planned..."). Don't force links into the tech corpus.
+
+### Category tags
+
+Every post must include exactly one of these category tags: `tech`, `life`, `travel`, `gear`. These drive the chip filter on `/blog`. Additional specific tags (`japan`, `e-bike`, `home-improvement`) are encouraged on top.
+
 ## Length
 
 - Technical deep-dives: 1500-2500 words
