@@ -20,7 +20,6 @@ COPY --from=build-stage /server-deps/package.json ./package.json
 COPY server.js ./
 COPY server/ ./server/
 COPY scripts/migrate-posts.js ./scripts/
-COPY src/content/blog/ ./src/content/blog/
 RUN mkdir -p /app/data
 ENV PORT=80
 ENV DB_PATH=/app/data/blog.db
