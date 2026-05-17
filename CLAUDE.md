@@ -97,3 +97,11 @@ Self-hosted Umami proxied through Express (`/u/script.js`, `/u/api/send`). Set `
 
 - Explain "why" not "what"
 - Push to both `main` and `latest` branches: `git push origin main && git push origin main:latest`
+
+## Deployment
+
+Production deploys follow a strict flow: commit → push to `main`+`latest` → GHA builds image → Docker Hub → `unraid-deploy` on the local machine recreates the container on jock.box → verify https://jads.app/. The full procedure (with preconditions, failure modes, and the exact commands) lives in `.claude/skills/deploy/SKILL.md` and is auto-loaded when the user says "ship", "deploy", "commit and push", etc.
+
+- `unraid-deploy` CLI lives in `~/src/unraid-tools` (symlinked to `~/.local/bin/`); it is **not** in this repo
+- `.env.deploy` (gitignored) holds `UNRAID_API_URL`, `UNRAID_API_KEY`, `UNRAID_CONTAINER`, `UNRAID_VERIFY_URL`
+- jock.box is LAN-only -- never wire GitHub Actions or other cloud services to call the Unraid API directly
