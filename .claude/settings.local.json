@@ -13,7 +13,8 @@
       "mcp__chrome-devtools__press_key",
       "mcp__chrome-devtools__list_pages",
       "mcp__chrome-devtools__type_text",
-      "mcp__chrome-devtools__wait_for"
+      "mcp__chrome-devtools__wait_for",
+      "Bash(claude mcp *)"
     ]
   }
 }

@@ -11,6 +11,9 @@ node_modules
 
 # local SQLite data
 /data
+blog.db
+blog.db-shm
+blog.db-wal
 
 # Log files
 npm-debug.log*
