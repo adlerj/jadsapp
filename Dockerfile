@@ -8,7 +8,7 @@ RUN npm run build
 # Build server dependencies (including native modules) in the full Node image
 # This avoids QEMU illegal instruction errors when cross-compiling on Alpine
 RUN mkdir /server-deps && cd /server-deps && npm init -y && \
-    npm install express@^4.21.0 @anthropic-ai/sdk@^0.39.0 express-rate-limit@^7.5.0 better-sqlite3@^11.0.0 marked@^18.0.3
+    npm install express@^4.21.0 @anthropic-ai/sdk@^0.39.0 express-rate-limit@^7.5.0 better-sqlite3@^11.0.0 marked@^18.0.3 @sentry/node@^10.53.1
 
 # Production stage
 FROM node:20-slim AS production-stage
