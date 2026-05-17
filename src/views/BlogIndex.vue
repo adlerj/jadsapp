@@ -34,7 +34,7 @@
         </div>
       </aside>
 
-      <div class="post-list" ref="postListRef">
+      <main class="post-list" ref="postListRef">
         <div v-if="showCategoryChips" class="category-chips" role="tablist">
           <button
             v-for="chip in categoryChips"
@@ -83,7 +83,7 @@
             </div>
           </router-link>
         </div>
-      </div>
+      </main>
     </div>
   </div>
 </template>

@@ -1,5 +1,8 @@
 <template>
-  <div :class="inline ? 'terminal-inline' : 'terminal-page'">
+  <component
+    :is="inline ? 'div' : 'main'"
+    :class="inline ? 'terminal-inline' : 'terminal-page'"
+  >
     <div class="terminal-window">
       <header class="chat-header">
         <div class="header-left">
@@ -79,7 +82,7 @@
         />
       </div>
     </div>
-  </div>
+  </component>
 </template>
 
 <script>

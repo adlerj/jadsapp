@@ -49,11 +49,13 @@
       </div>
     </nav>
 
-    <article
-      class="post-content"
-      ref="postContent"
-      v-html="renderedContent"
-    ></article>
+    <main>
+      <article
+        class="post-content"
+        ref="postContent"
+        v-html="renderedContent"
+      ></article>
+    </main>
     <div ref="scrollSentinel" class="scroll-sentinel"></div>
 
     <div class="share-row" aria-label="Share this post">

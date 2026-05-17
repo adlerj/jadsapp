@@ -18,20 +18,26 @@
       </p>
     </header>
 
-    <section v-for="block in sections" :key="block.heading" class="now-section">
-      <h2>{{ block.heading }}</h2>
-      <ul class="now-list">
-        <li v-for="(item, i) in block.items" :key="i">
-          <span v-if="item.label" class="now-label">{{ item.label }}:</span>
-          <template v-if="item.url">
-            <a :href="item.url" target="_blank" rel="noopener noreferrer"
-              >{{ item.text }} &nearr;</a
-            >
-          </template>
-          <template v-else>{{ item.text }}</template>
-        </li>
-      </ul>
-    </section>
+    <main>
+      <section
+        v-for="block in sections"
+        :key="block.heading"
+        class="now-section"
+      >
+        <h2>{{ block.heading }}</h2>
+        <ul class="now-list">
+          <li v-for="(item, i) in block.items" :key="i">
+            <span v-if="item.label" class="now-label">{{ item.label }}:</span>
+            <template v-if="item.url">
+              <a :href="item.url" target="_blank" rel="noopener noreferrer"
+                >{{ item.text }} &nearr;</a
+              >
+            </template>
+            <template v-else>{{ item.text }}</template>
+          </li>
+        </ul>
+      </section>
+    </main>
 
     <footer class="now-footer">
       <p>
