@@ -38,6 +38,16 @@ const routes = [
         "Blog post by Jeff Adler, Director of Engineering at Dropbox.",
     },
   },
+  {
+    path: "/terminal",
+    name: "terminal",
+    component: () => import("../views/TerminalChat.vue"),
+    meta: {
+      title: "Jadbot Terminal — Jeff Adler",
+      description:
+        "Chat with Jadbot, an AI assistant that knows everything about Jeff Adler.",
+    },
+  },
 ];
 
 const router = createRouter({

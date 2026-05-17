@@ -10,13 +10,21 @@
           <button @click="resetChat" class="header-btn" aria-label="Clear chat">
             CLEAR
           </button>
+          <router-link
+            v-if="inline"
+            to="/terminal"
+            class="header-btn expand-btn"
+            aria-label="Expand to fullscreen"
+            @click="trackExpand"
+            >&#9974;</router-link
+          >
           <router-link v-if="!inline" to="/" class="header-btn"
             >BACK</router-link
           >
         </div>
       </header>
 
-      <div class="terminal-body" ref="terminalBody">
+      <div class="terminal-body" ref="terminalBody" @scroll="handleScroll">
         <!-- Error -->
         <div v-if="error" class="error-section">
           <p class="system-line error">&gt; ERROR: CONNECTION FAILED</p>
@@ -43,6 +51,16 @@
             <span class="cursor-blink">_</span>
           </div>
         </div>
+
+        <!-- Scroll-to-bottom nudge -->
+        <button
+          v-if="userScrolledUp && isGenerating"
+          class="scroll-nudge"
+          @click="jumpToBottom"
+          aria-label="Scroll to latest message"
+        >
+          &darr; NEW MESSAGES
+        </button>
       </div>
 
       <!-- Input -->
@@ -52,9 +70,9 @@
           ref="inputField"
           v-model="userInput"
           @keydown.enter="handleSend"
-          :disabled="isGenerating"
-          placeholder="Ask about Jeff..."
+          :placeholder="pendingMessage ? 'Queued...' : 'Ask about Jeff...'"
           class="terminal-input"
+          :class="{ queued: pendingMessage }"
           autofocus
         />
       </div>
@@ -85,22 +103,38 @@ export default {
     const userInput = ref("");
     const terminalBody = ref(null);
     const inputField = ref(null);
+    const userScrolledUp = ref(false);
+    const pendingMessage = ref("");
+    const isMobile = ref(window.innerWidth <= 768);
 
     const handleSend = () => {
       const msg = userInput.value.trim();
-      if (!msg || isGenerating.value) return;
+      if (!msg) return;
+      userInput.value = "";
+
+      if (isGenerating.value) {
+        // Queue message; send after current generation finishes
+        pendingMessage.value = msg;
+        return;
+      }
+
       const userMsgCount = messages.value.filter(
         (m) => m.role === "user"
       ).length;
       trackEvent("jadbot_message", { depth: userMsgCount + 1 });
-      userInput.value = "";
+      userScrolledUp.value = false;
       sendMessage(msg);
       nextTick(() => inputField.value?.focus());
     };
 
     const resetChat = () => {
       trackEvent("jadbot_chat_cleared");
+      pendingMessage.value = "";
       reset();
+    };
+
+    const trackExpand = () => {
+      trackEvent("jadbot_expand_clicked");
     };
 
     const renderer = new marked.Renderer();
@@ -149,7 +183,22 @@ export default {
       }
     };
 
+    const handleScroll = () => {
+      if (!terminalBody.value) return;
+      const { scrollTop, scrollHeight, clientHeight } = terminalBody.value;
+      userScrolledUp.value = scrollTop < scrollHeight - clientHeight - 150;
+    };
+
     const scrollToBottom = () => {
+      nextTick(() => {
+        if (terminalBody.value && !userScrolledUp.value) {
+          terminalBody.value.scrollTop = terminalBody.value.scrollHeight;
+        }
+      });
+    };
+
+    const jumpToBottom = () => {
+      userScrolledUp.value = false;
       nextTick(() => {
         if (terminalBody.value) {
           terminalBody.value.scrollTop = terminalBody.value.scrollHeight;
@@ -157,25 +206,44 @@ export default {
       });
     };
 
+    const handleResize = () => {
+      isMobile.value = window.innerWidth <= 768;
+    };
+
     watch(messages, scrollToBottom, { deep: true });
     watch(isGenerating, (generating) => {
       if (!generating) {
-        nextTick(() => inputField.value?.focus());
+        // Apply theme from last response if any
         const lastMsg = messages.value[messages.value.length - 1];
         if (lastMsg && lastMsg.role === "assistant") {
           const themeMatch = lastMsg.content.match(/\[THEME:(\w+)\]/);
           if (themeMatch) setTheme(themeMatch[1]);
         }
+        // Send queued message if one was typed during generation
+        if (pendingMessage.value) {
+          const queued = pendingMessage.value;
+          pendingMessage.value = "";
+          const userMsgCount = messages.value.filter(
+            (m) => m.role === "user"
+          ).length;
+          trackEvent("jadbot_message", { depth: userMsgCount + 1 });
+          userScrolledUp.value = false;
+          sendMessage(queued);
+        }
       }
     });
 
     onMounted(() => {
-      nextTick(() => inputField.value?.focus());
+      if (!isMobile.value) {
+        nextTick(() => inputField.value?.focus());
+      }
       terminalBody.value?.addEventListener("click", handleInteraction);
+      window.addEventListener("resize", handleResize);
     });
 
     onUnmounted(() => {
       terminalBody.value?.removeEventListener("click", handleInteraction);
+      window.removeEventListener("resize", handleResize);
     });
 
     return {
@@ -186,8 +254,14 @@ export default {
       userInput,
       terminalBody,
       inputField,
+      userScrolledUp,
+      pendingMessage,
+      isMobile,
       handleSend,
+      handleScroll,
+      jumpToBottom,
       resetChat,
+      trackExpand,
       formatMessage,
     };
   },
@@ -268,6 +342,7 @@ export default {
   padding: 20px;
   scroll-behavior: smooth;
   min-height: 200px;
+  position: relative;
 }
 
 .system-line {
@@ -460,16 +535,54 @@ export default {
   }
 }
 
+.scroll-nudge {
+  position: sticky;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+  width: fit-content;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-primary);
+  color: var(--text-accent);
+  padding: 6px 16px;
+  font-family: var(--font-family);
+  font-size: 0.78em;
+  cursor: pointer;
+  letter-spacing: 1px;
+  animation: fadeIn 0.2s ease;
+  box-shadow: 0 0 10px var(--border-glow);
+}
+
+.scroll-nudge:hover {
+  background: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
+}
+
+.terminal-input.queued {
+  opacity: 0.6;
+}
+
+/* Expand-to-fullscreen button on inline widget */
+.expand-btn {
+  font-size: 1.1em;
+  line-height: 1;
+  padding: 4px 10px;
+}
+
 @media (max-width: 768px) {
   .terminal-page {
     padding: 0;
     align-items: stretch;
-    min-height: calc(100vh - 40px);
+    /* escape App.vue's 20px padding on all sides */
+    margin: -20px;
+    min-height: 100dvh;
   }
 
   .terminal-window {
     max-height: none;
-    height: calc(100vh - 40px);
+    /* dvh updates when iOS keyboard appears, keeping input above keyboard */
+    height: 100dvh;
     border-left: none;
     border-right: none;
     box-shadow: none;
@@ -477,9 +590,30 @@ export default {
 
   .chat-header {
     flex-direction: row;
-    gap: 0;
+    gap: 8px;
     align-items: center;
-    padding: 10px 15px;
+    padding: 10px 12px;
+  }
+
+  .chat-header h1 {
+    font-size: 0.95em;
+    white-space: nowrap;
+  }
+
+  .header-left {
+    gap: 6px;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .header-right {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .header-btn {
+    padding: 5px 10px;
+    font-size: 0.8em;
   }
 
   .terminal-body {
@@ -508,11 +642,14 @@ export default {
 
 @media (max-width: 768px) {
   .terminal-inline .terminal-window {
-    max-height: 360px;
+    /* Tall enough to be usable for real conversation on mobile */
+    max-height: none;
+    height: 65vh;
+    min-height: 480px;
   }
 
   .terminal-inline .terminal-body {
-    min-height: 80px;
+    min-height: 150px;
   }
 }
 </style>
