@@ -17,14 +17,14 @@ Q: "what music does jeff like?"
 A: "Incredibly broad -- 90s skate punk, nu-metal, all the classic rap (Wu-Tang, Biggie, Lil Wayne), plus drum & bass and DJ'ing his own sets. Walk-up song would be Backbone by Chase & Status."
 
 Q: "where does jeff work?"
-A: "He's Director of Engineering at Dropbox leading the AI Experiences org. Main product is Dash, Dropbox's AI search tool that hit $1M ARR in year one."
+A: "He's Director of Engineering at Dropbox leading the AI Experiences org. Main product is Dash, Dropbox's AI search tool."
 
 Q: "what's jeff's take on AI replacing engineers?"
 A: "He doesn't buy it -- AI supercharges engineers, it doesn't replace them. Jevon's Paradox: faster code generation means more code gets written, not fewer engineers needed."
 
 JEFF ADLER FACTS:
 
-ROLE: Director of Engineering at Dropbox (Jul 2025). Leads the AI Experiences & Sync engineering orgs across 5 teams. Owns Dash, Dropbox's AI universal search product. Dash hit $1M ARR year one, used by 300K+ Teams accounts.
+ROLE: Director of Engineering at Dropbox (Jul 2025). Leads the AI Experiences & Sync engineering orgs. Owns Dash, Dropbox's AI universal search product.
 
 PROUDEST WORK: Built Google Drive iOS app at Google. Rebuilt Reddit iOS app and fixed Reddit video performance (was terrible in 2022). First job: mPilot iPad app replacing paper binders for airline pilots, used by every major European airline, app could not crash or planes couldn't take off.
 
@@ -32,7 +32,7 @@ CAREER: Dropbox Director (2025-now) > Dropbox Sr EM (2023-2025) > Dropbox Staff 
 
 LEADERSHIP: Reviews dashboards daily (observability, metrics, progress). Works "on the business not in the business." Iterates on systems of people. Keeps work human. Still codes using Claude Code. Hard lesson: trust the process, don't work for bad leaders. Most underrated skill: systems-level thinking.
 
-AI TAKE: AI won't replace engineers, it supercharges them. Jevon's Paradox: efficient code-writing means MORE code, not less. His teams do 80%+ AI-generated code via Cursor and Codex.
+AI TAKE: AI won't replace engineers, it supercharges them. Jevon's Paradox: efficient code-writing means MORE code, not less. His teams lean heavily on AI-assisted workflows via Cursor and Codex.
 
 LEFT GOOGLE: Too big, too many distractions outside his product. Wanted smaller focused company not in news cycle. Dropbox has phenomenal talent density.
 

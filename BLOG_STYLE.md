@@ -51,13 +51,95 @@ Voice and rules for all blog content on jads.app. This file is used by AI agents
 
 ## Proprietary Rules
 
-- **Never** mention "Athena" (internal Dropbox framework name)
-- **Never** link to internal Dropbox Paper docs or internal tools
-- **Minerva** is open source (github.com/MinervaMobile) and can be discussed freely
-- **SliceKit** can be discussed — Jeff built it and it was his framework at Reddit
-- Discuss principles and patterns, not product-specific implementation details
-- When sharing metrics (e.g., -42% LOC, +89% test coverage), present them generically without naming the specific feature or team
-- HelloSign Mobile, Dropbox Scan, Dash are public products and can be mentioned by name
+The threat model is **plausible deniability for HR / NDA exposure**, not anonymity.
+Author identity is public (jads.app, real name on the byline, LinkedIn shows the
+chronology). The goal is that the *blog post itself* contains nothing an employer
+could reasonably flag as a trade-secret disclosure, internal-metric leak, or
+unreleased-product reveal.
+
+Tech blogging about former and current employers is a common genre and almost
+never actionable. The lines that matter are below.
+
+### Things that are fine to write (don't over-scrub)
+
+- **Employer names.** Google, Dropbox, Reddit, HelloSign. Naming them is fine.
+  Career chronology, joining/leaving, working on a product surface, "what I
+  learned there" reflections are standard tech-blog material.
+- **Public products by name.** Dropbox Dash, Dropbox Scan, HelloSign Mobile,
+  Reddit Recap, Reddit's video platform, SliceKit (publicly written up on
+  r/RedditEng), Minerva (OSS at github.com/MinervaMobile), Stormcrow (publicly
+  documented at dropbox.tech), Djinni (OSS), Bazel/Tulsi (public), Piper/fig
+  (publicly documented in published Google papers).
+- **General impressionistic takes.** "The codebase had legacy debt," "the
+  monorepo was a pain," "leadership made some calls I disagreed with,"
+  "tooling philosophy was X." Essentially never actionable.
+- **Citations to public sources.** dropbox.tech articles, conference talks,
+  WWDC sessions, the company's own blog posts. Linking these is fine even
+  when they're authored by colleagues.
+- **Technical lessons drawn from the work.** Reframe proprietary
+  implementation as the general principle and ship the lesson.
+
+### Things that need to be scrubbed
+
+These are the actual lines. The verification step is: scan a draft for each of
+these, fix anything that matches, then push.
+
+1. **Specific internal metrics that weren't published.** Crash rates on
+   user counts ("1% on a million users"), build times ("Gmail builds take 30
+   minutes"), team sizes ("Drive iOS team is 8 people"), code-reduction
+   percentages ("42% smaller"), coverage percentages ("89% coverage"), PR
+   velocity changes ("from 2-3/week to 5-7"), org headcount ("1,800
+   engineers"). Soften to rounded or qualitative ranges. The shape of the
+   lesson survives without the authoritative number.
+2. **Internal codenames, frameworks, and systems not publicly disclosed.**
+   "Three internal promises frameworks," "User Mediator pattern" if it
+   wasn't externally documented, internal-only tool names. **Never** name
+   "Athena" (internal Dropbox framework).
+3. **Internal release infrastructure, rollout populations, and org
+   structure.** Specific release-ring populations ("foundation team to app
+   org to product org to all-company"), promotion criteria, performance-mgmt
+   internals. If it reads like a leaked playbook, it's out.
+4. **Unreleased product info and forward-looking internal strategy.** Things
+   the company hasn't announced yet. This is the highest-risk category.
+5. **Names of specific internal teammates.** "I worked with [Name] on the
+   [Team] team," "[Name] would later write up..." Replace with generic
+   role/team or drop entirely.
+6. **Internal political dynamics.** "I lobbied X team for months," "the Y
+   team wasn't ready," cross-team conflicts. Reframe as "I worked through
+   the cross-team alignment process" or generalize.
+7. **Disparaging tone about prior-employer code or people.** Even when
+   technically accurate, dropping the harsh framing makes the post
+   defensible without losing the lesson.
+8. **First-person prescriptive claims about current-employer internal
+   practice.** "On my teams at Dropbox we do X" for sensitive internal
+   processes. Soften to "the pattern I've seen work" or "on the teams I
+   run." Naming the current employer in *general* context is fine; what
+   matters is not publishing the internal playbook.
+9. **Never** link to internal Dropbox Paper docs or other internal-only
+   tools.
+
+### Pre-publish verification step
+
+Before running `node cli/blog-cli.js push`, walk this checklist on the draft:
+
+- [ ] No internal-only codenames or frameworks (search the draft for any
+      product/framework/tool name -- if it's not in a public talk, blog
+      post, or paper, replace it with a generic description)
+- [ ] No specific internal metrics (search for numbers; for each one, ask
+      "was this published anywhere?" If not, soften)
+- [ ] No internal team names, internal teammates by name, or internal
+      political detail
+- [ ] No unreleased product info or forward-looking internal strategy
+- [ ] No disparaging characterizations of prior-employer engineering work
+- [ ] Cross-links to other posts still resolve (slug URLs unchanged from
+      the legacy migration)
+- [ ] Em dash rule: zero `--` style em dashes in the content; the CLI verify
+      step will catch these
+- [ ] Required frontmatter present (title, date, description, tags)
+
+The CLI `verify` command checks frontmatter, em-dash, and length rules. The
+proprietary checks above are manual -- a quick grep + a read-through is
+usually enough.
 
 ## Frontmatter Format
 
