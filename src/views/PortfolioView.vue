@@ -18,6 +18,7 @@
               >Terminal</a
             >
             <router-link to="/blog">Blog</router-link>
+            <router-link to="/now">Now</router-link>
           </nav>
         </div>
         <div class="header-actions">

@@ -48,6 +48,16 @@ const routes = [
         "Chat with Jadbot, an AI assistant that knows everything about Jeff Adler.",
     },
   },
+  {
+    path: "/now",
+    name: "now",
+    component: () => import("../views/NowView.vue"),
+    meta: {
+      title: "Now — Jeff Adler",
+      description:
+        "What Jeff is focused on right now: current work, writing, reading, and side projects.",
+    },
+  },
 ];
 
 const router = createRouter({

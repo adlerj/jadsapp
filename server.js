@@ -76,6 +76,7 @@ function reloadBlogData() {
     const urls = [
       { loc: "/", priority: "1.0", changefreq: "monthly", lastmod: today },
       { loc: "/blog", priority: "0.8", changefreq: "weekly", lastmod: today },
+      { loc: "/now", priority: "0.5", changefreq: "monthly", lastmod: today },
       ...posts.map((p) => ({
         loc: `/blog/${p.slug}`,
         priority: "0.6",
@@ -142,6 +143,7 @@ function reloadBlogData() {
       `Based in Denver, CO.\n\n` +
       `## About\n\n` +
       `- [Portfolio](${SITE_URL}/): career, hobbies, and an embedded AI chat (Jadbot) that answers questions about Jeff\n` +
+      `- [Now](${SITE_URL}/now): what Jeff is focused on right now\n` +
       `- [LinkedIn](https://linkedin.com/in/jeff-adler-2bbb9828)\n` +
       `- [X / Twitter](https://x.com/JadlerOS): @JadlerOS\n\n` +
       `## Blog\n\n` +
