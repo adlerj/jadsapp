@@ -47,6 +47,7 @@ let blogPostBodies = new Map();
 let blogPostMeta = [];
 let sitemapXml = "";
 let feedXml = "";
+let llmsTxt = "";
 
 function escapeXml(s) {
   return s
@@ -131,6 +132,28 @@ function reloadBlogData() {
         )
         .join("\n") +
       `\n</channel>\n</rss>\n`;
+
+    llmsTxt =
+      `# Jeff Adler — jads.app\n\n` +
+      `> Director of Engineering at Dropbox leading Dash, the AI-powered universal search product. ` +
+      `Engineering leader with 12+ years building and scaling platforms at Google, Reddit, and Dropbox. ` +
+      `Specializes in AI products, LLMs, Claude/Anthropic, agentic orchestration, mobile architecture, and engineering org design. ` +
+      `Based in Denver, CO.\n\n` +
+      `## About\n\n` +
+      `- [Portfolio](${SITE_URL}/): career, hobbies, and an embedded AI chat (Jadbot) that answers questions about Jeff\n` +
+      `- [LinkedIn](https://linkedin.com/in/jeff-adler-2bbb9828)\n` +
+      `- [X / Twitter](https://x.com/JadlerOS): @JadlerOS\n\n` +
+      `## Blog\n\n` +
+      `- [Jads Blog](${SITE_URL}/blog): essays on engineering leadership, AI, agentic development, and iOS architecture\n` +
+      `- [RSS feed](${SITE_URL}/feed.xml)\n\n` +
+      `## Posts\n\n` +
+      posts
+        .map(
+          (p) =>
+            `- [${p.title}](${SITE_URL}/blog/${p.slug}) (${p.date}): ${p.description}`
+        )
+        .join("\n") +
+      `\n`;
 
     console.log(
       `Loaded ${posts.length} blog posts (index: ${blogIndex.length} chars, sitemap: ${urls.length} URLs)`
@@ -342,6 +365,11 @@ app.get("/sitemap.xml", (req, res) => {
 app.get("/feed.xml", (req, res) => {
   res.set("Content-Type", "application/rss+xml");
   res.send(feedXml);
+});
+
+app.get("/llms.txt", (req, res) => {
+  res.set("Content-Type", "text/plain; charset=utf-8");
+  res.send(llmsTxt);
 });
 
 const indexHtmlPath = path.join(__dirname, "dist", "index.html");

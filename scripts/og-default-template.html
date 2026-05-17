@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        font-family: "Courier New", monospace;
+        background: #0a0a18;
+        color: #e0d0ff;
+        overflow: hidden;
+      }
+      body {
+        position: relative;
+        background: radial-gradient(
+            ellipse at top left,
+            rgba(255, 0, 255, 0.25),
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at bottom right,
+            rgba(0, 200, 255, 0.2),
+            transparent 50%
+          ),
+          #0a0a18;
+        padding: 60px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .scanlines {
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(
+          0deg,
+          rgba(255, 255, 255, 0.03) 0,
+          rgba(255, 255, 255, 0.03) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+        pointer-events: none;
+      }
+      .topbar {
+        font-size: 22px;
+        letter-spacing: 0.2em;
+        color: #ff66cc;
+        text-shadow: 0 0 12px rgba(255, 0, 200, 0.55);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .pulse {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        background: #66ffcc;
+        border-radius: 50%;
+        margin-right: 12px;
+        box-shadow: 0 0 12px #66ffcc;
+        vertical-align: middle;
+      }
+      .name {
+        font-size: 120px;
+        font-weight: 700;
+        line-height: 1;
+        color: #ff7df0;
+        text-shadow: 0 0 32px rgba(255, 0, 200, 0.55);
+        margin: 30px 0 18px;
+        letter-spacing: 0.02em;
+      }
+      .role {
+        font-size: 40px;
+        color: #66e6ff;
+        text-shadow: 0 0 14px rgba(0, 200, 255, 0.55);
+        letter-spacing: 0.04em;
+      }
+      .role .cursor {
+        display: inline-block;
+        margin-left: 6px;
+        animation: none;
+      }
+      .blurb {
+        font-size: 26px;
+        color: #c8c0e8;
+        line-height: 1.45;
+        max-width: 1000px;
+        margin-top: 28px;
+        opacity: 0.95;
+      }
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 22px;
+        letter-spacing: 0.15em;
+        color: #ff66cc;
+        border-top: 2px solid rgba(255, 102, 204, 0.4);
+        padding-top: 22px;
+      }
+      .url {
+        color: #66e6ff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scanlines"></div>
+    <div class="topbar">
+      <span><span class="pulse"></span>JADBOT OS v2.0</span>
+      <span>BUILD 2026.05</span>
+    </div>
+    <div>
+      <div class="name">JEFF ADLER</div>
+      <div class="role">Director of Engineering @ Dropbox<span class="cursor">_</span></div>
+      <div class="blurb">
+        Engineering leader building AI products with LLMs, Claude, and agentic
+        orchestration. Director at Dropbox (Dash). Previously Reddit &amp;
+        Google. iOS architecture, release systems, agentic workflows. Based in
+        Denver, CO.
+      </div>
+    </div>
+    <div class="footer">
+      <span>5 TEAMS &nbsp;·&nbsp; 100+ ENGINEERS LED &nbsp;·&nbsp; 12 YRS SHIPPING</span>
+      <span class="url">JADS.APP</span>
+    </div>
+  </body>
+</html>

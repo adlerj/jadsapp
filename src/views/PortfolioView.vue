@@ -51,7 +51,9 @@
             </div>
             <div class="hero-text">
               <div class="typing-animation">
-                <h3>{{ typewriterText }}<span class="cursor">_</span></h3>
+                <p class="typewriter-line">
+                  {{ typewriterText }}<span class="cursor">_</span>
+                </p>
               </div>
               <p class="hero-summary">
                 Engineering leader with a decade of building and scaling
@@ -72,9 +74,64 @@
                   "
                   ><i class="fab fa-linkedin"></i> LinkedIn</a
                 >
+                <a
+                  href="/resume.docx"
+                  class="contact-link"
+                  download
+                  @click="
+                    trackEvent('outbound_link_clicked', {
+                      destination: 'resume',
+                    })
+                  "
+                  ><i class="fas fa-file-alt"></i> Resume</a
+                >
               </div>
             </div>
           </div>
+
+          <ul class="hero-stats" aria-label="Career highlights">
+            <li>
+              <span class="stat-value">5</span>
+              <span class="stat-label">teams led at Dropbox Dash</span>
+            </li>
+            <li>
+              <span class="stat-value">100+</span>
+              <span class="stat-label">engineers organized at Reddit</span>
+            </li>
+            <li>
+              <span class="stat-value">12 yrs</span>
+              <span class="stat-label"
+                >shipping at Google, Reddit, Dropbox</span
+              >
+            </li>
+          </ul>
+
+          <section class="featured-writing" aria-labelledby="featured-heading">
+            <div class="featured-header">
+              <h2 id="featured-heading">FEATURED WRITING</h2>
+              <router-link to="/blog" class="featured-all"
+                >All posts &rarr;</router-link
+              >
+            </div>
+            <div class="featured-grid">
+              <router-link
+                v-for="post in featuredPosts"
+                :key="post.slug"
+                :to="`/blog/${post.slug}`"
+                class="featured-card"
+                @click="
+                  trackEvent('outbound_link_clicked', {
+                    destination: `featured:${post.slug}`,
+                  })
+                "
+              >
+                <span class="featured-date">{{ post.date }}</span>
+                <h3 class="featured-title">{{ post.title }}</h3>
+                <p class="featured-desc">{{ post.description }}</p>
+                <span class="featured-read">Read &rarr;</span>
+              </router-link>
+            </div>
+          </section>
 
           <div id="terminal" class="terminal-section">
             <TerminalChat :inline="true" @launch-widget="handleWidgetLaunch" />
@@ -151,7 +208,10 @@
             >
               <div class="timeline-content">
                 <h3>{{ job.title }}</h3>
-                <p>{{ job.company }} | {{ job.duration }}</p>
+                <p class="timeline-meta">
+                  {{ job.company }} | {{ job.duration }}
+                </p>
+                <p v-if="job.scope" class="timeline-scope">{{ job.scope }}</p>
                 <ul v-if="activeJob === index">
                   <li v-for="(detail, idx) in job.details" :key="idx">
                     <span v-if="!detail.isLink">{{ detail }}</span>
@@ -181,6 +241,30 @@
           </div>
         </section>
 
+        <section v-if="talks.length" id="talks" aria-labelledby="talks-heading">
+          <h2 id="talks-heading">Talks &amp; Press</h2>
+          <ul class="talks-list">
+            <li v-for="(t, i) in talks" :key="i" class="talk-item">
+              <span class="talk-date">{{ t.date }}</span>
+              <a
+                v-if="t.url"
+                :href="t.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="talk-title"
+                @click="
+                  trackEvent('outbound_link_clicked', {
+                    destination: `talk:${t.title}`,
+                  })
+                "
+                >{{ t.title }} &nearr;</a
+              >
+              <span v-else class="talk-title">{{ t.title }}</span>
+              <span v-if="t.venue" class="talk-venue">{{ t.venue }}</span>
+            </li>
+          </ul>
+        </section>
+
         <section id="passions">
           <h2>Off the Clock</h2>
           <div class="passions-grid">
@@ -205,7 +289,28 @@
                 <i :class="passion.icon"></i>
               </div>
               <h3>{{ passion.name }}</h3>
-              <span v-if="passion.action" class="play-hint">Click to play</span>
+              <span v-if="passion.action === 'link'" class="play-hint link-hint"
+                >Visit &nearr;</span
+              >
+              <span v-else-if="passion.action" class="play-hint"
+                >&#9658; Play</span
+              >
+              <div v-if="passion.links" class="passion-links">
+                <a
+                  v-for="link in passion.links"
+                  :key="link.url"
+                  :href="link.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="passion-link"
+                  @click.stop="
+                    trackEvent('outbound_link_clicked', {
+                      destination: `passion-link:${link.label}`,
+                    })
+                  "
+                  >{{ link.label }} &nearr;</a
+                >
+              </div>
             </div>
           </div>
           <p class="passions-description">
@@ -325,6 +430,8 @@ export default {
         title: "Director of Engineering",
         company: "Dropbox",
         duration: "May 2023 - Present",
+        scope:
+          "5 teams · Dropbox Dash AI product · $1M ARR · 300K+ enterprise accounts",
         details: [
           "Directing engineering orgs across 5 teams owning Dropbox's flagship AI product, Dash.",
           "Scaled the organization through intentional hiring and org design.",
@@ -342,6 +449,7 @@ export default {
         title: "Staff Software Engineer",
         company: "Reddit",
         duration: "Nov 2021 - May 2023",
+        scope: "iOS platform tech lead for 100+ engineer consumer org",
         details: [
           "iOS platform tech lead for a 100+ engineer consumer product organization.",
           "Architected SliceKit, a declarative presentation framework adopted across Reddit iOS.",
@@ -357,6 +465,8 @@ export default {
         title: "Staff Software Engineer",
         company: "Dropbox",
         duration: "Apr 2019 - Nov 2021",
+        scope:
+          "Led HelloSign Mobile, Dropbox Scan, File Transfers, Family Plan",
         details: [
           "Led development and launch for HelloSign Mobile, Dropbox Scan, File Transfers, and Family Plan.",
           "Defined reusable mobile architectures that became the standard for new apps at Dropbox.",
@@ -366,6 +476,8 @@ export default {
         title: "Senior Software Engineer",
         company: "Google",
         duration: "Jul 2016 - Apr 2019",
+        scope:
+          "Google Drive iOS tech lead · Material Design 2 redesign · on-device ML",
         details: [
           "Technical lead for Google Drive iOS, leading the Material Design 2 redesign and on-device ML integration.",
           "Re-architected core navigation and network layers of Google Search iOS.",
@@ -375,6 +487,7 @@ export default {
         title: "Software Engineer",
         company: "TrackVia & Maptext",
         duration: "2014 - 2016",
+        scope: "iOS platform · mPilot IFR navigation used by 70+ airlines",
         details: [
           "iOS platform engineering at TrackVia (enterprise low-code platform).",
           "Built mPilot, an IFR navigation app used by 70+ major airlines.",
@@ -382,9 +495,42 @@ export default {
       },
     ];
 
+    // Talks, podcasts, press, external features.
+    // Add entries to make the "Talks & Press" section appear on the homepage.
+    // Schema: { date: "Mar 2026", title: "...", venue: "Podcast/Conference name", url: "https://..." }
+    // url is optional; if omitted the title renders as plain text.
+    const talks = [];
+
+    const featuredPosts = [
+      {
+        slug: "the-manager-layer-is-next",
+        title: "The Manager Layer is Next",
+        date: "May 2026",
+        description:
+          "AI isn't replacing managers. It's exposing which ones were never load-bearing to begin with.",
+      },
+      {
+        slug: "tokenmaxxing-is-what-happens-when-you-measure-ai-adoption-wrong",
+        title: "Tokenmaxxing Is What Happens When You Measure Wrong",
+        date: "May 2026",
+        description:
+          "Mandating AI tool usage is correct. Measuring it is a trap. The right move is to measure outcomes, not inputs.",
+      },
+    ];
+
     const passions = [
       { name: "Snowboarding", icon: "fas fa-snowboarding", action: "game" },
-      { name: "Mountain Biking", icon: "fas fa-biking", action: "game" },
+      {
+        name: "Mountain Biking",
+        icon: "fas fa-biking",
+        action: "game",
+        links: [
+          {
+            label: "Strava",
+            url: "https://www.strava.com/athletes/17328901",
+          },
+        ],
+      },
       { name: "Disc Golf", icon: "fas fa-compact-disc", action: "game" },
       { name: "Volleyball", icon: "fas fa-volleyball-ball", action: "game" },
       { name: "DJing", icon: "fas fa-headphones-alt", action: "music" },
@@ -394,6 +540,18 @@ export default {
         name: "Tabletop Games",
         icon: "fas fa-dice-d20",
         action: "game",
+      },
+      {
+        name: "Photography",
+        icon: "fas fa-camera",
+        action: "link",
+        url: "https://www.instagram.com/jads.pics/",
+      },
+      {
+        name: "Travel",
+        icon: "fas fa-plane",
+        action: "link",
+        url: "https://www.youtube.com/watch?v=oejb-Y3TIRY",
       },
     ];
 
@@ -497,6 +655,13 @@ export default {
     const activatePassionFeature = (index) => {
       const passion = passions[index];
       if (!passion) return;
+      if (passion.action === "link" && passion.url) {
+        trackEvent("outbound_link_clicked", {
+          destination: `passion:${passion.name}`,
+        });
+        window.open(passion.url, "_blank", "noopener,noreferrer");
+        return;
+      }
       gameOpenedAt = Date.now();
       trackEvent("game_opened", { game: passion.name || passion.action });
       if (passion.name === "Snowboarding") showSnowboardGame.value = true;
@@ -565,6 +730,8 @@ export default {
       typewriterText,
       jobHistory,
       passions,
+      featuredPosts,
+      talks,
       activeJob,
       activePassion,
       showSnowboardGame,
@@ -701,9 +868,17 @@ h2 {
 }
 
 .typing-animation {
-  font-size: 1.5em;
+  font-size: clamp(1.1em, 4.5vw, 1.5em);
   margin: 0 0 15px;
   min-height: 1.6em;
+}
+
+.typewriter-line {
+  font-weight: bold;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .hero-summary {
@@ -716,6 +891,160 @@ h2 {
 .hero-links {
   display: flex;
   gap: 15px;
+}
+
+.hero-stats {
+  list-style: none;
+  display: flex;
+  gap: 0;
+  padding: 18px 0;
+  margin: 25px 0 30px;
+  border-top: 1px solid var(--border-primary);
+  border-bottom: 1px solid var(--border-primary);
+  box-shadow: 0 0 12px var(--border-glow);
+}
+
+.hero-stats li {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 12px;
+  position: relative;
+}
+
+.hero-stats li + li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10%;
+  height: 80%;
+  width: 1px;
+  background: var(--border-primary);
+  opacity: 0.6;
+}
+
+.hero-stats .stat-value {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: var(--text-primary);
+  text-shadow: 0 0 10px var(--border-glow);
+  line-height: 1.1;
+}
+
+.hero-stats .stat-label {
+  font-size: 0.78em;
+  opacity: 0.75;
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 560px) {
+  .hero-stats {
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 12px;
+  }
+  .hero-stats li + li::before {
+    left: 10%;
+    right: 10%;
+    width: auto;
+    height: 1px;
+    top: -7px;
+  }
+  .hero-stats .stat-value {
+    font-size: 1.6em;
+  }
+}
+
+.featured-writing {
+  margin: 30px 0;
+}
+
+.featured-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.featured-header h2 {
+  margin: 0;
+}
+
+.featured-all {
+  font-size: 0.9em;
+  color: var(--link-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.featured-all:hover {
+  border-bottom-color: var(--link-color);
+  text-shadow: 0 0 5px var(--border-glow);
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.featured-card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 6px var(--border-glow);
+}
+
+.featured-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px var(--border-glow);
+  border-color: var(--link-color);
+}
+
+.featured-date {
+  font-size: 0.78em;
+  opacity: 0.7;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.featured-title {
+  font-size: 1.15em;
+  margin: 8px 0 10px;
+  color: var(--text-primary);
+  text-shadow: 0 0 6px var(--border-glow);
+}
+
+.featured-desc {
+  margin: 0 0 14px;
+  font-size: 0.95em;
+  line-height: 1.55;
+  opacity: 0.88;
+  flex: 1;
+}
+
+.featured-read {
+  font-size: 0.85em;
+  color: var(--link-color);
+  letter-spacing: 0.02em;
+  align-self: flex-start;
+}
+
+@media (max-width: 760px) {
+  .featured-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .contact-link {
@@ -832,6 +1161,18 @@ h2 {
   margin: 0;
 }
 
+.timeline-meta {
+  margin: 4px 0 0;
+}
+
+.timeline-scope {
+  margin: 6px 0 0;
+  font-size: 0.92em;
+  opacity: 0.78;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
 .timeline-content a {
   color: var(--link-color);
   border-bottom: 1px solid var(--link-color);
@@ -877,6 +1218,63 @@ h2 {
   gap: 15px;
 }
 
+#talks {
+  margin-top: 50px;
+}
+
+.talks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.talk-item {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.talk-item:last-child {
+  border-bottom: none;
+}
+
+.talk-date {
+  font-size: 0.82em;
+  opacity: 0.65;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.talk-title {
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 1px dotted transparent;
+  transition: all 0.3s ease;
+}
+
+a.talk-title:hover {
+  color: var(--link-hover);
+  border-bottom-color: var(--link-hover);
+  text-shadow: 0 0 5px var(--border-glow);
+}
+
+.talk-venue {
+  display: block;
+  font-size: 0.85em;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+@media (max-width: 560px) {
+  .talk-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
 .passions-description {
   margin-top: 20px;
   font-size: 0.9em;
@@ -902,16 +1300,52 @@ h2 {
 }
 
 .play-hint {
-  display: block;
-  font-size: 0.7em;
-  opacity: 0;
+  display: inline-block;
+  font-size: 0.62em;
+  opacity: 0.55;
   color: var(--text-accent);
-  margin-top: 5px;
+  margin-top: 8px;
+  padding: 2px 7px;
+  border: 1px solid var(--text-accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   transition: opacity 0.3s ease;
 }
 
+.play-hint.link-hint {
+  color: var(--link-color);
+  border-color: var(--link-color);
+}
+
 .passion-item.clickable:hover .play-hint {
-  opacity: 0.7;
+  opacity: 1;
+}
+
+.passion-links {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.passion-link {
+  display: inline-block;
+  min-height: 28px;
+  line-height: 28px;
+  padding: 4px 10px;
+  font-size: 0.72em;
+  text-decoration: none;
+  color: var(--link-color);
+  border: 1px dotted var(--link-color);
+  letter-spacing: 0.04em;
+  transition: all 0.3s ease;
+}
+
+.passion-link:hover {
+  color: var(--link-hover);
+  border-color: var(--link-hover);
+  text-shadow: 0 0 5px var(--border-glow);
 }
 
 .passion-item h3 {

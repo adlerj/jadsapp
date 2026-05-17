@@ -3,7 +3,9 @@
     <div class="terminal-window">
       <header class="chat-header">
         <div class="header-left">
-          <h1>JADBOT TERMINAL</h1>
+          <component :is="inline ? 'h2' : 'h1'" class="terminal-title"
+            >JADBOT TERMINAL</component
+          >
           <span class="version">v4.0</span>
         </div>
         <div class="header-right">
@@ -73,7 +75,7 @@
           :placeholder="pendingMessage ? 'Queued...' : 'Ask about Jeff...'"
           class="terminal-input"
           :class="{ queued: pendingMessage }"
-          autofocus
+          :autofocus="!inline"
         />
       </div>
     </div>
@@ -234,7 +236,7 @@ export default {
     });
 
     onMounted(() => {
-      if (!isMobile.value) {
+      if (!isMobile.value && !props.inline) {
         nextTick(() => inputField.value?.focus());
       }
       terminalBody.value?.addEventListener("click", handleInteraction);
@@ -303,9 +305,10 @@ export default {
   gap: 10px;
 }
 
-.chat-header h1 {
+.chat-header .terminal-title {
   font-size: 1.2em;
   margin: 0;
+  font-weight: bold;
   text-shadow: 0 0 10px var(--border-glow);
 }
 
@@ -595,7 +598,7 @@ export default {
     padding: 10px 12px;
   }
 
-  .chat-header h1 {
+  .chat-header .terminal-title {
     font-size: 0.95em;
     white-space: nowrap;
   }

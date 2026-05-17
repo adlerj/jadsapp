@@ -1,6 +1,22 @@
 const { marked } = require("marked");
+const fs = require("fs");
+const path = require("path");
 
 const SITE_URL = "https://jads.app";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
+const PUBLIC_DIR = path.join(__dirname, "..", "public");
+
+// Returns the per-post OG image URL if a custom card exists at
+// public/og/<slug>.png, otherwise the site-wide default.
+function ogImageFor(post) {
+  if (post && post.slug) {
+    const customPath = path.join(PUBLIC_DIR, "og", `${post.slug}.png`);
+    if (fs.existsSync(customPath)) {
+      return `${SITE_URL}/og/${post.slug}.png`;
+    }
+  }
+  return DEFAULT_OG_IMAGE;
+}
 
 function escapeHtml(s) {
   return s
@@ -19,19 +35,20 @@ function buildMetaTags(meta) {
   );
   tags.push(`<link rel="canonical" href="${meta.url}">`);
   tags.push(
-    `<meta property="og:title" content="${escapeHtml(meta.ogTitle || meta.title)}">`
+    `<meta property="og:title" content="${escapeHtml(
+      meta.ogTitle || meta.title
+    )}">`
   );
   tags.push(
     `<meta property="og:description" content="${escapeHtml(meta.description)}">`
   );
   tags.push(`<meta property="og:url" content="${meta.url}">`);
   tags.push(`<meta property="og:type" content="${meta.ogType || "website"}">`);
-  tags.push(
-    `<meta property="og:site_name" content="Jeff Adler — jads.app">`
-  );
-  tags.push(
-    `<meta property="og:image" content="${SITE_URL}/jeff-adler.png">`
-  );
+  tags.push(`<meta property="og:site_name" content="Jeff Adler — jads.app">`);
+  const ogImage = meta.ogImage || DEFAULT_OG_IMAGE;
+  tags.push(`<meta property="og:image" content="${ogImage}">`);
+  tags.push(`<meta property="og:image:width" content="1200">`);
+  tags.push(`<meta property="og:image:height" content="630">`);
   tags.push(`<meta property="og:locale" content="en_US">`);
   if (meta.ogType === "article") {
     if (meta.publishedTime) {
@@ -48,26 +65,31 @@ function buildMetaTags(meta) {
   }
   if (meta.articleTags) {
     for (const tag of meta.articleTags) {
-      tags.push(
-        `<meta property="article:tag" content="${escapeHtml(tag)}">`
-      );
+      tags.push(`<meta property="article:tag" content="${escapeHtml(tag)}">`);
     }
   }
-  tags.push(`<meta name="twitter:card" content="summary">`);
+  const twitterCardType =
+    meta.ogType === "article" ? "summary_large_image" : "summary";
+  tags.push(`<meta name="twitter:card" content="${twitterCardType}">`);
   tags.push(`<meta name="twitter:site" content="@JadlerOS">`);
   tags.push(`<meta name="twitter:creator" content="@JadlerOS">`);
   tags.push(
-    `<meta name="twitter:title" content="${escapeHtml(meta.ogTitle || meta.title)}">`
+    `<meta name="twitter:title" content="${escapeHtml(
+      meta.ogTitle || meta.title
+    )}">`
   );
   tags.push(
-    `<meta name="twitter:description" content="${escapeHtml(meta.description)}">`
+    `<meta name="twitter:description" content="${escapeHtml(
+      meta.description
+    )}">`
   );
-  tags.push(
-    `<meta name="twitter:image" content="${SITE_URL}/jeff-adler.png">`
-  );
+  tags.push(`<meta name="twitter:image" content="${ogImage}">`);
   if (meta.jsonLd) {
     const safeJson = JSON.stringify(meta.jsonLd).replace(/</g, "\\u003c");
-    const ldAttr = meta.ogType === "article" ? ' data-blog-ld="true"' : ' data-blog-index-ld="true"';
+    const ldAttr =
+      meta.ogType === "article"
+        ? ' data-blog-ld="true"'
+        : ' data-blog-index-ld="true"';
     tags.push(
       `<script type="application/ld+json"${ldAttr}>${safeJson}</script>`
     );
@@ -101,9 +123,7 @@ function postJsonLd(post, url) {
       headline: post.title,
       description: post.description,
       datePublished: post.date,
-      dateModified: post.updatedAt
-        ? post.updatedAt.split(" ")[0]
-        : post.date,
+      dateModified: post.updatedAt ? post.updatedAt.split(" ")[0] : post.date,
       url: url,
       wordCount: post.wordCount,
       author: {
@@ -119,7 +139,7 @@ function postJsonLd(post, url) {
         url: SITE_URL,
       },
       mainEntityOfPage: { "@type": "WebPage", "@id": url },
-      image: `${SITE_URL}/jeff-adler.png`,
+      image: ogImageFor(post),
       inLanguage: "en-US",
       keywords: post.tags.join(", "),
     },
@@ -176,7 +196,10 @@ function blogIndexJsonLd(posts, url, desc) {
 
 function renderBlogPost(html, post) {
   const url = `${SITE_URL}/blog/${post.slug}`;
-  const ssrData = `<script>window.__SSR_POST__=${JSON.stringify(post).replace(/</g, "\\u003c")}</script>`;
+  const ssrData = `<script>window.__SSR_POST__=${JSON.stringify(post).replace(
+    /</g,
+    "\\u003c"
+  )}</script>`;
   const renderedBody = marked.parse(post.body, { gfm: true, breaks: true });
   const modifiedDate = post.updatedAt
     ? post.updatedAt.split(" ")[0]
@@ -187,12 +210,15 @@ function renderBlogPost(html, post) {
     description: post.description,
     url: url,
     ogType: "article",
+    ogImage: ogImageFor(post),
     publishedTime: post.date,
     modifiedTime: modifiedDate,
     articleTags: post.tags,
     jsonLd: postJsonLd(post, url),
   });
-  const ssrContent = `<div id="ssr-content" style="display:none"><article><h1>${escapeHtml(post.title)}</h1>${renderedBody}</article></div>`;
+  const ssrContent = `<div id="ssr-content" style="display:none"><article><h1>${escapeHtml(
+    post.title
+  )}</h1>${renderedBody}</article></div>`;
   return rendered
     .replace("</head>", `    ${ssrData}\n  </head>`)
     .replace('<div id="app">', `${ssrContent}\n    <div id="app">`);
@@ -203,7 +229,9 @@ function renderBlogIndex(html, posts) {
   const desc =
     "Jeff Adler's engineering blog. AI, agentic engineering, leadership, iOS architecture, and technical deep dives from Google, Dropbox, and Reddit.";
   const postsWithoutBody = posts.map(({ body, ...meta }) => meta);
-  const ssrData = `<script>window.__SSR_POSTS__=${JSON.stringify(postsWithoutBody).replace(/</g, "\\u003c")}</script>`;
+  const ssrData = `<script>window.__SSR_POSTS__=${JSON.stringify(
+    postsWithoutBody
+  ).replace(/</g, "\\u003c")}</script>`;
   const rendered = injectMeta(html, {
     title:
       "Jads Blog - Jeff Adler | Engineering Leadership, AI, Agentic Development",
