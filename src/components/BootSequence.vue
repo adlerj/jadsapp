@@ -52,7 +52,7 @@ export default {
         } else {
           done.value = true;
           fading.value = true;
-          sessionStorage.setItem("bootComplete", "1");
+          localStorage.setItem("bootComplete", "1");
           setTimeout(() => emit("complete"), 500);
         }
       };

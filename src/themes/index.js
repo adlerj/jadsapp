@@ -1,4 +1,44 @@
 export const THEMES = {
+  classic: {
+    id: "classic",
+    name: "Classic",
+    tagline: "Restrained terminal aesthetic.",
+    icon: "⌨️",
+    preview: "Clean dark mono",
+    colors: {
+      "--bg-primary": "#0e0f13",
+      "--bg-secondary": "#181a20",
+      "--bg-overlay": "rgba(14, 15, 19, 0.04)",
+      "--text-primary": "#e8e8ec",
+      "--text-secondary": "#9a9aa3",
+      "--text-accent": "#a5b9d4",
+      "--text-accent2": "#6dd3ff",
+      "--border-primary": "#2a2c33",
+      "--border-glow": "rgba(160, 175, 200, 0.18)",
+      "--link-color": "#6dd3ff",
+      "--link-hover": "#a8e5ff",
+      "--btn-bg": "transparent",
+      "--btn-hover-bg": "#2a2c33",
+      "--btn-hover-text": "#e8e8ec",
+      "--scrollbar-thumb": "#2a2c33",
+      "--scrollbar-track": "#0e0f13",
+    },
+    font: "'Courier New', monospace",
+    effects: {
+      scanlines: false,
+      flicker: false,
+      matrixRain: false,
+      bgAnimation: "none",
+      crt: false,
+      neonGlow: false,
+      blink: false,
+      marquee: false,
+      rainbowHeaders: false,
+      cursorStyle: null,
+      glitter: false,
+    },
+  },
+
   terminal: {
     id: "terminal",
     name: "The Matrix",
@@ -241,4 +281,4 @@ export const THEMES = {
 };
 
 export const THEME_IDS = Object.keys(THEMES);
-export const DEFAULT_THEME = "bladerunner";
+export const DEFAULT_THEME = "classic";

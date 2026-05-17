@@ -56,6 +56,39 @@
     ></article>
     <div ref="scrollSentinel" class="scroll-sentinel"></div>
 
+    <div class="share-row" aria-label="Share this post">
+      <span class="share-label">Share</span>
+      <a
+        :href="shareUrls.twitter"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="share-btn"
+        aria-label="Share on X"
+        @click="trackShare('twitter')"
+      >
+        <i class="fab fa-x-twitter"></i> X
+      </a>
+      <a
+        :href="shareUrls.linkedin"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="share-btn"
+        aria-label="Share on LinkedIn"
+        @click="trackShare('linkedin')"
+      >
+        <i class="fab fa-linkedin"></i> LinkedIn
+      </a>
+      <button
+        type="button"
+        class="share-btn share-copy"
+        aria-label="Copy link"
+        @click="copyShareLink"
+      >
+        <i class="fas fa-link"></i>
+        {{ copyState === "copied" ? "Copied" : "Copy link" }}
+      </button>
+    </div>
+
     <footer class="post-footer">
       <div v-if="related.length" class="related-posts">
         <h3>Related Posts</h3>
@@ -313,6 +346,64 @@ export default {
       trackEvent("blog_nav_clicked", { type, target });
     }
 
+    const shareUrls = computed(() => {
+      if (!post.value) return { twitter: "#", linkedin: "#" };
+      const url = `https://jads.app/blog/${route.params.slug}`;
+      const text = post.value.title;
+      return {
+        twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+          text
+        )}&url=${encodeURIComponent(url)}&via=JadlerOS`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+          url
+        )}`,
+      };
+    });
+
+    const copyState = ref("idle");
+    let copyResetTimeout = null;
+    async function copyShareLink() {
+      if (!post.value) return;
+      const url = `https://jads.app/blog/${route.params.slug}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        copyState.value = "copied";
+        trackShare("copy");
+        clearTimeout(copyResetTimeout);
+        copyResetTimeout = setTimeout(() => {
+          copyState.value = "idle";
+        }, 2000);
+      } catch (err) {
+        // Clipboard API blocked (insecure context, denied permission, etc.)
+        // Fall back to legacy selection.
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "absolute";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          copyState.value = "copied";
+          trackShare("copy-fallback");
+          clearTimeout(copyResetTimeout);
+          copyResetTimeout = setTimeout(() => {
+            copyState.value = "idle";
+          }, 2000);
+        } catch (_) {
+          // Last resort: do nothing visible; user can copy from URL bar.
+        }
+        document.body.removeChild(ta);
+      }
+    }
+
+    function trackShare(destination) {
+      trackEvent("outbound_link_clicked", {
+        destination: `share:${destination}`,
+      });
+    }
+
     const postContent = ref(null);
     const scrollSentinel = ref(null);
     const firedDepths = new Set();
@@ -368,6 +459,10 @@ export default {
       related,
       formatDate,
       trackNav,
+      shareUrls,
+      copyState,
+      copyShareLink,
+      trackShare,
       postContent,
       scrollSentinel,
     };
@@ -608,6 +703,55 @@ export default {
   margin-top: 3rem;
   padding-top: 2rem;
   border-top: 1px solid var(--border-primary);
+}
+
+.share-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 2.5rem 0 1rem;
+  padding: 14px 0;
+  border-top: 1px solid var(--border-primary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.share-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-family: var(--font-family);
+  color: var(--link-color);
+  background: transparent;
+  border: 1px solid var(--link-color);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 32px;
+}
+
+.share-btn:hover {
+  background: var(--link-color);
+  color: var(--bg-primary);
+  text-shadow: 0 0 5px var(--border-glow);
+}
+
+.share-btn i {
+  font-size: 0.95em;
+}
+
+.share-copy {
+  font-family: inherit;
 }
 
 .related-posts {

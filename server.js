@@ -26,6 +26,7 @@ console.log(`  SENTRY_DSN: ${process.env.SENTRY_DSN ? "set" : "NOT SET"}`);
 
 const express = require("express");
 const path = require("path");
+const helmet = require("helmet");
 const Anthropic = require("@anthropic-ai/sdk").default;
 const rateLimit = require("express-rate-limit");
 const { systemPrompt } = require("./server/systemPrompt");
@@ -176,6 +177,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.set("trust proxy", 1);
+
+// Security headers. CSP is intentionally disabled: SSR injects inline
+// scripts for blog hydration (window.__SSR_POST__), the static index.html
+// embeds JSON-LD blocks, and Vue dev/runtime relies on inline styles --
+// adding CSP without nonces would break the SPA. Other helmet defaults
+// (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy,
+// Cross-Origin-Opener-Policy, etc.) ship as-is.
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+
 app.use(express.json());
 
 const chatLimiter = rateLimit({

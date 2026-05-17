@@ -50,17 +50,20 @@
               />
             </div>
             <div class="hero-text">
+              <p class="hero-thesis">
+                Building AI-native engineering orgs at Dropbox.
+              </p>
               <div class="typing-animation">
                 <p class="typewriter-line">
                   {{ typewriterText }}<span class="cursor">_</span>
                 </p>
               </div>
               <p class="hero-summary">
-                Engineering leader with a decade of building and scaling
-                platforms at Google, Reddit, and Dropbox -- now directing AI
-                product engineering at Dropbox. From iOS architecture to release
-                systems to agentic orchestration, I build things that ship.
-                Based in Denver, CO.
+                I direct engineering at Dropbox, leading the team behind Dash,
+                our AI-powered universal search. Before that I scaled iOS
+                platforms at Google and Reddit. Lately I spend most of my time
+                on the question of what engineering orgs look like when most of
+                the code is agent-written. Denver, CO. Sometimes on a snowboard.
               </p>
               <div class="hero-links">
                 <a
@@ -422,7 +425,7 @@ export default {
     const showGuitarStrum = ref(false);
     const showSushiRain = ref(false);
     const showWebamp = ref(false);
-    const showBoot = ref(!sessionStorage.getItem("bootComplete"));
+    const showBoot = ref(!localStorage.getItem("bootComplete"));
     let typewriterTimeout = null;
 
     const jobHistory = [
@@ -867,10 +870,20 @@ h2 {
   flex: 1;
 }
 
+.hero-thesis {
+  font-size: clamp(1.4em, 5vw, 1.9em);
+  font-weight: bold;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+  text-shadow: 0 0 14px var(--border-glow);
+  line-height: 1.2;
+}
+
 .typing-animation {
-  font-size: clamp(1.1em, 4.5vw, 1.5em);
+  font-size: clamp(0.95em, 3.5vw, 1.15em);
   margin: 0 0 15px;
   min-height: 1.6em;
+  opacity: 0.85;
 }
 
 .typewriter-line {
