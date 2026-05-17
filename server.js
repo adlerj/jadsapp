@@ -31,6 +31,7 @@ const rateLimit = require("express-rate-limit");
 const { systemPrompt } = require("./server/systemPrompt");
 console.log("  Loading database...");
 const { getAllPosts, getPostBySlug } = require("./server/db");
+const { buildBlogMeta, getRelevantPosts } = require("./server/rag");
 console.log("  Database loaded OK");
 const blogRoutes = require("./server/routes/blog");
 const {
@@ -41,7 +42,9 @@ const {
 } = require("./server/ssr");
 console.log("  All modules loaded OK");
 
-let blogContent = "";
+let blogIndex = "";
+let blogPostBodies = new Map();
+let blogPostMeta = [];
 let sitemapXml = "";
 let feedXml = "";
 
@@ -57,9 +60,15 @@ function reloadBlogData() {
   try {
     const posts = getAllPosts();
 
-    blogContent =
-      "\n\nJEFF'S BLOG POSTS (use these to answer questions about Jeff's writing, opinions, and technical experience):\n\n" +
-      posts.map((p) => `### ${p.title}\n${p.body}`).join("\n\n---\n\n");
+    blogIndex =
+      "\n\nJEFF'S BLOG (topics Jeff has written about):\n" +
+      posts
+        .map((p) => `- ${p.title} [${p.tags.join(", ")}] -- ${p.description}`)
+        .join("\n");
+    blogPostBodies = new Map(
+      posts.map((p) => [p.slug, `### ${p.title}\n${p.body}`])
+    );
+    blogPostMeta = buildBlogMeta(posts);
 
     const today = new Date().toISOString().split("T")[0];
     const urls = [
@@ -124,7 +133,7 @@ function reloadBlogData() {
       `\n</channel>\n</rss>\n`;
 
     console.log(
-      `Loaded ${posts.length} blog posts (RAG: ${blogContent.length} chars, sitemap: ${urls.length} URLs)`
+      `Loaded ${posts.length} blog posts (index: ${blogIndex.length} chars, sitemap: ${urls.length} URLs)`
     );
   } catch (e) {
     console.error("Could not load blog data:", e.message);
@@ -199,14 +208,24 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
   }
 
   try {
+    const userQuery =
+      [...trimmed].reverse().find((m) => m.role === "user")?.content || "";
+    const relevantBodies = customSystemPrompt
+      ? ""
+      : getRelevantPosts(userQuery, blogPostMeta, blogPostBodies)
+          .map((b) => "\n\n---\n" + b)
+          .join("");
+    const finalSystem =
+      customSystemPrompt || systemPrompt + blogIndex + relevantBodies;
+
     const stream = anthropic.messages.stream({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 400,
+      max_tokens: 220,
       temperature: 0.3,
       system: [
         {
           type: "text",
-          text: customSystemPrompt || systemPrompt + blogContent,
+          text: finalSystem,
           cache_control: { type: "ephemeral" },
         },
       ],
