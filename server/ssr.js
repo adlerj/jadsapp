@@ -216,12 +216,12 @@ function renderBlogPost(html, post) {
     articleTags: post.tags,
     jsonLd: postJsonLd(post, url),
   });
-  const ssrContent = `<div id="ssr-content" style="display:none"><article><h1>${escapeHtml(
+  const ssrContent = `<article id="ssr-content"><h1>${escapeHtml(
     post.title
-  )}</h1>${renderedBody}</article></div>`;
+  )}</h1>${renderedBody}</article>`;
   return rendered
     .replace("</head>", `    ${ssrData}\n  </head>`)
-    .replace('<div id="app">', `${ssrContent}\n    <div id="app">`);
+    .replace('<div id="app">', `<div id="app">${ssrContent}`);
 }
 
 function renderBlogIndex(html, posts) {
