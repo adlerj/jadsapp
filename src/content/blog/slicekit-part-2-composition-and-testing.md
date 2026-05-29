@@ -1,8 +1,8 @@
 ---
-title: "SliceKit: Composition and Testing (Part 2)"
+title: SliceKit: Composition and Testing (Part 2)
 date: 2022-05-06
 description: How SliceKit's composition model works in practice, plus the testing strategy that got the Reddit iOS org on board.
-tags: ios, declarative-ui, testing, slicekit
+tags: ios, declarative-ui, testing, slicekit, tech
 series: SliceKit
 part: 2
 ---
@@ -37,7 +37,7 @@ struct ActionSliceViewModel: SliceViewModel {
 
 Notice that `ActionSliceViewModel` composes other ViewModels, mirroring how the `ActionSlice` composes other slices. The ViewModel tree matches the view tree exactly.
 
-There's no business logic in these types. No methods that mutate state. No closures that capture mutable references. They're data. This is the foundation that makes everything else work.
+There's no business logic in these types: no methods that mutate state, no closures that capture mutable references. They're data. This is the foundation that makes everything else work.
 
 ### Binding ViewModels to Slices
 
@@ -63,7 +63,7 @@ class AuthorSlice: UIView, SliceConfigurable {
 }
 ```
 
-`configure(with:)` is a pure function in spirit. Given the same ViewModel, the slice always looks the same. The framework calls this method whenever the ViewModel changes. The slice doesn't know or care *why* it changed. It just renders the current state.
+`configure(with:)` is a pure function in spirit. Given the same ViewModel, the slice always looks the same. The framework calls this method whenever the ViewModel changes, and the slice doesn't know or care *why* it changed. It just renders the current state.
 
 ### Composing a screen
 
@@ -129,7 +129,7 @@ class PostDetailCoordinator: SliceCoordinator {
 
 This is the entire screen definition. The coordinator transforms app state into an array of slice descriptors. The framework handles diffing, cell reuse, insertion and deletion animations, scroll position maintenance. All of it.
 
-Want to add a new section to this screen? Append another `SliceDescriptor`. Want to conditionally show something? Use an `if` statement. The screen definition is just Swift code that returns data.
+Adding a section means appending another `SliceDescriptor`, and conditional content is just an `if` statement. The screen definition is Swift code that returns data.
 
 ### Unidirectional data flow
 
@@ -179,7 +179,7 @@ func handle(_ action: PostDetailAction) {
 }
 ```
 
-Navigation lives in the coordinator. Networking lives in the coordinator. Business logic lives in the coordinator. Slices are dumb views. ViewModels are dumb data. The coordinator is the only smart object, and it has a clearly scoped job.
+Navigation, networking, and business logic all live in the coordinator. Slices are dumb views, ViewModels are dumb data, and the coordinator is the only smart object, with a clearly scoped job.
 
 ## Testing strategy
 
@@ -212,7 +212,7 @@ func testVoteViewModel_negativeScore_showsZero() {
 }
 ```
 
-These tests run in milliseconds. No simulator needed. No setup, no teardown. They're the kind of tests you actually run on every save because they're fast enough to not interrupt your flow. With [Swift 5.5's async/await](https://www.swift.org/blog/swift-5.5-released/) now in wide adoption, the community is debating how to test async code in declarative UIs. Our answer: keep async out of the view layer entirely. ViewModels are synchronous data. The async work lives in the coordinator, tested separately.
+These tests run in milliseconds. No simulator, no setup, no teardown. They're the kind of tests you actually run on every save because they're fast enough to not interrupt your flow. With [Swift 5.5's async/await](https://www.swift.org/blog/swift-5.5-released/) now in wide adoption, the community is debating how to test async code in declarative UIs. Our answer: keep async out of the view layer entirely. ViewModels are synchronous data. The async work lives in the coordinator, tested separately.
 
 This connects to a broader principle I've written about in [Dependency Inversion in Practice](/blog/breaking-apart-an-ios-monolith). When you separate your logic from your framework dependencies, testing becomes a pure-function exercise.
 
@@ -268,7 +268,7 @@ func testPostDetail_withoutMedia_excludesMediaSlice() {
 }
 ```
 
-Again, no UIKit in these tests. You're testing data transformations. The coordinator takes state in and produces descriptors out. Easy to set up, fast to run, impossible to make flaky.
+Again, no UIKit in these tests. You're testing data transformations. The coordinator takes state in and produces descriptors out. Easy to set up, fast to run, hard to make flaky.
 
 ## Adoption without mandates
 
@@ -276,18 +276,16 @@ Getting a large iOS org to adopt a new framework is at least half the challenge.
 
 ## Results so far
 
-SliceKit is now used across the majority of new feature development on the iOS app. The shared component library has grown substantially. Engineers can transfer between teams and be productive on day one because every feature uses the same patterns.
+SliceKit is now used across the majority of new feature development on the iOS app, and the shared component library keeps growing as teams contribute slices back. Because every feature uses the same patterns, engineers can transfer between teams and be productive quickly.
 
-Test coverage is improving significantly, not because of mandates or coverage thresholds, but because SliceKit makes testing so easy that engineers test by default. When writing a test takes 30 seconds and requires no setup, people write tests.
+Test coverage is going up. No mandates, no coverage thresholds. SliceKit makes testing easy enough that engineers test by default. When writing a test takes 30 seconds and requires no setup, people write tests.
 
-New engineer onboarding is dropping from weeks of ramp-up to days. Learn the slice pattern once, and you can build features anywhere in the app.
+Onboarding is faster too. Learn the slice pattern once, and you can build features anywhere in the app.
 
-But the thing I'm proudest of isn't any metric. It's that engineers are choosing to use SliceKit because they like it. They evangelize it to their teammates. They contribute new slices back to the shared library. The framework is succeeding because it's earning adoption, not because it demands it.
+But the thing I'm proudest of isn't any of that. It's that engineers are choosing to use SliceKit because they like it. They evangelize it to their teammates and contribute new slices back to the shared library. The framework is earning its adoption rather than demanding it.
 
 ## Looking ahead
 
-Declarative UI is clearly the future for mobile development. SwiftUI is getting better with every release. Jetpack Compose is reaching maturity on Android. Airbnb's [Epoxy](https://github.com/airbnb/epoxy-ios) is proving that declarative UIKit can work at scale. The industry consensus is clear: describe what you want, let the framework figure out how.
+Declarative UI is clearly the future for mobile development. SwiftUI is getting better with every release, Jetpack Compose is reaching maturity on Android, and Airbnb's [Epoxy](https://github.com/airbnb/epoxy-ios) is proving that declarative UIKit can work at scale.
 
-SliceKit is validating this approach at scale on UIKit, and I think the lessons transfer directly to SwiftUI and beyond. The principles (immutable ViewModels, unidirectional data flow, composition over inheritance, making the right path easy) are framework-agnostic. They're about how you structure systems for humans to work in, not about any specific rendering technology.
-
-The hardest problems in platform engineering are never technical. They're about adoption, ergonomics, and trust. Build something good, make it easy, lead by example. The rest follows.
+SliceKit is validating that approach on UIKit, and the lessons transfer directly to SwiftUI and beyond. Immutable ViewModels, unidirectional data flow, composition over inheritance, and making the right path the easy one are about how you structure systems for humans to work in, not about any specific rendering technology.

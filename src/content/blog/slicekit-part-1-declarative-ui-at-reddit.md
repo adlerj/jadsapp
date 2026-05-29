@@ -2,16 +2,16 @@
 title: SliceKit: Declarative UI at Reddit (Part 1)
 date: 2022-03-18
 description: How I built a declarative UI framework for the iOS org at Reddit, and why consistency at scale requires opinionated tooling.
-tags: ios, declarative-ui, reddit, platform, slicekit
+tags: ios, declarative-ui, reddit, platform, slicekit, tech
 series: SliceKit
 part: 1
 ---
 
 # SliceKit: Declarative UI at Reddit (Part 1)
 
-When you have a large iOS org committing to the same codebase, architecture isn't optional. It's survival.
+When a large iOS org commits to the same codebase, architecture is what keeps the thing shippable. Without it, the code drifts faster than anyone can govern it.
 
-I'm on Reddit's iOS platform team building the infrastructure that product engineers ship on top of. Within weeks of joining I had a clear picture of what's broken. Not because people are writing bad code. They're not. The problem is that everyone's writing *different* code. Good code, often. But different good code, everywhere, with no shared vocabulary for how features should be built.
+I'm on Reddit's iOS platform team building the infrastructure that product engineers ship on top of. Within weeks of joining I had a clear picture of what was broken, and it wasn't that people were writing bad code. The problem was that everyone was writing *different* code. Good code, often, but different good code everywhere, with no shared vocabulary for how features should be built.
 
 This is the story of SliceKit, a declarative, unidirectional MVVM-C framework I'm designing to fix that. In this first part I'll cover the problems it solves and the core abstraction. In Part 2, I'll go deep on composition, testing, and adoption.
 
@@ -19,25 +19,25 @@ This series was also published on the [Reddit Engineering subreddit](https://www
 
 ## The four problems
 
-Every large iOS codebase accumulates architectural debt. But this codebase has a specific flavor of it, and I think it's instructive because I've seen the same patterns at every company I've worked at above a certain team size.
+Every large iOS codebase accumulates architectural debt. This one has a specific flavor of it, and I think it's instructive, because I've seen the same patterns at every company I've worked at above a certain team size.
 
 ### 1. No consistency across teams
 
-Different orgs have landed on different patterns. Some teams use MVP. Others use MVVM. A few have rolled their own thing that doesn't have a name. Some features are structured carefully; others have collected the kind of `// TODO: refactor` notes that never get addressed.
+Different orgs have landed on different patterns. Some teams use MVP, others use MVVM, and a few have rolled their own thing that doesn't have a name. Some features are structured carefully; others have collected the kind of `// TODO: refactor` notes that never get addressed.
 
-The practical cost: engineers can't move between areas of the codebase. Transferring from the feed team to the messaging team means learning a completely different architectural approach. Onboarding a new hire means "it depends on which team you're on." Code review is harder because reviewers have to context-switch between paradigms.
+The practical cost is mobility. Engineers can't move between areas of the codebase, because transferring from the feed team to the messaging team means learning a completely different architectural approach. Onboarding a new hire means "it depends on which team you're on." Code review is harder because reviewers have to context-switch between paradigms.
 
 When I describe this problem to friends at other companies, the reaction is always "yeah, same." It's the default state of any codebase that grows faster than its conventions.
 
 ### 2. Breaking DRY everywhere
 
-Without a shared component system, teams build UI one-off. Need a button that shows a vote count? Build one. Need the same button in a different context? Build another one. Need to update the design system? Track down every implementation and update them individually.
+Without a shared component system, teams build UI one-off. A button that shows a vote count gets built once on one screen, then rebuilt from scratch when another team needs the same thing somewhere else. Updating the design system means tracking down every implementation and changing each one by hand.
 
-This isn't just wasted engineering effort. It's a design consistency problem. The same conceptual component (a "vote button") looks slightly different depending on which team built the screen it lives on. Theming support is ad-hoc. Dark mode is a nightmare because each team has implemented color handling differently.
+That's more than wasted engineering effort. It's a design consistency problem. The same conceptual component, a "vote button," looks slightly different depending on which team built the screen it lives on. Theming support is ad-hoc. Dark mode is a nightmare because each team has implemented color handling differently.
 
 ### 3. SOLID is aspirational
 
-Mutable state is everywhere. There's no single source of truth for screen state. View controllers hold some state, presenters hold other state, and the actual data model holds yet more state. When things get out of sync (and they always get out of sync), debugging means tracing state mutations through multiple objects with bidirectional communication paths.
+Mutable state is everywhere. There's no single source of truth for screen state. View controllers hold some state, presenters hold other state, and the actual data model holds yet more. When things get out of sync (and they always get out of sync), debugging means tracing state mutations through multiple objects with bidirectional communication paths.
 
 Massive view controllers are common. There are view controllers in the codebase that are thousands of lines long, handling layout, data transformation, networking callbacks, and navigation all in one file. Not because engineers don't know better, but because the existing patterns don't provide clear boundaries for where things should go.
 
@@ -45,9 +45,9 @@ Massive view controllers are common. There are view controllers in the codebase 
 
 The codebase is deeply imperative. State changes trigger side effects that trigger more state changes. Control flow is hard to follow because you have to trace the execution path through callbacks, delegates, and KVO observers to understand what happens when a user taps a button.
 
-This makes the code fragile. Want to add a new state to a screen? You need to audit every imperative path to make sure nothing breaks. Want to reorder two UI elements? That might require rewiring the entire data flow because the imperative setup assumes a specific execution order.
+This makes the code fragile. Adding a new state to a screen means auditing every imperative path to make sure nothing breaks. Reordering two UI elements might require rewiring the entire data flow, because the imperative setup assumes a specific execution order.
 
-In short, engineers are describing *how* to render every pixel instead of declaring *what* should appear. I've written about why that distinction matters so much in [Building Declarative Systems to Scale Product Engineering](/blog/declarative-skeleton-42-percent-less-code). SliceKit is the answer: let engineers describe the screen they want and let the framework handle the rest.
+Engineers are describing *how* to render every pixel instead of declaring *what* should appear. I've written about why that distinction matters so much in [Building Declarative Systems to Scale Product Engineering](/blog/declarative-skeleton-42-percent-less-code). SliceKit is the answer: let engineers describe the screen they want and let the framework handle the rest.
 
 ## This isn't my first time
 
@@ -87,7 +87,7 @@ A cell can contain a single slice or a vertical stack of them. This is how compl
 +----------------------------------+
 ```
 
-The `ActionSlice` itself is a horizontal composition of smaller slices: a `VoteSlice`, a `CommentButtonSlice`, a `ShareSlice`, and an `AwardSlice`. Composition all the way down.
+The `ActionSlice` itself is a horizontal composition of smaller slices: a `VoteSlice`, a `CommentButtonSlice`, a `ShareSlice`, and an `AwardSlice`. Slices compose into slices, all the way down.
 
 This maps directly to the language designers use. When a designer says "put the author bar above the media, with the action bar below it," an engineer translates that 1:1 into a slice stack. There's no impedance mismatch between the design spec and the code.
 
@@ -105,29 +105,13 @@ The entire Recap screen is being built by one engineer in about a week. Not beca
 
 ## How SliceKit maps to the problems
 
-### Consistency through unidirectional flow
+**Consistency.** SliceKit prescribes a single way to build features. Data flows in one direction: from the data layer, through a ViewModel, into a Slice. User actions flow back up through a Coordinator. There's always one correct place for any piece of logic, which means one pattern to learn no matter which team you're on, and exactly one place to look in review for business logic (ViewModel), navigation (Coordinator), and presentation (Slice).
 
-SliceKit prescribes a single way to build features. Data flows in one direction: from the data layer, through a ViewModel, into a Slice. User actions flow back up through a Coordinator. There's always one correct place for any piece of logic.
+**DRY.** Every button in the app uses `ButtonSlice`, every author header uses `AuthorSlice`. When the design team updates button styling, it changes in one place and propagates everywhere. Dark mode, theming, and design tokens are all handled at the slice level, once. By the time SliceKit is the default path, the shared library is a catalog of components no product engineer ever has to rebuild.
 
-New engineer joins the team? They learn one pattern. Transfer between teams? Same pattern. Code review? You know exactly where to look for business logic (ViewModel), navigation (Coordinator), and presentation (Slice).
+**SOLID.** SliceKit enforces good architecture rather than suggesting it. ViewModels are immutable value types. Slices don't hold state. Coordinators own the navigation stack. You can't build a 3,000-line view controller with SliceKit because the framework doesn't give you a place to put that code. Separation of concerns is a structural property of the framework, not a guideline you hope people follow.
 
-### DRY through shared components
-
-Every button in the app uses `ButtonSlice`. Every author header uses `AuthorSlice`. When the design team updates button styling, it changes in one place and propagates everywhere. Dark mode, theming, design tokens: all handled at the slice level, once.
-
-By the time SliceKit is the default path, the shared library contains a large catalog of slices. That's a large catalog of components that no product engineer ever has to rebuild.
-
-### SOLID through framework guardrails
-
-SliceKit doesn't just suggest good architecture. It enforces it. ViewModels are immutable value types. Slices don't hold state. Coordinators own the navigation stack. You literally can't build a 3,000-line view controller with SliceKit because the framework doesn't give you a place to put that code.
-
-The separation of concerns isn't a guideline you hope people follow. It's a structural property of the framework.
-
-### Declarative through data-driven rendering
-
-Slices are pure functions of their ViewModel. Given the same ViewModel, a slice always renders the same way. There are no side effects, no ordering dependencies, no hidden state. You describe what the screen should look like, and SliceKit makes it so.
-
-This transforms debugging. Something looks wrong on screen? Inspect the ViewModel. The ViewModel is wrong? Trace it back to the data layer. The data flow is linear and predictable.
+**Declarative rendering.** Slices are pure functions of their ViewModel. Given the same ViewModel, a slice always renders the same way, with no side effects, no ordering dependencies, no hidden state. This transforms debugging. Something looks wrong on screen? Inspect the ViewModel. The ViewModel is wrong? Trace it back to the data layer. The data flow is linear and predictable.
 
 ## What's next
 

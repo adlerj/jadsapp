@@ -20,6 +20,20 @@ Voice and rules for all blog content on jads.app. This file is used by AI agents
 - Prefer shorter sentences over long compound ones.
 - When humor lands, it should feel effortless, not forced. No puns or dad jokes.
 
+## Avoid AI-Cadence Tells
+
+These patterns make a post read as machine-generated. A triage of the full archive found them firing across nearly every post. Cut them on sight.
+
+- **Antithesis spam.** "It's not X, it's Y" / "X, not Y" / "Not because A. Not because B." At most ONE such construction per post. Rewrite the rest as plain declaratives.
+- **Hollow signposting.** "Here's the thing", "Here's where it gets interesting", "The real question is", "Make no mistake", "Let me steelman". Delete the lead-in and state the point.
+- **Fragment-cascade cadence.** Runs of three or more staccato fragments for rhythm. Sentence. Then another. Then another. Vary sentence length instead.
+- **Thesis restatement.** Saying the same point three to five times in slightly different words. State it strongly once, maybe twice, then cut the paragraphs or sections that only re-say it.
+- **Recap closers.** "In short", "The bottom line", "At the end of the day", "In conclusion". End on the most concrete or forward-looking line, not a summary.
+- **Mechanical rule-of-three.** Not every list needs exactly three parallel items. Vary length; collapse overlapping items.
+- **Rhetorical Q&A padding.** "The result? ...", "The takeaway? ...", "Why does this matter? ...". Just make the statement.
+
+If a sentence's only job is cadence, it is padding. Cut it. Every paragraph should add a fact, a number, a name, a step, or a turn in the argument.
+
 ## Structure
 
 - Open with the problem or thesis, not backstory

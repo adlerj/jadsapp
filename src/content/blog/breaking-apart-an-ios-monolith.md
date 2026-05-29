@@ -2,18 +2,18 @@
 title: Breaking Apart an iOS Monolith
 date: 2019-12-06
 description: How I broke apart a Dropbox iOS monolith using protocol-first design, turning a tangled dependency graph into independent modules.
-tags: architecture, swift, testing, dependency-inversion
+tags: architecture, swift, testing, dependency-inversion, tech
 series: Scaling Architecture
 part: 2
 ---
 
 # Breaking Apart an iOS Monolith
 
-You know your codebase is a monolith when you change a file in the networking layer and the compiler rebuilds the entire app. When you open a pull request touching three files and get merge conflicts with four other PRs. When a new engineer asks "where does this dependency come from?" and the honest answer is "everywhere."
+You know your codebase is a monolith when you change a file in the networking layer and the compiler rebuilds the entire app, and when opening a pull request touching three files lands you merge conflicts with four other PRs. Ask a new engineer where a dependency comes from and the honest answer is "everywhere."
 
 This is our situation. A large iOS codebase with years of organic growth, where modules have accumulated dependencies on each other until the dependency graph looks less like a tree and more like a plate of spaghetti. Compile times are measured in minutes. Reasoning about a single feature requires understanding half the app.
 
-The tool that's breaking the monolith apart isn't new architecture, a rewrite, or a different language. It's a principle from 1996: dependency inversion. Uber [published their approach](https://www.uber.com/blog/driver-app-ribs-architecture/) to this problem with RIBs, scaling to 200+ engineers across 40 teams on a single mobile app. Their answer was a formal, heavy framework. Mine is lighter, but rooted in the same insight: you need hard boundaries between modules, and those boundaries need to be enforced by the compiler.
+The tool breaking the monolith apart is not new architecture or a rewrite. It's a principle from 1996: dependency inversion. Uber [published their approach](https://www.uber.com/blog/driver-app-ribs-architecture/) to this problem with RIBs, scaling to 200+ engineers across 40 teams on a single mobile app. Their answer was a formal, heavy framework. Mine is lighter, but rooted in the same insight: you need hard boundaries between modules, and those boundaries need to be enforced by the compiler.
 
 ## The Monolith Problem
 
@@ -43,7 +43,7 @@ The problems compound with team size:
 
 ## The Principle
 
-Dependency inversion says: high-level modules should not depend on low-level modules. Both should depend on abstractions.
+Dependency inversion says high-level modules should not depend on low-level modules. Both should depend on abstractions.
 
 In Swift, abstractions are protocols. Instead of `ProfileViewController` depending on the concrete `UserService`, it depends on a `UserServiceProtocol` that `UserService` happens to conform to.
 
@@ -103,7 +103,7 @@ Notice: `UserService` depends on `NetworkClientProtocol`, `AuthManagerProtocol`,
 
 There are several patterns for providing dependencies: service locators, property injection, ambient singletons, and init injection. After trying all of them, I am convinced init injection is the only one worth using.
 
-**Service locators** (e.g., `ServiceLocator.shared.resolve(UserServiceProtocol.self)`) hide dependencies. You can't tell from a class's interface what it needs. Dependencies are resolved at runtime, so you get crashes instead of compiler errors when something is misconfigured. They're ambient global state wearing a trench coat.
+**Service locators** (e.g., `ServiceLocator.shared.resolve(UserServiceProtocol.self)`) hide dependencies. You can't tell from a class's interface what it needs. Dependencies are resolved at runtime, so you get crashes instead of compiler errors when something is misconfigured.
 
 **Property injection** (`viewController.userService = userService`) makes dependencies optional by accident. Nothing stops you from forgetting to set one. You discover the problem at runtime when a force-unwrap crashes.
 
@@ -136,7 +136,7 @@ class ProfileViewController: UIViewController {
 
 You can read the `init` signature and know exactly what this class needs. The compiler enforces that every dependency is provided. There's no hidden state, no runtime resolution, no ambiguity.
 
-The common objection: "My init has 12 parameters." That's not a problem with init injection. That's your class telling you it has too many responsibilities. Init injection makes excessive dependencies visible, which is a feature, not a bug.
+The common objection: "My init has 12 parameters." That's your class telling you it has too many responsibilities. Init injection just makes the excess visible instead of hiding it behind a singleton.
 
 ## Scoped Services
 
@@ -239,11 +239,7 @@ After dependency inversion, the graph becomes a tree with clear layers:
 
 Each feature module depends on the interfaces module and nothing else. The services module provides concrete implementations. The app module wires everything together. Feature modules can be compiled, tested, and developed independently.
 
-This isn't theoretical. As we migrate modules:
-
-- **Compile times for individual modules drop from minutes to seconds.** Changing a file in the Profile module rebuilds only the Profile module, not the entire app.
-- **Merge conflicts between feature teams nearly disappear.** Each team works in their own module. The interfaces module changes rarely and is small enough to resolve conflicts trivially.
-- **New features can be developed against mock services.** Start building the UI with a mock that conforms to the protocol. Wire in the real service later. The feature works either way because it only knows about the interface.
+As we migrate modules, the payoffs show up immediately. Compile times for individual modules drop from minutes to seconds, because changing a file in the Profile module rebuilds only the Profile module, not the entire app. Merge conflicts between feature teams nearly disappear, since each team works in their own module and the interfaces module changes rarely. And new features can be developed against mock services: start building the UI with a mock that conforms to the protocol, wire in the real service later, and the feature works either way because it only knows about the interface.
 
 ## Testing Becomes Trivial
 
@@ -314,8 +310,4 @@ This approach pairs directly with [building declarative systems](/blog/declarati
 
 When I [left Google for Dropbox](/blog/leaving-google), dependency inversion was one of the key architectural ideas I wanted to apply at scale. Google's massive codebase has sophisticated tooling to manage dependencies, but on iOS, you have to build that discipline into the architecture itself. Airbnb [walked away from React Native](https://medium.com/airbnb-engineering/sunsetting-react-native-1868ba28e30a) last year for related reasons: when your abstraction layer can't enforce clean boundaries, you end up "supporting code on three platforms instead of two." The same principle applies within a single platform. Abstractions that don't enforce boundaries are just suggestions.
 
-Dependency inversion isn't glamorous. It doesn't make for exciting conference talks. There's no moment where the crowd gasps. But it's the single most effective tool I know for taming a growing codebase. It turns a monolith that fights you into modules that compose. It turns testing from an ordeal into a formality. It turns "I need to understand the whole app" into "I need to understand this protocol."
-
-The next time you reach for a singleton or a direct import of a concrete class, ask yourself: what if this was a protocol? What if it was injected? What would that make possible?
-
-Usually, the answer is: everything.
+Dependency inversion isn't glamorous. There's no moment where the conference crowd gasps. But it's the single most effective tool I know for taming a growing codebase, turning a monolith that fights you into modules you can compile, test, and reason about one at a time. The next time you reach for a singleton or a direct import of a concrete class, define the protocol instead and inject it. The boundary you get for free is what keeps the codebase from collapsing back into spaghetti.
