@@ -1,381 +1,371 @@
 <template>
   <div class="portfolio">
-    <BootSequence v-if="showBoot" @complete="onBootComplete" />
-
-    <template v-if="!showBoot">
-      <header>
-        <div class="header-content">
-          <h1 @mouseover="glitchEffect">Jeff Adler</h1>
-          <nav>
-            <a href="#about" @click.prevent="navigateTo('about')">About</a>
-            <a href="#experience" @click.prevent="navigateTo('experience')"
-              >Experience</a
-            >
-            <a href="#passions" @click.prevent="navigateTo('passions')"
-              >Passions</a
-            >
-            <a href="#terminal" @click.prevent="navigateTo('terminal')"
-              >Terminal</a
-            >
-            <router-link to="/blog">Blog</router-link>
-            <router-link to="/now">Now</router-link>
-          </nav>
-        </div>
-        <div class="header-actions">
-          <button
-            @click="openThemePicker"
-            class="music-button"
-            aria-label="Change theme"
+    <header>
+      <div class="header-content">
+        <h1 @mouseover="glitchEffect">Jeff Adler</h1>
+        <nav>
+          <a href="#about" @click.prevent="navigateTo('about')">About</a>
+          <a href="#experience" @click.prevent="navigateTo('experience')"
+            >Experience</a
           >
-            <i class="fas fa-palette"></i>
-          </button>
-          <button
-            @click="toggleWebamp"
-            class="music-button"
-            :class="{ active: showWebamp }"
-            aria-label="Toggle music player"
+          <a href="#passions" @click.prevent="navigateTo('passions')"
+            >Passions</a
           >
-            <i class="fas fa-music"></i>
-          </button>
-        </div>
-      </header>
+          <a href="#terminal" @click.prevent="navigateTo('terminal')"
+            >Terminal</a
+          >
+          <router-link to="/blog">Blog</router-link>
+          <router-link to="/now">Now</router-link>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <button
+          @click="openThemePicker"
+          class="music-button"
+          aria-label="Change theme"
+        >
+          <i class="fas fa-palette"></i>
+        </button>
+        <button
+          @click="toggleWebamp"
+          class="music-button"
+          :class="{ active: showWebamp }"
+          aria-label="Toggle music player"
+        >
+          <i class="fas fa-music"></i>
+        </button>
+      </div>
+    </header>
 
-      <main>
-        <section id="about">
-          <div class="hero">
-            <div class="hero-photo">
-              <img
-                src="/jeff-adler.png"
-                alt="Jeff Adler"
-                class="profile-photo"
-              />
-            </div>
-            <div class="hero-text">
-              <p class="hero-thesis">
-                Building AI-native engineering orgs at Dropbox.
-              </p>
-              <div class="typing-animation">
-                <p class="typewriter-line">
-                  {{ typewriterText }}<span class="cursor">_</span>
-                </p>
-              </div>
-              <p class="hero-summary">
-                I direct engineering at Dropbox, leading the team behind Dash,
-                our AI-powered universal search. Before that I scaled iOS
-                platforms at Google and Reddit. Lately I spend most of my time
-                on the question of what engineering orgs look like when most of
-                the code is agent-written. Denver, CO. Sometimes on a snowboard.
-              </p>
-              <div class="hero-links">
-                <a
-                  href="https://linkedin.com/in/jeff-adler-2bbb9828"
-                  target="_blank"
-                  class="contact-link"
-                  @click="
-                    trackEvent('outbound_link_clicked', {
-                      destination: 'linkedin',
-                    })
-                  "
-                  ><i class="fab fa-linkedin"></i> LinkedIn</a
-                >
-                <a
-                  href="/resume.docx"
-                  class="contact-link"
-                  download
-                  @click="
-                    trackEvent('outbound_link_clicked', {
-                      destination: 'resume',
-                    })
-                  "
-                  ><i class="fas fa-file-alt"></i> Resume</a
-                >
-              </div>
-            </div>
+    <main>
+      <section id="about">
+        <div class="hero">
+          <div class="hero-photo">
+            <img src="/jeff-adler.png" alt="Jeff Adler" class="profile-photo" />
           </div>
-
-          <ul class="hero-stats" aria-label="Career highlights">
-            <li>
-              <span class="stat-value">3B+</span>
-              <span class="stat-label"
-                >users on Drive, Search, Dropbox, Reddit</span
-              >
-            </li>
-            <li>
-              <span class="stat-value">100+</span>
-              <span class="stat-label">engineers organized at Reddit</span>
-            </li>
-            <li>
-              <span class="stat-value">12 yrs</span>
-              <span class="stat-label"
-                >shipping at Google, Reddit, Dropbox</span
-              >
-            </li>
-          </ul>
-
-          <section class="featured-writing" aria-labelledby="featured-heading">
-            <div class="featured-header">
-              <h2 id="featured-heading">FEATURED WRITING</h2>
-              <router-link to="/blog" class="featured-all"
-                >All posts &rarr;</router-link
-              >
+          <div class="hero-text">
+            <p class="hero-thesis">
+              Building AI-native engineering orgs at Dropbox.
+            </p>
+            <div class="typing-animation">
+              <p class="typewriter-line">
+                {{ typewriterText }}<span class="cursor">_</span>
+              </p>
             </div>
-            <div class="featured-grid">
-              <router-link
-                v-for="post in featuredPosts"
-                :key="post.slug"
-                :to="`/blog/${post.slug}`"
-                class="featured-card"
+            <p class="hero-summary">
+              I direct engineering at Dropbox, leading the team behind Dash, our
+              AI-powered universal search. Before that I scaled iOS platforms at
+              Google and Reddit. Lately I spend most of my time on the question
+              of what engineering orgs look like when most of the code is
+              agent-written. Denver, CO. Sometimes on a snowboard.
+            </p>
+            <div class="hero-links">
+              <a
+                href="https://linkedin.com/in/jeff-adler-2bbb9828"
+                target="_blank"
+                class="contact-link"
                 @click="
                   trackEvent('outbound_link_clicked', {
-                    destination: `featured:${post.slug}`,
+                    destination: 'linkedin',
                   })
                 "
+                ><i class="fab fa-linkedin"></i> LinkedIn</a
               >
-                <span class="featured-date">{{ post.date }}</span>
-                <h3 class="featured-title">{{ post.title }}</h3>
-                <p class="featured-desc">{{ post.description }}</p>
-                <span class="featured-read">Read &rarr;</span>
-              </router-link>
-            </div>
-          </section>
-
-          <div id="terminal" class="terminal-section">
-            <TerminalChat :inline="true" @launch-widget="handleWidgetLaunch" />
-          </div>
-
-          <h2>About Me</h2>
-          <div class="about-details">
-            <div class="about-block">
-              <h3>What I Build</h3>
-              <ul>
-                <li>
-                  AI-powered products from concept to scale using LLMs and ML —
-                  taking ideas from zero to one and driving them through
-                  product-market fit
-                </li>
-                <li>
-                  Foundational platforms at massive scale, building and owning
-                  core infrastructure used by hundreds of millions of users
-                </li>
-                <li>
-                  Multi-surface platforms spanning web, desktop, mobile, and
-                  browser extensions with shared-code architectures
-                </li>
-                <li>
-                  Agentic development workflows powered by Claude and LLM
-                  orchestration that fundamentally change how engineering teams
-                  ship software
-                </li>
-              </ul>
-            </div>
-            <div class="about-block">
-              <h3>How I Lead</h3>
-              <ul>
-                <li>
-                  Transforming legacy engineering organizations to adopt agentic
-                  coding practices, accelerating teams to build in the AI-native
-                  era
-                </li>
-                <li>
-                  Scaling engineering organizations through intentional org
-                  design and hiring
-                </li>
-                <li>
-                  Growing people by building career development systems and
-                  creating environments where engineers get promoted
-                </li>
-                <li>
-                  Disciplined execution through operating rhythms, portfolio
-                  prioritization, and explicit cut lines
-                </li>
-                <li>
-                  Conviction with humility, pushing hard on what matters while
-                  staying genuinely open to better ideas
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section id="experience">
-          <h2>Career Timeline</h2>
-          <div class="timeline">
-            <div
-              v-for="(job, index) in jobHistory"
-              :key="index"
-              class="timeline-item"
-              :class="{ active: activeJob === index }"
-              :style="{ animationDelay: index * 0.4 + 's' }"
-              role="button"
-              tabindex="0"
-              @click="setActiveJob(index)"
-              @keydown.enter="setActiveJob(index)"
-              @keydown.space.prevent="setActiveJob(index)"
-            >
-              <div class="timeline-content">
-                <h3>{{ job.title }}</h3>
-                <p class="timeline-meta">
-                  {{ job.company }} | {{ job.duration }}
-                </p>
-                <p v-if="job.scope" class="timeline-scope">{{ job.scope }}</p>
-                <ul v-if="activeJob === index">
-                  <li v-for="(detail, idx) in job.details" :key="idx">
-                    <span v-if="!detail.isLink">{{ detail }}</span>
-                    <a
-                      v-else
-                      :href="detail.url"
-                      target="_blank"
-                      @click="
-                        trackEvent('outbound_link_clicked', {
-                          destination: detail.url,
-                        })
-                      "
-                      >{{ detail.text }}</a
-                    >
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div class="education">
-            <h3>Education</h3>
-            <p>
-              Rutgers University, B.S. Computer & Electrical Engineering, Minor
-              in CS
-            </p>
-          </div>
-        </section>
-
-        <section v-if="talks.length" id="talks" aria-labelledby="talks-heading">
-          <h2 id="talks-heading">Talks &amp; Press</h2>
-          <ul class="talks-list">
-            <li v-for="(t, i) in talks" :key="i" class="talk-item">
-              <span class="talk-date">{{ t.date }}</span>
               <a
-                v-if="t.url"
-                :href="t.url"
+                href="/resume.docx"
+                class="contact-link"
+                download
+                @click="
+                  trackEvent('outbound_link_clicked', {
+                    destination: 'resume',
+                  })
+                "
+                ><i class="fas fa-file-alt"></i> Resume</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <ul class="hero-stats" aria-label="Career highlights">
+          <li>
+            <span class="stat-value">3B+</span>
+            <span class="stat-label"
+              >users on Drive, Search, Dropbox, Reddit</span
+            >
+          </li>
+          <li>
+            <span class="stat-value">100+</span>
+            <span class="stat-label">engineers organized at Reddit</span>
+          </li>
+          <li>
+            <span class="stat-value">12 yrs</span>
+            <span class="stat-label">shipping at Google, Reddit, Dropbox</span>
+          </li>
+        </ul>
+
+        <section class="featured-writing" aria-labelledby="featured-heading">
+          <div class="featured-header">
+            <h2 id="featured-heading">FEATURED WRITING</h2>
+            <router-link to="/blog" class="featured-all"
+              >All posts &rarr;</router-link
+            >
+          </div>
+          <div class="featured-grid">
+            <router-link
+              v-for="post in featuredPosts"
+              :key="post.slug"
+              :to="`/blog/${post.slug}`"
+              class="featured-card"
+              @click="
+                trackEvent('outbound_link_clicked', {
+                  destination: `featured:${post.slug}`,
+                })
+              "
+            >
+              <span class="featured-date">{{ post.date }}</span>
+              <h3 class="featured-title">{{ post.title }}</h3>
+              <p class="featured-desc">{{ post.description }}</p>
+              <span class="featured-read">Read &rarr;</span>
+            </router-link>
+          </div>
+        </section>
+
+        <div id="terminal" class="terminal-section">
+          <TerminalChat :inline="true" @launch-widget="handleWidgetLaunch" />
+        </div>
+
+        <h2>About Me</h2>
+        <div class="about-details">
+          <div class="about-block">
+            <h3>What I Build</h3>
+            <ul>
+              <li>
+                AI-powered products from concept to scale using LLMs and ML —
+                taking ideas from zero to one and driving them through
+                product-market fit
+              </li>
+              <li>
+                Foundational platforms at massive scale, building and owning
+                core infrastructure used by hundreds of millions of users
+              </li>
+              <li>
+                Multi-surface platforms spanning web, desktop, mobile, and
+                browser extensions with shared-code architectures
+              </li>
+              <li>
+                Agentic development workflows powered by Claude and LLM
+                orchestration that fundamentally change how engineering teams
+                ship software
+              </li>
+            </ul>
+          </div>
+          <div class="about-block">
+            <h3>How I Lead</h3>
+            <ul>
+              <li>
+                Transforming legacy engineering organizations to adopt agentic
+                coding practices, accelerating teams to build in the AI-native
+                era
+              </li>
+              <li>
+                Scaling engineering organizations through intentional org design
+                and hiring
+              </li>
+              <li>
+                Growing people by building career development systems and
+                creating environments where engineers get promoted
+              </li>
+              <li>
+                Disciplined execution through operating rhythms, portfolio
+                prioritization, and explicit cut lines
+              </li>
+              <li>
+                Conviction with humility, pushing hard on what matters while
+                staying genuinely open to better ideas
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="experience">
+        <h2>Career Timeline</h2>
+        <div class="timeline">
+          <div
+            v-for="(job, index) in jobHistory"
+            :key="index"
+            class="timeline-item"
+            :class="{ active: activeJob === index }"
+            :style="{ animationDelay: index * 0.4 + 's' }"
+            role="button"
+            tabindex="0"
+            @click="setActiveJob(index)"
+            @keydown.enter="setActiveJob(index)"
+            @keydown.space.prevent="setActiveJob(index)"
+          >
+            <div class="timeline-content">
+              <h3>{{ job.title }}</h3>
+              <p class="timeline-meta">
+                {{ job.company }} | {{ job.duration }}
+              </p>
+              <p v-if="job.scope" class="timeline-scope">{{ job.scope }}</p>
+              <ul v-if="activeJob === index">
+                <li v-for="(detail, idx) in job.details" :key="idx">
+                  <span v-if="!detail.isLink">{{ detail }}</span>
+                  <a
+                    v-else
+                    :href="detail.url"
+                    target="_blank"
+                    @click="
+                      trackEvent('outbound_link_clicked', {
+                        destination: detail.url,
+                      })
+                    "
+                    >{{ detail.text }}</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="education">
+          <h3>Education</h3>
+          <p>
+            Rutgers University, B.S. Computer & Electrical Engineering, Minor in
+            CS
+          </p>
+        </div>
+      </section>
+
+      <section v-if="talks.length" id="talks" aria-labelledby="talks-heading">
+        <h2 id="talks-heading">Talks &amp; Press</h2>
+        <ul class="talks-list">
+          <li v-for="(t, i) in talks" :key="i" class="talk-item">
+            <span class="talk-date">{{ t.date }}</span>
+            <a
+              v-if="t.url"
+              :href="t.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="talk-title"
+              @click="
+                trackEvent('outbound_link_clicked', {
+                  destination: `talk:${t.title}`,
+                })
+              "
+              >{{ t.title }} &nearr;</a
+            >
+            <span v-else class="talk-title">{{ t.title }}</span>
+            <span v-if="t.venue" class="talk-venue">{{ t.venue }}</span>
+          </li>
+        </ul>
+      </section>
+
+      <section id="passions">
+        <h2>Off the Clock</h2>
+        <div class="passions-grid">
+          <div
+            v-for="(passion, index) in passions"
+            :key="index"
+            class="passion-item"
+            :class="{ clickable: passion.action }"
+            :style="{ animationDelay: index * 0.5 + 's' }"
+            role="button"
+            tabindex="0"
+            @mouseover="activatePassion(index)"
+            @mouseleave="deactivatePassion(index)"
+            @click="activatePassionFeature(index)"
+            @keydown.enter="activatePassionFeature(index)"
+            @keydown.space.prevent="activatePassionFeature(index)"
+          >
+            <div
+              class="passion-icon"
+              :class="{ active: activePassion === index }"
+            >
+              <i :class="passion.icon"></i>
+            </div>
+            <h3>{{ passion.name }}</h3>
+            <span v-if="passion.action === 'link'" class="play-hint link-hint"
+              >Visit &nearr;</span
+            >
+            <span v-else-if="passion.action" class="play-hint"
+              >&#9658; Play</span
+            >
+            <div v-if="passion.links" class="passion-links">
+              <a
+                v-for="link in passion.links"
+                :key="link.url"
+                :href="link.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="talk-title"
-                @click="
+                class="passion-link"
+                @click.stop="
                   trackEvent('outbound_link_clicked', {
-                    destination: `talk:${t.title}`,
+                    destination: `passion-link:${link.label}`,
                   })
                 "
-                >{{ t.title }} &nearr;</a
+                >{{ link.label }} &nearr;</a
               >
-              <span v-else class="talk-title">{{ t.title }}</span>
-              <span v-if="t.venue" class="talk-venue">{{ t.venue }}</span>
-            </li>
-          </ul>
-        </section>
-
-        <section id="passions">
-          <h2>Off the Clock</h2>
-          <div class="passions-grid">
-            <div
-              v-for="(passion, index) in passions"
-              :key="index"
-              class="passion-item"
-              :class="{ clickable: passion.action }"
-              :style="{ animationDelay: index * 0.5 + 's' }"
-              role="button"
-              tabindex="0"
-              @mouseover="activatePassion(index)"
-              @mouseleave="deactivatePassion(index)"
-              @click="activatePassionFeature(index)"
-              @keydown.enter="activatePassionFeature(index)"
-              @keydown.space.prevent="activatePassionFeature(index)"
-            >
-              <div
-                class="passion-icon"
-                :class="{ active: activePassion === index }"
-              >
-                <i :class="passion.icon"></i>
-              </div>
-              <h3>{{ passion.name }}</h3>
-              <span v-if="passion.action === 'link'" class="play-hint link-hint"
-                >Visit &nearr;</span
-              >
-              <span v-else-if="passion.action" class="play-hint"
-                >&#9658; Play</span
-              >
-              <div v-if="passion.links" class="passion-links">
-                <a
-                  v-for="link in passion.links"
-                  :key="link.url"
-                  :href="link.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="passion-link"
-                  @click.stop="
-                    trackEvent('outbound_link_clicked', {
-                      destination: `passion-link:${link.label}`,
-                    })
-                  "
-                  >{{ link.label }} &nearr;</a
-                >
-              </div>
             </div>
           </div>
-          <p class="passions-description">
-            When not building AI products and engineering agentic workflows,
-            Jeff is mountain biking Colorado trails, snowboarding at A-Basin,
-            playing disc golf, or DJing drum &amp; bass.
-          </p>
-        </section>
-      </main>
-
-      <footer>
-        <p>
-          &copy; 2026 Jeff Adler (jadler / jads). All rights reserved. | System
-          Version 2.0.0
+        </div>
+        <p class="passions-description">
+          When not building AI products and engineering agentic workflows, Jeff
+          is mountain biking Colorado trails, snowboarding at A-Basin, playing
+          disc golf, or DJing drum &amp; bass.
         </p>
-      </footer>
+      </section>
+    </main>
 
-      <transition name="fade">
-        <div v-if="showSnowboardGame" class="game-overlay">
-          <SnowboardGame @close-game="closeGame('Snowboarding')" />
-        </div>
-      </transition>
+    <footer>
+      <p>
+        &copy; 2026 Jeff Adler (jadler / jads). All rights reserved. | System
+        Version 2.0.0
+      </p>
+    </footer>
 
-      <transition name="fade">
-        <div v-if="showMountainBikeGame" class="game-overlay">
-          <MountainBikeGame @close="closeGame('Mountain Biking')" />
-        </div>
-      </transition>
+    <transition name="fade">
+      <div v-if="showSnowboardGame" class="game-overlay">
+        <SnowboardGame @close-game="closeGame('Snowboarding')" />
+      </div>
+    </transition>
 
-      <transition name="fade">
-        <div v-if="showDiscGolfGame" class="game-overlay">
-          <DiscGolfGame @close-game="closeGame('Disc Golf')" />
-        </div>
-      </transition>
+    <transition name="fade">
+      <div v-if="showMountainBikeGame" class="game-overlay">
+        <MountainBikeGame @close="closeGame('Mountain Biking')" />
+      </div>
+    </transition>
 
-      <transition name="fade">
-        <div v-if="showVolleyballGame" class="game-overlay">
-          <SlimeVolleyball @close-game="closeGame('Volleyball')" />
-        </div>
-      </transition>
+    <transition name="fade">
+      <div v-if="showDiscGolfGame" class="game-overlay">
+        <DiscGolfGame @close-game="closeGame('Disc Golf')" />
+      </div>
+    </transition>
 
-      <transition name="fade">
-        <div v-if="showTabletopGame" class="game-overlay">
-          <TabletopGame @close-game="closeGame('Tabletop Games')" />
-        </div>
-      </transition>
+    <transition name="fade">
+      <div v-if="showVolleyballGame" class="game-overlay">
+        <SlimeVolleyball @close-game="closeGame('Volleyball')" />
+      </div>
+    </transition>
 
-      <transition name="fade">
-        <div v-if="showGuitarStrum" class="game-overlay">
-          <GuitarStrum @close="closeGame('Guitar')" />
-        </div>
-      </transition>
+    <transition name="fade">
+      <div v-if="showTabletopGame" class="game-overlay">
+        <TabletopGame @close-game="closeGame('Tabletop Games')" />
+      </div>
+    </transition>
 
-      <transition name="fade">
-        <SushiRain v-if="showSushiRain" @close="closeGame('Sushi')" />
-      </transition>
+    <transition name="fade">
+      <div v-if="showGuitarStrum" class="game-overlay">
+        <GuitarStrum @close="closeGame('Guitar')" />
+      </div>
+    </transition>
 
-      <WebampPlayer :isVisible="showWebamp" @close="showWebamp = false" />
-    </template>
+    <transition name="fade">
+      <SushiRain v-if="showSushiRain" @close="closeGame('Sushi')" />
+    </transition>
+
+    <WebampPlayer :isVisible="showWebamp" @close="showWebamp = false" />
   </div>
 </template>
 
@@ -389,7 +379,6 @@ import TabletopGame from "../components/TabletopGame.vue";
 import GuitarStrum from "../components/GuitarStrum.vue";
 import SushiRain from "../components/SushiRain.vue";
 import WebampPlayer from "../components/WebampPlayer.vue";
-import BootSequence from "../components/BootSequence.vue";
 import TerminalChat from "../views/TerminalChat.vue";
 import { trackEvent } from "../composables/useAnalytics";
 
@@ -404,7 +393,6 @@ export default {
     GuitarStrum,
     SushiRain,
     WebampPlayer,
-    BootSequence,
     TerminalChat,
   },
   emits: ["open-theme-picker"],
@@ -428,7 +416,6 @@ export default {
     const showGuitarStrum = ref(false);
     const showSushiRain = ref(false);
     const showWebamp = ref(false);
-    const showBoot = ref(!localStorage.getItem("bootComplete"));
     let typewriterTimeout = null;
 
     const jobHistory = [
@@ -632,12 +619,6 @@ export default {
 
     let gameOpenedAt = null;
 
-    const onBootComplete = () => {
-      showBoot.value = false;
-      trackEvent("boot_completed");
-      nextTick(setupSectionObserver);
-    };
-
     const gameRefMap = {
       Snowboarding: showSnowboardGame,
       "Mountain Biking": showMountainBikeGame,
@@ -726,10 +707,8 @@ export default {
     }
 
     onMounted(() => {
-      if (!showBoot.value) {
-        typeWriter();
-        nextTick(setupSectionObserver);
-      }
+      typeWriter();
+      nextTick(setupSectionObserver);
     });
 
     return {
@@ -748,7 +727,6 @@ export default {
       showGuitarStrum,
       showSushiRain,
       showWebamp,
-      showBoot,
       setActiveJob,
       activatePassion,
       deactivatePassion,
@@ -759,18 +737,9 @@ export default {
       openThemePicker,
       handleWidgetLaunch,
       typeWriter,
-      onBootComplete,
       closeGame,
       trackEvent,
     };
-  },
-
-  watch: {
-    showBoot(val) {
-      if (!val) {
-        this.typeWriter();
-      }
-    },
   },
 };
 </script>

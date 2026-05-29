@@ -177,13 +177,26 @@ export default {
         url: url,
         author: {
           "@type": "Person",
+          "@id": "https://jads.app/#person",
           name: "Jeff Adler",
           url: "https://jads.app",
           jobTitle: "Director of Engineering",
           worksFor: { "@type": "Organization", name: "Dropbox" },
+          sameAs: [
+            "https://www.wikidata.org/wiki/Q139972437",
+            "https://linkedin.com/in/jeff-adler-2bbb9828",
+            "https://x.com/JadlerOS",
+            "https://github.com/adlerj",
+            "https://www.instagram.com/jads.pics/",
+            "https://www.strava.com/athletes/17328901",
+          ],
         },
-        mainEntityOfPage: { "@type": "WebPage", "@id": url },
-        hasPart: allPosts.slice(0, 20).map((p) => ({
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": url,
+          isPartOf: { "@id": "https://jads.app/#website" },
+        },
+        hasPart: allPosts.map((p) => ({
           "@type": "BlogPosting",
           headline: p.title,
           url: `https://jads.app/blog/${p.slug}`,

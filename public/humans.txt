@@ -1,0 +1,18 @@
+/* TEAM */
+  Name: Jeff Adler
+  Role: Director of Engineering, Dropbox (Dash)
+  Location: Denver, Colorado, USA
+  Site: https://jads.app
+  LinkedIn: https://linkedin.com/in/jeff-adler-2bbb9828
+  GitHub: https://github.com/adlerj
+  X: https://x.com/JadlerOS
+
+/* ABOUT */
+  Software engineering leader. AI products, LLMs, agentic engineering, iOS
+  architecture. Formerly Reddit and Google. Not the CrossFit Games athlete,
+  the actor, or the academics of the same name.
+
+/* SITE */
+  Stack: Vue 3, Express, SQLite, server-rendered blog + entity pages
+  LLM index: https://jads.app/llms.txt
+  Full corpus: https://jads.app/llms-full.txt

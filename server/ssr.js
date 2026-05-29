@@ -1,6 +1,7 @@
 const { marked } = require("marked");
 const fs = require("fs");
 const path = require("path");
+const bio = require("./bio");
 
 const SITE_URL = "https://jads.app";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
@@ -128,17 +129,24 @@ function postJsonLd(post, url) {
       wordCount: post.wordCount,
       author: {
         "@type": "Person",
-        name: "Jeff Adler",
+        "@id": bio.PERSON_ID,
+        name: bio.NAME,
         url: SITE_URL,
-        jobTitle: "Director of Engineering",
+        jobTitle: bio.JOB_TITLE,
         worksFor: { "@type": "Organization", name: "Dropbox" },
+        sameAs: bio.SAME_AS,
       },
       publisher: {
         "@type": "Person",
-        name: "Jeff Adler",
+        "@id": bio.PERSON_ID,
+        name: bio.NAME,
         url: SITE_URL,
       },
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": url,
+        isPartOf: { "@id": bio.WEBSITE_ID },
+      },
       image: ogImageFor(post),
       inLanguage: "en-US",
       keywords: post.tags.join(", "),
@@ -170,13 +178,19 @@ function blogIndexJsonLd(posts, url, desc) {
       url: url,
       author: {
         "@type": "Person",
-        name: "Jeff Adler",
+        "@id": bio.PERSON_ID,
+        name: bio.NAME,
         url: SITE_URL,
-        jobTitle: "Director of Engineering",
+        jobTitle: bio.JOB_TITLE,
         worksFor: { "@type": "Organization", name: "Dropbox" },
+        sameAs: bio.SAME_AS,
       },
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
-      hasPart: posts.slice(0, 20).map((p) => ({
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": url,
+        isPartOf: { "@id": bio.WEBSITE_ID },
+      },
+      hasPart: posts.map((p) => ({
         "@type": "BlogPosting",
         headline: p.title,
         url: `${SITE_URL}/blog/${p.slug}`,
@@ -240,7 +254,176 @@ function renderBlogIndex(html, posts) {
     url: url,
     jsonLd: blogIndexJsonLd(posts, url, desc),
   });
-  return rendered.replace("</head>", `    ${ssrData}\n  </head>`);
+  // Server-render a crawlable index of EVERY post so non-JS crawlers and LLMs
+  // can discover and follow the full corpus (Vue replaces this on hydration).
+  const items = posts
+    .map(
+      (p) =>
+        `<li><a href="/blog/${p.slug}">${escapeHtml(p.title)}</a>` +
+        (p.date ? ` <time datetime="${p.date}">${p.date}</time>` : "") +
+        (p.description ? ` -- ${escapeHtml(p.description)}` : "") +
+        `</li>`
+    )
+    .join("");
+  const ssrContent =
+    `<nav id="ssr-content" aria-label="All blog posts">` +
+    `<h1>Jads Blog</h1><p>${escapeHtml(desc)}</p>` +
+    `<ul>${items}</ul></nav>`;
+  return rendered
+    .replace("</head>", `    ${ssrData}\n  </head>`)
+    .replace('<div id="app">', `<div id="app">${ssrContent}`);
+}
+
+// Server-render the homepage portfolio content so crawlers and LLMs that don't
+// run JS get the full bio, career, and crawlable internal links -- not an empty
+// shell. The static index.html already carries the correct homepage head
+// (title, canonical, OG, Person JSON-LD), so we leave the head untouched and
+// only inject body content; Vue replaces #ssr-content on hydration.
+function renderHome(html, posts) {
+  const career = bio.CAREER.map(
+    (r) =>
+      `<li><strong>${escapeHtml(r.title)}</strong> (${escapeHtml(
+        r.period
+      )}) -- ${escapeHtml(r.detail)}</li>`
+  ).join("");
+  const featuredLinks = posts
+    .slice(0, 6)
+    .map((p) => `<li><a href="/blog/${p.slug}">${escapeHtml(p.title)}</a></li>`)
+    .join("");
+  const ssrContent =
+    `<article id="ssr-content">` +
+    `<h1>${escapeHtml(bio.NAME)}</h1>` +
+    `<p>${escapeHtml(bio.THESIS)}</p>` +
+    `<h2>About</h2><p>${escapeHtml(bio.BIO_SHORT)}</p>` +
+    `<h2>Experience</h2><ul>${career}</ul>` +
+    `<h2>Education</h2><p>${escapeHtml(bio.EDUCATION)}</p>` +
+    `<h2>Expertise</h2><p>${escapeHtml(bio.EXPERTISE.join(", "))}</p>` +
+    `<h2>Writing</h2><ul>${featuredLinks}</ul>` +
+    `<p><a href="/blog">All blog posts</a> | <a href="/about">About Jeff Adler</a> | ` +
+    `<a href="/now">Now</a> | <a href="/terminal">Ask Jadbot</a></p>` +
+    `</article>`;
+  return html.replace('<div id="app">', `<div id="app">${ssrContent}`);
+}
+
+// Server-render /now with its own correct title/description/canonical (it
+// previously fell through to the homepage shell -- wrong canonical + no
+// content). Keep the section content in sync with src/views/NowView.vue.
+function renderNow(html) {
+  const url = `${SITE_URL}/now`;
+  const desc =
+    "What Jeff Adler is focused on right now: current work at Dropbox Dash, writing, reading, and life outside work.";
+  const rendered = injectMeta(html, {
+    title: "Now - Jeff Adler",
+    ogTitle: "Now - Jeff Adler",
+    description: desc,
+    url,
+  });
+  const ssrContent =
+    `<article id="ssr-content">` +
+    `<h1>Now</h1>` +
+    `<p>What Jeff Adler is focused on right now.</p>` +
+    `<h2>Working on</h2><ul>` +
+    `<li>Leading engineering for Dropbox Dash, the AI-powered universal search product. Five teams, end-to-end ownership.</li>` +
+    `<li>Thinking about 0 to 1 in an agentic-native world.</li></ul>` +
+    `<h2>Writing</h2><ul>` +
+    `<li><a href="/blog/the-manager-layer-is-next">The Manager Layer is Next</a></li>` +
+    `<li><a href="/blog/tokenmaxxing-is-what-happens-when-you-measure-ai-adoption-wrong">Tokenmaxxing Is What Happens When You Measure Wrong</a></li>` +
+    `<li>Drafting more on what engineering orgs look like when most of the code is agent-written.</li></ul>` +
+    `<h2>Reading</h2><ul>` +
+    `<li>The War of Art, by Steven Pressfield.</li>` +
+    `<li>The One Thing, by Gary Keller and Jay Papasan.</li>` +
+    `<li>The Art of Possibility, by Rosamund and Benjamin Zander.</li></ul>` +
+    `<h2>Outside</h2><ul>` +
+    `<li>Snowboarding A-Basin with the condo crew.</li>` +
+    `<li>Mountain biking Colorado trails.</li>` +
+    `<li>Shooting photos around Denver.</li></ul>` +
+    `<p><a href="/">Home</a> | <a href="/blog">Blog</a> | <a href="/about">About</a></p>` +
+    `</article>`;
+  return rendered.replace('<div id="app">', `<div id="app">${ssrContent}`);
+}
+
+// Server-render /about: the canonical bio + FAQ destination for the "who is
+// Jeff Adler" query, wrapped in ProfilePage + FAQPage schema (top GEO signals
+// for LLM citation). Content is sourced from server/bio.js; the client
+// AboutView imports the same module, so server and client never drift.
+function aboutJsonLd(url) {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "@id": `${url}#webpage`,
+      url: url,
+      name: "About Jeff Adler",
+      isPartOf: { "@id": bio.WEBSITE_ID },
+      about: { "@id": bio.PERSON_ID },
+      mainEntity: {
+        "@type": "Person",
+        "@id": bio.PERSON_ID,
+        name: bio.NAME,
+        jobTitle: bio.JOB_TITLE,
+        url: SITE_URL,
+        worksFor: { "@type": "Organization", name: bio.EMPLOYER },
+        description: bio.BIO_SHORT,
+        disambiguatingDescription: bio.DISAMBIGUATION,
+        sameAs: bio.SAME_AS,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: bio.FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "About", item: url },
+      ],
+    },
+  ];
+}
+
+function renderAbout(html) {
+  const url = `${SITE_URL}/about`;
+  const desc =
+    "Jeff Adler is Director of Engineering at Dropbox (Dash) in Denver, Colorado. Bio, career, and FAQ. Formerly Reddit and Google.";
+  const rendered = injectMeta(html, {
+    title: "About Jeff Adler - Director of Engineering at Dropbox",
+    ogTitle: "About Jeff Adler",
+    description: desc,
+    url,
+  });
+  const ldScript =
+    `<script type="application/ld+json" data-about-ld="true">` +
+    `${JSON.stringify(aboutJsonLd(url)).replace(/</g, "\\u003c")}</script>`;
+  const career = bio.CAREER.map(
+    (r) =>
+      `<li><strong>${escapeHtml(r.title)}</strong> (${escapeHtml(
+        r.period
+      )}) -- ${escapeHtml(r.detail)}</li>`
+  ).join("");
+  const faq = bio.FAQ.map(
+    (f) =>
+      `<div><h3>${escapeHtml(f.q)}</h3><p>${escapeHtml(f.a)}</p></div>`
+  ).join("");
+  const ssrContent =
+    `<article id="ssr-content">` +
+    `<h1>About Jeff Adler</h1>` +
+    `<p>${escapeHtml(bio.BIO_SHORT)}</p>` +
+    `<p>${escapeHtml(bio.DISAMBIGUATION)}</p>` +
+    `<h2>Experience</h2><ul>${career}</ul>` +
+    `<h2>Education</h2><p>${escapeHtml(bio.EDUCATION)}</p>` +
+    `<h2>Frequently Asked Questions</h2>${faq}` +
+    `<p><a href="/">Home</a> | <a href="/blog">Blog</a> | <a href="/now">Now</a></p>` +
+    `</article>`;
+  return rendered
+    .replace("</head>", `    ${ldScript}\n  </head>`)
+    .replace('<div id="app">', `<div id="app">${ssrContent}`);
 }
 
 module.exports = {
@@ -249,6 +432,9 @@ module.exports = {
   injectMeta,
   renderBlogPost,
   renderBlogIndex,
+  renderHome,
+  renderNow,
+  renderAbout,
   postJsonLd,
   blogIndexJsonLd,
 };

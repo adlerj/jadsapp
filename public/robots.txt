@@ -1,4 +1,48 @@
+# jads.app -- everything is open to crawlers and AI assistants.
+# LLM index:      https://jads.app/llms.txt
+# LLM full corpus: https://jads.app/llms-full.txt
+
 User-agent: *
+Allow: /
+
+# Explicit opt-in for AI / answer-engine crawlers (cite away).
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Bytespider
 Allow: /
 
 Sitemap: https://jads.app/sitemap.xml

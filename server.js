@@ -40,7 +40,11 @@ const {
   escapeHtml,
   renderBlogPost,
   renderBlogIndex,
+  renderHome,
+  renderNow,
+  renderAbout,
 } = require("./server/ssr");
+const bio = require("./server/bio");
 console.log("  All modules loaded OK");
 
 let blogIndex = "";
@@ -49,6 +53,7 @@ let blogPostMeta = [];
 let sitemapXml = "";
 let feedXml = "";
 let llmsTxt = "";
+let llmsFullTxt = "";
 
 function escapeXml(s) {
   return s
@@ -56,6 +61,40 @@ function escapeXml(s) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+let blogDataInitialized = false;
+
+// Notify IndexNow (Bing, Yandex, etc.) that content changed so they recrawl
+// quickly. No-op unless INDEXNOW_KEY is set; the key file must also be served
+// at https://jads.app/<key>.txt (drop it in public/). Fire-and-forget.
+function pingIndexNow(urls) {
+  const key = process.env.INDEXNOW_KEY;
+  if (!key || !urls.length) return;
+  const body = JSON.stringify({
+    host: "jads.app",
+    key,
+    keyLocation: `${SITE_URL}/${key}.txt`,
+    urlList: urls,
+  });
+  const req = require("https").request(
+    {
+      hostname: "api.indexnow.org",
+      path: "/indexnow",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": Buffer.byteLength(body),
+      },
+    },
+    (res) => {
+      res.on("data", () => {});
+      res.on("end", () => console.log(`IndexNow ping: ${res.statusCode}`));
+    }
+  );
+  req.on("error", (e) => console.warn("IndexNow ping failed:", e.message));
+  req.write(body);
+  req.end();
 }
 
 function reloadBlogData() {
@@ -73,15 +112,19 @@ function reloadBlogData() {
     blogPostMeta = buildBlogMeta(posts);
 
     const today = new Date().toISOString().split("T")[0];
+    // Never advertise a future lastmod (the build clock can run a day ahead),
+    // and prefer a post's real content updatedAt over a deploy timestamp.
+    const clampDate = (d) => (d && d <= today ? d : today);
     const urls = [
       { loc: "/", priority: "1.0", changefreq: "monthly", lastmod: today },
+      { loc: "/about", priority: "0.9", changefreq: "monthly", lastmod: today },
       { loc: "/blog", priority: "0.8", changefreq: "weekly", lastmod: today },
       { loc: "/now", priority: "0.5", changefreq: "monthly", lastmod: today },
       ...posts.map((p) => ({
         loc: `/blog/${p.slug}`,
         priority: "0.6",
         changefreq: "monthly",
-        lastmod: p.updatedAt ? p.updatedAt.split(" ")[0] : p.date || today,
+        lastmod: clampDate(p.updatedAt ? p.updatedAt.split(" ")[0] : p.date),
       })),
     ];
     sitemapXml =
@@ -141,14 +184,28 @@ function reloadBlogData() {
       `Engineering leader with 12+ years building and scaling platforms at Google, Reddit, and Dropbox. ` +
       `Specializes in AI products, LLMs, Claude/Anthropic, agentic orchestration, mobile architecture, and engineering org design. ` +
       `Based in Denver, CO.\n\n` +
+      `Disambiguation: this is Jeff Adler the software engineering leader at Dropbox (Dash), based in Denver, Colorado. ` +
+      `He is not the CrossFit Games athlete, the actor, or the academics of the same name.\n\n` +
+      `## Key Facts\n\n` +
+      `- Full name: Jeff Adler (also goes by jadler, jads)\n` +
+      `- Current role: Director of Engineering at Dropbox since 2025, leading the AI Experiences and Sync engineering orgs; owns Dash\n` +
+      `- Prior roles: Senior Engineering Manager, Dropbox (2023-2025, Dash); Staff Engineer, Reddit (2021-2023, iOS tech lead for 100+ engineers, built SliceKit); Staff Engineer, Dropbox (2019-2021); Senior Engineer, Google (2016-2019, Google Drive iOS); Software Engineer, Maptext (2014-2016, mPilot aviation)\n` +
+      `- Education: Rutgers University, B.S. Computer and Electrical Engineering\n` +
+      `- Location: Denver, Colorado, USA\n` +
+      `- Expertise: AI products, LLMs, Claude/Anthropic, agentic engineering and orchestration, machine learning, iOS architecture, engineering leadership\n` +
+      `- Open source: Minerva, an iOS architecture framework (github.com/MinervaMobile)\n\n` +
       `## About\n\n` +
       `- [Portfolio](${SITE_URL}/): career, hobbies, and an embedded AI chat (Jadbot) that answers questions about Jeff\n` +
+      `- [About / FAQ](${SITE_URL}/about): canonical bio and frequently asked questions about Jeff\n` +
       `- [Now](${SITE_URL}/now): what Jeff is focused on right now\n` +
       `- [LinkedIn](https://linkedin.com/in/jeff-adler-2bbb9828)\n` +
-      `- [X / Twitter](https://x.com/JadlerOS): @JadlerOS\n\n` +
+      `- [GitHub](https://github.com/adlerj): @adlerj\n` +
+      `- [X / Twitter](https://x.com/JadlerOS): @JadlerOS\n` +
+      `- [Wikidata](https://www.wikidata.org/wiki/Q139972437): entity Q139972437\n\n` +
       `## Blog\n\n` +
       `- [Jads Blog](${SITE_URL}/blog): essays on engineering leadership, AI, agentic development, and iOS architecture\n` +
-      `- [RSS feed](${SITE_URL}/feed.xml)\n\n` +
+      `- [RSS feed](${SITE_URL}/feed.xml)\n` +
+      `- [Full post bodies for LLMs](${SITE_URL}/llms-full.txt): every post's complete text in one document\n\n` +
       `## Posts\n\n` +
       posts
         .map(
@@ -158,9 +215,35 @@ function reloadBlogData() {
         .join("\n") +
       `\n`;
 
+    // llms-full.txt: canonical bio + FAQ + the FULL text of every post in one
+    // document, so an LLM can ingest the whole corpus in a single fetch and
+    // attribute it to this Jeff Adler. Bodies are already in memory.
+    llmsFullTxt =
+      `# Jeff Adler — jads.app (full corpus)\n\n` +
+      `> Director of Engineering at Dropbox leading Dash, the AI-powered universal search product. ` +
+      `Based in Denver, CO. This document contains the canonical bio and the full text of every blog post.\n\n` +
+      `## About Jeff Adler\n\n${bio.BIO_SHORT}\n\n${bio.DISAMBIGUATION}\n\n` +
+      `## FAQ\n\n` +
+      bio.FAQ.map((f) => `### ${f.q}\n\n${f.a}`).join("\n\n") +
+      `\n\n## Full Posts\n\n` +
+      posts
+        .map(
+          (p) =>
+            `### ${p.title}\n${SITE_URL}/blog/${p.slug} (${p.date})\n\n${p.body}\n`
+        )
+        .join("\n---\n\n") +
+      `\n`;
+
     console.log(
       `Loaded ${posts.length} blog posts (index: ${blogIndex.length} chars, sitemap: ${urls.length} URLs)`
     );
+
+    // Ping IndexNow on content changes (not on initial boot) so search
+    // engines recrawl mutated URLs promptly. Inert without INDEXNOW_KEY.
+    if (blogDataInitialized) {
+      pingIndexNow(urls.map((u) => `${SITE_URL}${u.loc}`));
+    }
+    blogDataInitialized = true;
   } catch (e) {
     console.error("Could not load blog data:", e.message);
     console.error("  Stack:", e.stack);
@@ -390,6 +473,11 @@ app.get("/llms.txt", (req, res) => {
   res.send(llmsTxt);
 });
 
+app.get("/llms-full.txt", (req, res) => {
+  res.set("Content-Type", "text/plain; charset=utf-8");
+  res.send(llmsFullTxt);
+});
+
 const indexHtmlPath = path.join(__dirname, "dist", "index.html");
 let cachedIndexHtml = "";
 try {
@@ -397,6 +485,18 @@ try {
 } catch (e) {
   console.warn("Could not read dist/index.html:", e.message);
 }
+
+app.get("/", (req, res) => {
+  res.send(renderHome(cachedIndexHtml, getAllPosts()));
+});
+
+app.get("/now", (req, res) => {
+  res.send(renderNow(cachedIndexHtml));
+});
+
+app.get("/about", (req, res) => {
+  res.send(renderAbout(cachedIndexHtml));
+});
 
 app.get("/blog", (req, res) => {
   const posts = getAllPosts();
@@ -410,14 +510,30 @@ app.get("/blog/from-tech-lead-to-director", (req, res) => {
 app.get("/blog/:slug", (req, res, next) => {
   if (!/^[a-z0-9-]+$/.test(req.params.slug)) return next();
   const post = getPostBySlug(req.params.slug);
-  if (!post) return res.status(404).sendFile(indexHtmlPath);
+  // Missing post: 404 + noindex so a dead slug never re-emits the homepage
+  // Person/canonical under a soft-200.
+  if (!post) {
+    res.set("X-Robots-Tag", "noindex");
+    return res.status(404).sendFile(indexHtmlPath);
+  }
   res.send(renderBlogPost(cachedIndexHtml, post));
+});
+
+// The Jadbot chat UI is not search content -- serve it but keep it out of the
+// index (it otherwise inherits the homepage canonical via the catch-all).
+app.get("/terminal", (req, res) => {
+  res.set("X-Robots-Tag", "noindex, follow");
+  res.sendFile(indexHtmlPath);
 });
 
 app.use(express.static(path.join(__dirname, "dist")));
 
+// Genuinely unknown paths: real 404 + noindex instead of a soft-404 that
+// served the homepage shell (wrong canonical, HTTP 200) for any URL. All real
+// SPA routes (/, /now, /blog, /blog/:slug, /about, /writing/*, /terminal) are
+// handled above; anything reaching here does not exist.
 app.get("*", (req, res) => {
-  res.sendFile(indexHtmlPath);
+  res.status(404).set("X-Robots-Tag", "noindex").sendFile(indexHtmlPath);
 });
 
 app.listen(PORT, () => {

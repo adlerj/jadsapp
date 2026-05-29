@@ -58,6 +58,16 @@ const routes = [
         "What Jeff is focused on right now: current work, writing, reading, and side projects.",
     },
   },
+  {
+    path: "/about",
+    name: "about",
+    component: () => import("../views/AboutView.vue"),
+    meta: {
+      title: "About Jeff Adler - Director of Engineering at Dropbox",
+      description:
+        "Jeff Adler is Director of Engineering at Dropbox (Dash) in Denver, Colorado. Bio, career, and FAQ. Formerly Reddit and Google.",
+    },
+  },
 ];
 
 const router = createRouter({
@@ -88,6 +98,10 @@ router.beforeEach((to, from, next) => {
   const blogIndexLd = document.querySelector("script[data-blog-index-ld]");
   if (blogIndexLd && to.name !== "blog") {
     blogIndexLd.remove();
+  }
+  const aboutLd = document.querySelector("script[data-about-ld]");
+  if (aboutLd && to.name !== "about") {
+    aboutLd.remove();
   }
   document
     .querySelectorAll('meta[property="article:tag"]')
