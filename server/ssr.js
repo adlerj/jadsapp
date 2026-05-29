@@ -275,6 +275,14 @@ function renderBlogIndex(html, posts) {
     .replace('<div id="app">', `<div id="app">${ssrContent}`);
 }
 
+// Crawlable links to the topic hubs, for the homepage and /about SSR.
+function hubLinksHtml() {
+  return hubs
+    .allHubs()
+    .map((h) => `<a href="/writing/${h.slug}">${escapeHtml(h.title)}</a>`)
+    .join(" | ");
+}
+
 // Server-render the homepage portfolio content so crawlers and LLMs that don't
 // run JS get the full bio, career, and crawlable internal links -- not an empty
 // shell. The static index.html already carries the correct homepage head
@@ -300,6 +308,7 @@ function renderHome(html, posts) {
     `<h2>Education</h2><p>${escapeHtml(bio.EDUCATION)}</p>` +
     `<h2>Expertise</h2><p>${escapeHtml(bio.EXPERTISE.join(", "))}</p>` +
     `<h2>Writing</h2><ul>${featuredLinks}</ul>` +
+    `<p>Topics: ${hubLinksHtml()}</p>` +
     `<p><a href="/blog">All blog posts</a> | <a href="/about">About Jeff Adler</a> | ` +
     `<a href="/now">Now</a> | <a href="/terminal">Ask Jadbot</a></p>` +
     `</article>`;
@@ -420,6 +429,7 @@ function renderAbout(html) {
     `<h2>Experience</h2><ul>${career}</ul>` +
     `<h2>Education</h2><p>${escapeHtml(bio.EDUCATION)}</p>` +
     `<h2>Frequently Asked Questions</h2>${faq}` +
+    `<p>Topics: ${hubLinksHtml()}</p>` +
     `<p><a href="/">Home</a> | <a href="/blog">Blog</a> | <a href="/now">Now</a></p>` +
     `</article>`;
   return rendered

@@ -36,6 +36,20 @@
       </section>
 
       <p class="about-links">
+        <strong>Topics:</strong>
+        <router-link to="/writing/agentic-engineering"
+          >Agentic Engineering</router-link
+        >
+        &middot;
+        <router-link to="/writing/engineering-leadership"
+          >Engineering Leadership</router-link
+        >
+        &middot;
+        <router-link to="/writing/ios-architecture"
+          >iOS Architecture</router-link
+        >
+      </p>
+      <p class="about-links">
         <router-link to="/blog">Blog</router-link>
         &middot;
         <router-link to="/now">Now</router-link>
