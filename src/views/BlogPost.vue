@@ -700,6 +700,35 @@ export default {
   margin: 1rem 0;
 }
 
+.post-content :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.post-content :deep(th),
+.post-content :deep(td) {
+  border: 1px solid var(--border-primary);
+  padding: 0.6rem 0.85rem;
+  text-align: left;
+  vertical-align: top;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.post-content :deep(th) {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.post-content :deep(tbody tr:nth-child(even)) {
+  background: var(--bg-secondary);
+}
+
 /* Footer: related + adjacent */
 .post-footer {
   margin-top: 3rem;
