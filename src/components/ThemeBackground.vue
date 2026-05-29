@@ -260,8 +260,15 @@ export default {
       draw();
     };
 
+    const prefersReducedMotion = () =>
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     const startCurrentAnimation = () => {
       stopAnimation();
+      // Don't burn CPU on a backgrounded tab or for reduced-motion users.
+      if (document.hidden || prefersReducedMotion()) return;
       const anim = effects.value.bgAnimation;
       if (anim === "rain") setTimeout(startRain, 50);
       else if (anim === "grid") setTimeout(startGrid, 50);
@@ -271,17 +278,26 @@ export default {
 
     watch(() => effects.value.bgAnimation, startCurrentAnimation);
 
+    let visibilityHandler = null;
+
     onMounted(() => {
       startCurrentAnimation();
       resizeHandler = () => {
         startCurrentAnimation();
       };
       window.addEventListener("resize", resizeHandler);
+      visibilityHandler = () => {
+        if (document.hidden) stopAnimation();
+        else startCurrentAnimation();
+      };
+      document.addEventListener("visibilitychange", visibilityHandler);
     });
 
     onUnmounted(() => {
       stopAnimation();
       if (resizeHandler) window.removeEventListener("resize", resizeHandler);
+      if (visibilityHandler)
+        document.removeEventListener("visibilitychange", visibilityHandler);
     });
 
     return { effects, rainCanvas, gridCanvas, starsCanvas, sparklesCanvas };

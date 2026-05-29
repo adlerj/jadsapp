@@ -128,6 +128,18 @@
               <span class="featured-read">Read &rarr;</span>
             </router-link>
           </div>
+          <nav class="topic-links" aria-label="Topics">
+            <span class="topic-label">Topics:</span>
+            <router-link to="/writing/agentic-engineering"
+              >Agentic Engineering</router-link
+            >
+            <router-link to="/writing/engineering-leadership"
+              >Engineering Leadership</router-link
+            >
+            <router-link to="/writing/ios-architecture"
+              >iOS Architecture</router-link
+            >
+          </nav>
         </section>
 
         <div id="terminal" class="terminal-section">
@@ -370,17 +382,41 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
-import SnowboardGame from "../components/SnowboardGame.vue";
-import MountainBikeGame from "../components/MountainBikeGame.vue";
-import DiscGolfGame from "../components/DiscGolfGame.vue";
-import SlimeVolleyball from "../components/SlimeVolleyball.vue";
-import TabletopGame from "../components/TabletopGame.vue";
-import GuitarStrum from "../components/GuitarStrum.vue";
-import SushiRain from "../components/SushiRain.vue";
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  defineAsyncComponent,
+} from "vue";
 import WebampPlayer from "../components/WebampPlayer.vue";
 import TerminalChat from "../views/TerminalChat.vue";
+import { fetchAllPosts } from "../composables/useBlog";
 import { trackEvent } from "../composables/useAnalytics";
+
+// Games are click-gated; lazy-load them so their code (canvas games) is split
+// out of the initial homepage bundle and only fetched on first interaction.
+const SnowboardGame = defineAsyncComponent(() =>
+  import("../components/SnowboardGame.vue")
+);
+const MountainBikeGame = defineAsyncComponent(() =>
+  import("../components/MountainBikeGame.vue")
+);
+const DiscGolfGame = defineAsyncComponent(() =>
+  import("../components/DiscGolfGame.vue")
+);
+const SlimeVolleyball = defineAsyncComponent(() =>
+  import("../components/SlimeVolleyball.vue")
+);
+const TabletopGame = defineAsyncComponent(() =>
+  import("../components/TabletopGame.vue")
+);
+const GuitarStrum = defineAsyncComponent(() =>
+  import("../components/GuitarStrum.vue")
+);
+const SushiRain = defineAsyncComponent(() =>
+  import("../components/SushiRain.vue")
+);
 
 export default {
   name: "PortfolioView",
@@ -494,22 +530,17 @@ export default {
     // url is optional; if omitted the title renders as plain text.
     const talks = [];
 
-    const featuredPosts = [
-      {
-        slug: "the-manager-layer-is-next",
-        title: "The Manager Layer is Next",
-        date: "May 2026",
-        description:
-          "AI isn't replacing managers. It's exposing which ones were never load-bearing to begin with.",
-      },
-      {
-        slug: "tokenmaxxing-is-what-happens-when-you-measure-ai-adoption-wrong",
-        title: "Tokenmaxxing Is What Happens When You Measure Wrong",
-        date: "May 2026",
-        description:
-          "Mandating AI tool usage is correct. Measuring it is a trap. The right move is to measure outcomes, not inputs.",
-      },
-    ];
+    // Derived from the CMS on mount (newest posts) so it never drifts as new
+    // posts ship. The server-rendered homepage carries the same links for crawlers.
+    const featuredPosts = ref([]);
+
+    function monthYear(iso) {
+      if (!iso) return "";
+      return new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      });
+    }
 
     const passions = [
       { name: "Snowboarding", icon: "fas fa-snowboarding", action: "game" },
@@ -706,9 +737,16 @@ export default {
       sections.forEach((s) => sectionObserver.observe(s));
     }
 
-    onMounted(() => {
+    onMounted(async () => {
       typeWriter();
       nextTick(setupSectionObserver);
+      const all = await fetchAllPosts();
+      featuredPosts.value = all.slice(0, 6).map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        date: monthYear(p.date),
+        description: p.description,
+      }));
     });
 
     return {
@@ -1024,6 +1062,36 @@ h2 {
   color: var(--link-color);
   letter-spacing: 0.02em;
   align-self: flex-start;
+}
+
+.topic-links {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.topic-links .topic-label {
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+}
+
+.topic-links a {
+  color: var(--link-color);
+  text-decoration: none;
+  border: 1px solid var(--border-primary);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.topic-links a:hover {
+  color: var(--link-hover);
+  border-color: var(--link-color);
 }
 
 @media (max-width: 760px) {

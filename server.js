@@ -43,8 +43,10 @@ const {
   renderHome,
   renderNow,
   renderAbout,
+  renderHub,
 } = require("./server/ssr");
 const bio = require("./server/bio");
+const { getHub, allHubs } = require("./server/hubs");
 console.log("  All modules loaded OK");
 
 let blogIndex = "";
@@ -120,6 +122,12 @@ function reloadBlogData() {
       { loc: "/about", priority: "0.9", changefreq: "monthly", lastmod: today },
       { loc: "/blog", priority: "0.8", changefreq: "weekly", lastmod: today },
       { loc: "/now", priority: "0.5", changefreq: "monthly", lastmod: today },
+      ...allHubs().map((h) => ({
+        loc: `/writing/${h.slug}`,
+        priority: "0.7",
+        changefreq: "monthly",
+        lastmod: today,
+      })),
       ...posts.map((p) => ({
         loc: `/blog/${p.slug}`,
         priority: "0.6",
@@ -202,6 +210,13 @@ function reloadBlogData() {
       `- [GitHub](https://github.com/adlerj): @adlerj\n` +
       `- [X / Twitter](https://x.com/JadlerOS): @JadlerOS\n` +
       `- [Wikidata](https://www.wikidata.org/wiki/Q139972437): entity Q139972437\n\n` +
+      `## Topics\n\n` +
+      allHubs()
+        .map(
+          (h) => `- [${h.title}](${SITE_URL}/writing/${h.slug}): ${h.description}`
+        )
+        .join("\n") +
+      `\n\n` +
       `## Blog\n\n` +
       `- [Jads Blog](${SITE_URL}/blog): essays on engineering leadership, AI, agentic development, and iOS architecture\n` +
       `- [RSS feed](${SITE_URL}/feed.xml)\n` +
@@ -496,6 +511,12 @@ app.get("/now", (req, res) => {
 
 app.get("/about", (req, res) => {
   res.send(renderAbout(cachedIndexHtml));
+});
+
+app.get("/writing/:topic", (req, res, next) => {
+  const hub = getHub(req.params.topic);
+  if (!hub) return next();
+  res.send(renderHub(cachedIndexHtml, hub, getAllPosts()));
 });
 
 app.get("/blog", (req, res) => {

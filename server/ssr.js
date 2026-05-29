@@ -2,6 +2,7 @@ const { marked } = require("marked");
 const fs = require("fs");
 const path = require("path");
 const bio = require("./bio");
+const hubs = require("./hubs");
 
 const SITE_URL = "https://jads.app";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
@@ -426,6 +427,102 @@ function renderAbout(html) {
     .replace('<div id="app">', `<div id="app">${ssrContent}`);
 }
 
+// Server-render a topic hub at /writing/<slug>: a citable pillar page (thesis +
+// CollectionPage/ItemList + FAQPage) that links every post in the cluster, so
+// crawlers get an anchor-dense topic page and every clustered post gains an
+// inbound link. Shares server/hubs.js with the client HubView.
+function hubJsonLd(hub, url, members) {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "@id": `${url}#webpage`,
+      url: url,
+      name: hub.title,
+      description: hub.description,
+      isPartOf: { "@id": bio.WEBSITE_ID },
+      about: { "@id": bio.PERSON_ID },
+      author: { "@id": bio.PERSON_ID },
+      mainEntity: { "@id": `${url}#list` },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "@id": `${url}#list`,
+      numberOfItems: members.length,
+      itemListElement: members.map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${SITE_URL}/blog/${p.slug}`,
+        name: p.title,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: hub.faq.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: hub.title, item: url },
+      ],
+    },
+  ];
+}
+
+function renderHub(html, hub, posts) {
+  const url = `${SITE_URL}/writing/${hub.slug}`;
+  const members = hubs.postsForHub(hub, posts);
+  const rendered = injectMeta(html, {
+    title: hub.pageTitle,
+    ogTitle: hub.title,
+    description: hub.description,
+    url,
+  });
+  const ldScript =
+    `<script type="application/ld+json" data-hub-ld="true">` +
+    `${JSON.stringify(hubJsonLd(hub, url, members)).replace(
+      /</g,
+      "\\u003c"
+    )}</script>`;
+  const thesis = hub.thesis.map((p) => `<p>${escapeHtml(p)}</p>`).join("");
+  const items = members
+    .map(
+      (p) =>
+        `<li><a href="/blog/${p.slug}">${escapeHtml(p.title)}</a>` +
+        (p.date ? ` <time datetime="${p.date}">${p.date}</time>` : "") +
+        (p.description ? ` -- ${escapeHtml(p.description)}` : "") +
+        `</li>`
+    )
+    .join("");
+  const faq = hub.faq
+    .map((f) => `<div><h3>${escapeHtml(f.q)}</h3><p>${escapeHtml(f.a)}</p></div>`)
+    .join("");
+  const others = hubs
+    .allHubs()
+    .filter((h) => h.slug !== hub.slug)
+    .map((h) => `<a href="/writing/${h.slug}">${escapeHtml(h.title)}</a>`)
+    .join(" | ");
+  const ssrContent =
+    `<article id="ssr-content">` +
+    `<h1>${escapeHtml(hub.title)}</h1>` +
+    thesis +
+    `<h2>Reading path (${members.length} posts)</h2><ul>${items}</ul>` +
+    `<h2>Frequently Asked Questions</h2>${faq}` +
+    `<p>More topics: ${others} | <a href="/blog">All posts</a> | <a href="/about">About Jeff Adler</a></p>` +
+    `</article>`;
+  return rendered
+    .replace("</head>", `    ${ldScript}\n  </head>`)
+    .replace('<div id="app">', `<div id="app">${ssrContent}`);
+}
+
 module.exports = {
   SITE_URL,
   escapeHtml,
@@ -435,6 +532,7 @@ module.exports = {
   renderHome,
   renderNow,
   renderAbout,
+  renderHub,
   postJsonLd,
   blogIndexJsonLd,
 };
